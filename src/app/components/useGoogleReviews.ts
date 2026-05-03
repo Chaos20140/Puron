@@ -20,8 +20,10 @@ export type GoogleReviewsData = {
 };
 
 // Hardcoded to the Supabase project that hosts the working edge function.
+// No `?force=1` here — we WANT to hit the 1-hour KV cache on every page load.
+// Pass `?force=1` manually only when debugging stale data.
 const REVIEWS_URL =
-  "https://fhgevybapodhubkuylnw.supabase.co/functions/v1/make-server-1fdc8e05/google-reviews?force=1";
+  "https://fhgevybapodhubkuylnw.supabase.co/functions/v1/make-server-1fdc8e05/google-reviews";
 
 export function useGoogleReviews() {
   const [data, setData] = useState<GoogleReviewsData | null>(null);

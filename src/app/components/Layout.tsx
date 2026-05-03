@@ -17,12 +17,9 @@ export function Layout() {
 
   return (
     <div className="bg-transparent text-[#F5F5F7] font-['Inter'] antialiased overflow-x-hidden selection:bg-[#7C3AED]/30 selection:text-white min-h-screen">
-      {/* Animated 3D Background */}
+      {/* Animated 3D Background — already paints purple auroras + nebula glow,
+          so we don't add extra blurred radial divs here. */}
       <AnimatedBackground />
-
-      {/* Background Glows */}
-      <div className="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#7C3AED] blur-[120px] opacity-10 pointer-events-none z-[-1]" />
-      <div className="fixed bottom-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-[#A855F7] blur-[100px] opacity-[0.08] pointer-events-none z-[-1]" />
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0D]/80 backdrop-blur-lg border-b border-white/5">

@@ -236,7 +236,12 @@ export function AnimatedBackground() {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-screen pointer-events-none"
-      style={{ zIndex: -1 }}
+      // z-index: 0 (NOT -1). The body has a dark background to prevent the
+      // white-flash on initial load (set in index.html and theme.css). A
+      // negative z-index would push the canvas behind that body background
+      // and make it invisible. z-0 stays above the body bg but below the
+      // navigation (z-50) and page content (z-10) above it.
+      style={{ zIndex: 0 }}
     />
   );
 }

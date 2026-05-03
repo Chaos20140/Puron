@@ -7,13 +7,16 @@ const app = new Hono();
 // Enable logger
 app.use('*', logger(console.log));
 
-// Enable CORS for all routes and methods
+// CORS is intentionally wide-open: this edge function exposes a single public,
+// read-only GET endpoint that returns Google Places review data with no PII
+// and no auth. If you ever add an authenticated/mutating route, lock `origin`
+// down to the marketing site's domain(s) before deploying.
 app.use(
   "/*",
   cors({
     origin: "*",
     allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowMethods: ["GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
     maxAge: 600,
   }),
