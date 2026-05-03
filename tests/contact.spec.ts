@@ -55,4 +55,42 @@ test.describe("Kontaktformular", () => {
     // Form bleibt mit Inhalten erhalten
     await expect(page.getByLabel("Name")).toHaveValue("Test");
   });
+
+  test("Leeres Formular → Inline-Fehler, kein Network-Call", async ({ page }) => {
+    let requestMade = false;
+    await page.route(CONTACT_ENDPOINT, async (route) => {
+      requestMade = true;
+      await route.fulfill({ status: 200, body: "{}" });
+    });
+
+    await page.goto("/contact");
+    await page.getByRole("button", { name: /anfrage senden/i }).click();
+
+    // Drei required-Felder: name, email, message — alle zeigen Fehler
+    await expect(page.getByText(/Bitte gib deinen Namen an/i)).toBeVisible();
+    await expect(page.getByText(/Bitte gib deine E-Mail-Adresse an/i)).toBeVisible();
+    await expect(page.getByText(/Bitte beschreibe kurz dein Anliegen/i)).toBeVisible();
+
+    // Kein Submit ans Backend
+    expect(requestMade).toBe(false);
+    // Kein Vielen-Dank
+    await expect(page.getByRole("heading", { name: /vielen dank/i })).toHaveCount(0);
+  });
+
+  test("Invalide E-Mail → Inline-Fehler, kein Submit", async ({ page }) => {
+    let requestMade = false;
+    await page.route(CONTACT_ENDPOINT, async (route) => {
+      requestMade = true;
+      await route.fulfill({ status: 200, body: "{}" });
+    });
+
+    await page.goto("/contact");
+    await page.getByLabel("Name").fill("Max");
+    await page.getByLabel("E-Mail").fill("kein-at-zeichen-und-keine-domain");
+    await page.getByLabel("Wobei benötigen Sie Hilfe?").fill("Test");
+    await page.getByRole("button", { name: /anfrage senden/i }).click();
+
+    await expect(page.getByText(/sieht nicht wie eine gültige E-Mail aus/i)).toBeVisible();
+    expect(requestMade).toBe(false);
+  });
 });

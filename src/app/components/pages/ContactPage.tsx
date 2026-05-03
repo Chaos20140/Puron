@@ -11,6 +11,8 @@ const goals = [
   "Noch nicht sicher",
 ];
 
+type ValidatedField = "name" | "email" | "company" | "message";
+
 type FormFields = {
   name: string;
   company: string;
@@ -27,6 +29,37 @@ const emptyForm: FormFields = {
   website: "",
 };
 
+const MAX = { name: 100, company: 100, email: 200, message: 2000 } as const;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FormErrors = Partial<Record<ValidatedField, string>>;
+
+function validate(form: FormFields): FormErrors {
+  const errors: FormErrors = {};
+  const name = form.name.trim();
+  const email = form.email.trim();
+  const message = form.message.trim();
+
+  if (!name) errors.name = "Bitte gib deinen Namen an.";
+  else if (form.name.length > MAX.name) errors.name = `Maximal ${MAX.name} Zeichen.`;
+
+  if (!email) errors.email = "Bitte gib deine E-Mail-Adresse an.";
+  else if (form.email.length > MAX.email) errors.email = `Maximal ${MAX.email} Zeichen.`;
+  else if (!EMAIL_RE.test(email)) errors.email = "Das sieht nicht wie eine gültige E-Mail aus.";
+
+  if (form.company.length > MAX.company) errors.company = `Maximal ${MAX.company} Zeichen.`;
+
+  if (!message) errors.message = "Bitte beschreibe kurz dein Anliegen.";
+  else if (form.message.length > MAX.message) errors.message = `Maximal ${MAX.message} Zeichen.`;
+
+  return errors;
+}
+
+const inputBase =
+  "w-full bg-[#0A0A0D] border rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:ring-1 transition-all disabled:opacity-60";
+const inputOk = "border-white/10 focus:border-[#7C3AED] focus:ring-[#7C3AED]";
+const inputErr = "border-red-500/60 focus:border-red-500 focus:ring-red-500";
+
 export function ContactPage() {
   usePageTitle("Kontakt");
   const [form, setForm] = useState<FormFields>(emptyForm);
@@ -34,15 +67,40 @@ export function ContactPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Partial<Record<ValidatedField, boolean>>>({});
+
+  const errors = validate(form);
+  const showErr = (f: ValidatedField) => Boolean(touched[f] && errors[f]);
 
   const update =
     (field: keyof FormFields) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm((f) => ({ ...f, [field]: e.target.value }));
+      setForm((s) => ({ ...s, [field]: e.target.value }));
+
+  const blur = (f: ValidatedField) => () => setTouched((t) => ({ ...t, [f]: true }));
+
+  const inputClass = (f: ValidatedField) => `${inputBase} ${showErr(f) ? inputErr : inputOk}`;
+
+  const fieldA11y = (f: ValidatedField) =>
+    showErr(f)
+      ? { "aria-invalid": true as const, "aria-describedby": `${f}-error` }
+      : {};
+
+  const FieldError = ({ field }: { field: ValidatedField }) =>
+    showErr(field) ? (
+      <p id={`${field}-error`} role="alert" className="text-xs text-red-400 mt-1.5">
+        {errors[field]}
+      </p>
+    ) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+
+    // Mark every validated field as touched so any error becomes visible.
+    setTouched({ name: true, email: true, company: true, message: true });
+    if (Object.keys(errors).length > 0) return;
+
     setSubmitting(true);
     setError(null);
     try {
@@ -63,6 +121,7 @@ export function ContactPage() {
       }
       setForm(emptyForm);
       setSelectedGoal("");
+      setTouched({});
       setSubmitted(true);
     } catch {
       setError(
@@ -122,70 +181,87 @@ export function ContactPage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-[#B3B3C2]">Name</label>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-[#B3B3C2] mb-2">Name</label>
               <input
                 type="text"
                 id="name"
                 name="name"
                 value={form.name}
                 onChange={update("name")}
+                onBlur={blur("name")}
                 placeholder="Max Mustermann"
                 required
-                maxLength={100}
+                maxLength={MAX.name}
                 autoComplete="name"
                 disabled={submitting}
-                className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+                className={inputClass("name")}
+                {...fieldA11y("name")}
               />
+              <FieldError field="name" />
             </div>
-            <div className="space-y-2">
-              <label htmlFor="company" className="text-sm font-medium text-[#B3B3C2]">Unternehmen</label>
+            <div>
+              <label htmlFor="company" className="block text-sm font-medium text-[#B3B3C2] mb-2">Unternehmen</label>
               <input
                 type="text"
                 id="company"
                 name="company"
                 value={form.company}
                 onChange={update("company")}
+                onBlur={blur("company")}
                 placeholder="Muster GmbH"
-                maxLength={100}
+                maxLength={MAX.company}
                 autoComplete="organization"
                 disabled={submitting}
-                className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+                className={inputClass("company")}
+                {...fieldA11y("company")}
               />
+              <FieldError field="company" />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-[#B3B3C2]">E-Mail</label>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#B3B3C2] mb-2">E-Mail</label>
             <input
               type="email"
               id="email"
               name="email"
               value={form.email}
               onChange={update("email")}
+              onBlur={blur("email")}
               placeholder="max@beispiel.de"
               required
-              maxLength={200}
+              maxLength={MAX.email}
               autoComplete="email"
               disabled={submitting}
-              className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+              className={inputClass("email")}
+              {...fieldA11y("email")}
             />
+            <FieldError field="email" />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="message" className="text-sm font-medium text-[#B3B3C2]">Wobei benötigen Sie Hilfe?</label>
+          <div>
+            <div className="flex items-baseline justify-between mb-2">
+              <label htmlFor="message" className="block text-sm font-medium text-[#B3B3C2]">Wobei benötigen Sie Hilfe?</label>
+              <span className={`text-xs tabular-nums ${form.message.length > MAX.message ? "text-red-400" : "text-[#71717A]"}`}>
+                {form.message.length}/{MAX.message}
+              </span>
+            </div>
             <textarea
               id="message"
               name="message"
               rows={4}
               value={form.message}
               onChange={update("message")}
+              onBlur={blur("message")}
               placeholder="Erzählen Sie uns von Ihren aktuellen Herausforderungen..."
               required
-              maxLength={2000}
+              maxLength={MAX.message}
               disabled={submitting}
-              className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all resize-none disabled:opacity-60"
+              className={`${inputClass("message")} resize-none`}
+              {...fieldA11y("message")}
             />
+            <FieldError field="message" />
           </div>
 
           <div className="space-y-3 pt-2">
