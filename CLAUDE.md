@@ -22,7 +22,7 @@ The site has two pieces of live data: a Google Places "reviews" widget on the ho
 | Lint | ESLint 9 flat config ([eslint.config.js](eslint.config.js)) — `pnpm lint` |
 | E2E | Playwright (chromium only, mocks the edge function via `page.route()`) |
 | Package manager | **pnpm** (use `corepack pnpm …` if pnpm isn't on PATH; `npm install` will fail because of the lockfile format) |
-| Backend | Supabase Edge Function (Deno + Hono) at [supabase/functions/server/index.tsx](supabase/functions/server/index.tsx), backed by a Postgres KV table `kv_store_1fdc8e05`; emails via Resend |
+| Backend | Supabase Edge Function (Deno + Hono) at [supabase/functions/server/index.ts](supabase/functions/server/index.ts), backed by a Postgres KV table `kv_store_1fdc8e05`; emails via Resend |
 
 Peer deps mark `react`/`react-dom` optional — they get hoisted from the resolved deps tree. Do not "fix" this by promoting them to `dependencies` unless you understand the Figma Make packaging contract.
 
@@ -99,7 +99,7 @@ When adding UI, copy this convention rather than reaching for `bg-primary`/`text
 
 ### Backend (Edge Function endpoints)
 
-The Hono handler in [supabase/functions/server/index.tsx](supabase/functions/server/index.tsx) exposes two endpoints, both prefixed with `/make-server-1fdc8e05`. The frontend uses the shared base URL from [src/app/api.ts](src/app/api.ts) (`SUPABASE_FUNCTION_URL`).
+The Hono handler in [supabase/functions/server/index.ts](supabase/functions/server/index.ts) exposes two endpoints, both prefixed with `/make-server-1fdc8e05`. The frontend uses the shared base URL from [src/app/api.ts](src/app/api.ts) (`SUPABASE_FUNCTION_URL`).
 
 **`GET /google-reviews`** — fetches live Google Places reviews.
 1. Reads `GOOGLE_PLACES_API_KEY` from Deno env.
@@ -117,7 +117,7 @@ The Hono handler in [supabase/functions/server/index.tsx](supabase/functions/ser
 
 **CORS** is read from `ALLOWED_ORIGINS` env var (comma-separated origins, default `*`). Once the production domain is known, set it to e.g. `https://puron.agency,https://www.puron.agency` so the `POST /contact` endpoint can't be abused by other sites.
 
-**KV** is a thin wrapper over a single Postgres table `kv_store_1fdc8e05` with `(key TEXT PK, value JSONB)` (see [supabase/functions/server/kv_store.tsx](supabase/functions/server/kv_store.tsx)). It currently holds: cached place ID, cached reviews payload, per-IP contact rate-limit counters.
+**KV** is a thin wrapper over a single Postgres table `kv_store_1fdc8e05` with `(key TEXT PK, value JSONB)` (see [supabase/functions/server/kv_store.ts](supabase/functions/server/kv_store.ts)). It currently holds: cached place ID, cached reviews payload, per-IP contact rate-limit counters.
 
 ## 5. Known issues / footguns (read before changing things)
 
@@ -139,7 +139,7 @@ The Hono handler in [supabase/functions/server/index.tsx](supabase/functions/ser
 
 ## 7. Edge-function changes
 
-The Edge Function lives at [supabase/functions/server/index.tsx](supabase/functions/server/index.tsx) and is deployed to the `fhgevybapodhubkuylnw` project under the function slug **`make-server-1fdc8e05`** (so its full URL ends in `/functions/v1/make-server-1fdc8e05/...`). To redeploy you need the Supabase CLI logged into that project; this repo has no script for it.
+The Edge Function lives at [supabase/functions/server/index.ts](supabase/functions/server/index.ts) and is deployed to the `fhgevybapodhubkuylnw` project under the function slug **`make-server-1fdc8e05`** (so its full URL ends in `/functions/v1/make-server-1fdc8e05/...`). To redeploy you need the Supabase CLI logged into that project; this repo has no script for it.
 
 **Required Function Secrets** (Supabase Dashboard → Edge Functions → `make-server-1fdc8e05` → Secrets):
 - `GOOGLE_PLACES_API_KEY` — for `/google-reviews`
@@ -151,10 +151,12 @@ The Edge Function lives at [supabase/functions/server/index.tsx](supabase/functi
 After editing the function code in this repo, redeploy via Supabase CLI:
 
 ```bash
-supabase functions deploy server --project-ref fhgevybapodhubkuylnw
+supabase functions deploy server --project-ref fhgevybapodhubkuylnw --no-verify-jwt
 ```
 
-(or paste the file contents into the Supabase Dashboard → Edge Functions → server → Edit and click "Deploy").
+`--no-verify-jwt` keeps the endpoints public (matches current production behaviour). Without it, Supabase enforces JWT verification on the function and the marketing site can't reach it.
+
+Alternatively paste the file contents into the Supabase Dashboard → Edge Functions → server → Edit and click "Deploy".
 
 ## 8. Code → Figma snapshots (reference)
 

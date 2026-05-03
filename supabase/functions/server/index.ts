@@ -1,7 +1,7 @@
 import { Hono } from "npm:hono";
 import { cors } from "npm:hono/cors";
 import { logger } from "npm:hono/logger";
-import * as kv from "./kv_store.tsx";
+import * as kv from "./kv_store.ts";
 
 // Tiny Deno global declaration so editors that treat this file with the
 // browser-targeted tsconfig don't flag every Deno.* reference. The actual
