@@ -1,4 +1,7 @@
+import { usePageTitle } from "../../hooks/usePageTitle";
+
 export function PrivacyPage() {
+  usePageTitle("Datenschutz");
   const sections = [
     { title: "1. Verantwortliche Stelle", content: "Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:\n\nPuron Agency GmbH\nCreative Boulevard 42\n10115 Berlin, Deutschland\nE-Mail: hello@puron.agency" },
     { title: "2. Datenerfassung auf unserer Website", content: "Wenn Sie unsere Website besuchen, erfasst unser Webserver automatisch technische Daten wie Ihre IP-Adresse, den Browsertyp, das Betriebssystem, die verweisende URL, Datum und Uhrzeit des Zugriffs sowie die besuchten Seiten. Diese Daten werden auf Grundlage unseres berechtigten Interesses verarbeitet, um die technische Funktionalität und Sicherheit unserer Website zu gewährleisten." },

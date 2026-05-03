@@ -10,7 +10,17 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
     setDidError(true)
   }
 
-  const { src, alt, style, className, ...rest } = props
+  // Default to lazy + async-decode for ALL Unsplash/remote images. Caller
+  // can opt out by passing loading="eager" / decoding="sync" explicitly.
+  const {
+    src,
+    alt,
+    style,
+    className,
+    loading = 'lazy',
+    decoding = 'async',
+    ...rest
+  } = props
 
   return didError ? (
     <div
@@ -22,6 +32,15 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       </div>
     </div>
   ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      loading={loading}
+      decoding={decoding}
+      {...rest}
+      onError={handleError}
+    />
   )
 }

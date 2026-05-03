@@ -1,0 +1,13 @@
+{
+  "name": "Puron Agency",
+  "short_name": "Puron",
+  "description": "Social Media Content, der Unternehmen sichtbar macht — Reels, Posts, Ads und Content-Strategien aus Meschede.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0D",
+  "theme_color": "#7C3AED",
+  "lang": "de",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

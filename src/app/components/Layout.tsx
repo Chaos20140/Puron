@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router";
 import { PuronLogo } from "./PuronLogo";
 import { AnimatedBackground } from "./AnimatedBackground";
 import { AnimatedButton } from "./AnimatedButton";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -18,8 +19,12 @@ export function Layout() {
   return (
     <div className="bg-transparent text-[#F5F5F7] font-['Inter'] antialiased overflow-x-hidden selection:bg-[#7C3AED]/30 selection:text-white min-h-screen">
       {/* Animated 3D Background — already paints purple auroras + nebula glow,
-          so we don't add extra blurred radial divs here. */}
-      <AnimatedBackground />
+          so we don't add extra blurred radial divs here.
+          Wrapped in a silent ErrorBoundary: a canvas crash should not
+          take the whole site down — the page just loses the backdrop. */}
+      <ErrorBoundary>
+        <AnimatedBackground />
+      </ErrorBoundary>
 
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0D]/80 backdrop-blur-lg border-b border-white/5">

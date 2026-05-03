@@ -1,6 +1,6 @@
-import { Link } from "react-router";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { AnimatedButton } from "../AnimatedButton";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const projects = [
   {
@@ -49,6 +49,7 @@ const projects = [
 ];
 
 export function ProjectsPage() {
+  usePageTitle("Projekte");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-7xl mx-auto px-6">

@@ -1,7 +1,6 @@
-import { Link } from "react-router";
 import { ImageWithFallback } from "../figma/ImageWithFallback";
-import { AnimatedButton } from "../AnimatedButton";
 import { motion } from "motion/react";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const team = [
   {
@@ -40,6 +39,7 @@ const team = [
 ];
 
 export function TeamPage() {
+  usePageTitle("Unser Team");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24" style={{ isolation: "isolate" }}>
       <div className="max-w-7xl mx-auto px-6">

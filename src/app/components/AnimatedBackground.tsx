@@ -9,7 +9,7 @@ export function AnimatedBackground() {
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId: number | null = null;
     let time = 0;
 
     const resize = () => {
@@ -20,6 +20,7 @@ export function AnimatedBackground() {
     window.addEventListener("resize", resize);
 
     const isMobile = window.innerWidth < 768;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // 3D Network Sphere Particles
     const particleCount = isMobile ? 70 : 180;
@@ -224,11 +225,37 @@ export function AnimatedBackground() {
       animationId = requestAnimationFrame(animate);
     };
 
-    animate();
+    const start = () => {
+      if (animationId === null) animate();
+    };
+    const stop = () => {
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    if (prefersReducedMotion) {
+      // One static frame, no rAF loop — respects WCAG 2.3.3.
+      animate();
+      stop();
+    } else {
+      start();
+    }
+
+    // Pause the loop when the tab is hidden — saves battery and avoids
+    // background-throttle stutter when the tab regains focus.
+    const onVisibility = () => {
+      if (prefersReducedMotion) return;
+      if (document.hidden) stop();
+      else start();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stop();
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

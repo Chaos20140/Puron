@@ -1,5 +1,5 @@
-import { Link } from "react-router";
 import { AnimatedButton } from "../AnimatedButton";
+import { usePageTitle } from "../../hooks/usePageTitle";
 
 const services = [
   {
@@ -33,6 +33,7 @@ const services = [
 ];
 
 export function ServicesPage() {
+  usePageTitle("Dienstleistungen");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-7xl mx-auto px-6">

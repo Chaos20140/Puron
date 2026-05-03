@@ -28,7 +28,7 @@ export function Hero3DVisual() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId: number | null = null;
     let time = 0;
 
     const resize = () => {
@@ -40,6 +40,8 @@ export function Hero3DVisual() {
     };
     resize();
     window.addEventListener("resize", resize);
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Create 3D geometries for Solar System elements
     const ringNodes = 120;
@@ -87,31 +89,31 @@ export function Hero3DVisual() {
       ): [number, number, number][] => {
         return geom.map(v => {
           // Local rotation (e.g. planet spinning)
-          let cx = Math.cos(rx), sx = Math.sin(rx);
-          let y1 = v[1] * cx - v[2] * sx;
-          let z1 = v[1] * sx + v[2] * cx;
+          const cx = Math.cos(rx), sx = Math.sin(rx);
+          const y1 = v[1] * cx - v[2] * sx;
+          const z1 = v[1] * sx + v[2] * cx;
 
-          let cy = Math.cos(ry), sy = Math.sin(ry);
-          let x2 = v[0] * cy + z1 * sy;
-          let z2 = -v[0] * sy + z1 * cy;
+          const cy = Math.cos(ry), sy = Math.sin(ry);
+          const x2 = v[0] * cy + z1 * sy;
+          const z2 = -v[0] * sy + z1 * cy;
 
-          let cz = Math.cos(rz), sz = Math.sin(rz);
-          let x3 = x2 * cz - y1 * sz;
-          let y3 = x2 * sz + y1 * cz;
+          const cz = Math.cos(rz), sz = Math.sin(rz);
+          const x3 = x2 * cz - y1 * sz;
+          const y3 = x2 * sz + y1 * cz;
 
           // Scale & Translate to orbit position
-          let x4 = x3 * s + tx;
-          let y4 = y3 * s + ty;
-          let z4 = z2 * s + tz;
+          const x4 = x3 * s + tx;
+          const y4 = y3 * s + ty;
+          const z4 = z2 * s + tz;
 
           // System Rotation
-          let cxSys = Math.cos(systemRx), sxSys = Math.sin(systemRx);
-          let y5 = y4 * cxSys - z4 * sxSys;
-          let z5 = y4 * sxSys + z4 * cxSys;
+          const cxSys = Math.cos(systemRx), sxSys = Math.sin(systemRx);
+          const y5 = y4 * cxSys - z4 * sxSys;
+          const z5 = y4 * sxSys + z4 * cxSys;
 
-          let cySys = Math.cos(systemRy), sySys = Math.sin(systemRy);
-          let x6 = x4 * cySys + z5 * sySys;
-          let z6 = -x4 * sySys + z5 * cySys;
+          const cySys = Math.cos(systemRy), sySys = Math.sin(systemRy);
+          const x6 = x4 * cySys + z5 * sySys;
+          const z6 = -x4 * sySys + z5 * cySys;
           
           // Perspective Projection
           const fov = 4;
@@ -257,11 +259,34 @@ export function Hero3DVisual() {
       animationId = requestAnimationFrame(animate);
     };
 
-    animate();
+    const start = () => {
+      if (animationId === null) animate();
+    };
+    const stop = () => {
+      if (animationId !== null) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    if (prefersReducedMotion) {
+      animate();
+      stop();
+    } else {
+      start();
+    }
+
+    const onVisibility = () => {
+      if (prefersReducedMotion) return;
+      if (document.hidden) stop();
+      else start();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      cancelAnimationFrame(animationId);
+      stop();
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

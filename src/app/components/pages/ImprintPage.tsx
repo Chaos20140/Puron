@@ -1,4 +1,7 @@
+import { usePageTitle } from "../../hooks/usePageTitle";
+
 export function ImprintPage() {
+  usePageTitle("Impressum");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-3xl mx-auto px-6">

@@ -1,15 +1,76 @@
 import { useState } from "react";
 import { AnimatedButton } from "../AnimatedButton";
+import { SUPABASE_FUNCTION_URL } from "../../api";
+import { usePageTitle } from "../../hooks/usePageTitle";
+
+const goals = [
+  "Mehr Kunden",
+  "Mehr Bewerber",
+  "Mehr Sichtbarkeit",
+  "Stärkeres Markenimage",
+  "Noch nicht sicher",
+];
+
+type FormFields = {
+  name: string;
+  company: string;
+  email: string;
+  message: string;
+  website: string; // honeypot — must stay empty
+};
+
+const emptyForm: FormFields = {
+  name: "",
+  company: "",
+  email: "",
+  message: "",
+  website: "",
+};
 
 export function ContactPage() {
+  usePageTitle("Kontakt");
+  const [form, setForm] = useState<FormFields>(emptyForm);
   const [selectedGoal, setSelectedGoal] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const goals = ["Mehr Kunden", "Mehr Bewerber", "Mehr Sichtbarkeit", "Stärkeres Markenimage", "Noch nicht sicher"];
+  const update =
+    (field: keyof FormFields) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`${SUPABASE_FUNCTION_URL}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, goal: selectedGoal }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string }
+        | null;
+      if (!res.ok || data?.ok !== true) {
+        setError(
+          data?.error
+            ?? "Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.",
+        );
+        return;
+      }
+      setForm(emptyForm);
+      setSelectedGoal("");
+      setSubmitted(true);
+    } catch {
+      setError(
+        "Verbindungsfehler. Bitte prüfe deine Internetverbindung und versuche es erneut.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -37,42 +98,130 @@ export function ContactPage() {
           <p className="text-lg text-[#B3B3C2]">Sagen Sie uns, was Sie brauchen, und hinterlassen Sie Ihre E-Mail. Wir melden uns bei Ihnen, um eine mögliche Zusammenarbeit zu besprechen.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-[#121217] p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="space-y-6 bg-[#121217] p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl"
+        >
+          {/* Honeypot — hidden from users, attractive to dumb bots. Do NOT
+              add aria-hidden because some bots skip those; rely on layout. */}
+          <div
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}
+          >
+            <label htmlFor="website">Website (bitte leer lassen)</label>
+            <input
+              id="website"
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={update("website")}
+            />
+          </div>
+
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm font-medium text-[#B3B3C2]">Name</label>
-              <input type="text" id="name" placeholder="Max Mustermann" required className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all" />
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={update("name")}
+                placeholder="Max Mustermann"
+                required
+                maxLength={100}
+                autoComplete="name"
+                disabled={submitting}
+                className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+              />
             </div>
             <div className="space-y-2">
               <label htmlFor="company" className="text-sm font-medium text-[#B3B3C2]">Unternehmen</label>
-              <input type="text" id="company" placeholder="Muster GmbH" className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all" />
+              <input
+                type="text"
+                id="company"
+                name="company"
+                value={form.company}
+                onChange={update("company")}
+                placeholder="Muster GmbH"
+                maxLength={100}
+                autoComplete="organization"
+                disabled={submitting}
+                className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+              />
             </div>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-[#B3B3C2]">E-Mail</label>
-            <input type="email" id="email" placeholder="max@beispiel.de" required className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={form.email}
+              onChange={update("email")}
+              placeholder="max@beispiel.de"
+              required
+              maxLength={200}
+              autoComplete="email"
+              disabled={submitting}
+              className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all disabled:opacity-60"
+            />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="message" className="text-sm font-medium text-[#B3B3C2]">Wobei benötigen Sie Hilfe?</label>
-            <textarea id="message" rows={4} placeholder="Erzählen Sie uns von Ihren aktuellen Herausforderungen..." required className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all resize-none" />
+            <textarea
+              id="message"
+              name="message"
+              rows={4}
+              value={form.message}
+              onChange={update("message")}
+              placeholder="Erzählen Sie uns von Ihren aktuellen Herausforderungen..."
+              required
+              maxLength={2000}
+              disabled={submitting}
+              className="w-full bg-[#0A0A0D] border border-white/10 rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] transition-all resize-none disabled:opacity-60"
+            />
           </div>
 
           <div className="space-y-3 pt-2">
             <label className="text-sm font-medium text-[#B3B3C2]">Primäres Ziel (Optional)</label>
             <div className="flex flex-wrap gap-3">
               {goals.map((g) => (
-                <button key={g} type="button" onClick={() => setSelectedGoal(g === selectedGoal ? "" : g)} className={`px-4 py-2 rounded-full border text-sm transition-all duration-300 hover:scale-[1.05] active:scale-95 ${selectedGoal === g ? "bg-[#7C3AED]/10 border-[#7C3AED] text-white" : "border-white/10 bg-[#0A0A0D] text-[#B3B3C2] hover:border-white/30"}`}>
+                <button
+                  key={g}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setSelectedGoal(g === selectedGoal ? "" : g)}
+                  className={`px-4 py-2 rounded-full border text-sm transition-all duration-300 hover:scale-[1.05] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${selectedGoal === g ? "bg-[#7C3AED]/10 border-[#7C3AED] text-white" : "border-white/10 bg-[#0A0A0D] text-[#B3B3C2] hover:border-white/30"}`}
+                >
                   {g}
                 </button>
               ))}
             </div>
           </div>
 
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+            >
+              {error}
+            </div>
+          )}
+
           <div className="pt-4">
-            <AnimatedButton type="submit" variant="primary" fullWidth className="!rounded-xl !py-4 !text-base">
-              Anfrage senden
+            <AnimatedButton
+              type="submit"
+              variant="primary"
+              fullWidth
+              className="!rounded-xl !py-4 !text-base"
+            >
+              {submitting ? "Wird gesendet…" : "Anfrage senden"}
             </AnimatedButton>
           </div>
         </form>
