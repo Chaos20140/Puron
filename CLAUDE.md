@@ -141,9 +141,15 @@ The Hono handler in [supabase/functions/server/index.ts](supabase/functions/serv
 
 The Edge Function lives at [supabase/functions/server/index.ts](supabase/functions/server/index.ts) and is deployed to the `fhgevybapodhubkuylnw` project under the function slug **`make-server-1fdc8e05`** (so its full URL ends in `/functions/v1/make-server-1fdc8e05/...`). To redeploy you need the Supabase CLI logged into that project; this repo has no script for it.
 
-**Required Function Secrets** (Supabase Dashboard → Edge Functions → `make-server-1fdc8e05` → Secrets):
-- `GOOGLE_PLACES_API_KEY` — for `/google-reviews`
-- `RESEND_API_KEY` — for `/contact`
+**Function Secrets** are managed via [supabase/.env](supabase/.env) (gitignored). The committed [supabase/.env.example](supabase/.env.example) documents every variable + how to obtain it. To push secrets to the live function:
+
+```bash
+supabase secrets set --env-file supabase/.env --project-ref fhgevybapodhubkuylnw
+```
+
+Variables (set in `supabase/.env`):
+- `GOOGLE_PLACES_API_KEY` — required for `/google-reviews`
+- `RESEND_API_KEY` — required for `/contact`
 - `CONTACT_EMAIL_TO` (optional, default `Tolunay.u@outlook.de`)
 - `CONTACT_EMAIL_FROM` (optional, default `onboarding@resend.dev` — replace with `noreply@yourdomain` once you verify the domain in Resend so emails don't land in spam)
 - `ALLOWED_ORIGINS` (optional, default `*`) — comma-separated allow-list, e.g. `https://puron.agency,https://www.puron.agency`

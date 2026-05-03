@@ -4,3 +4,6 @@ playwright-report
 test-results
 .playwright
 supabase/.temp
+supabase/.env
+.env
+.env.local
