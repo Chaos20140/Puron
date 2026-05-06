@@ -201,4 +201,8 @@ If you deploy to **Vercel**, translate the same rules into a `vercel.json` (the 
 }
 ```
 
-For SPA fallback (so direct visits to `/services` etc. don't 404), Vercel needs a `rewrites` block pointing everything to `/index.html`; Netlify reads `public/_redirects`; Cloudflare Pages uses `public/_redirects` or its UI. None of these are in the repo yet — add when you pick a host.
+For SPA fallback (so direct visits to `/services` etc. don't 404):
+- **Netlify / Cloudflare Pages**: [public/_redirects](public/_redirects) is committed (`/*    /index.html   200`).
+- **Vercel**: ignores `_redirects`. Add a `vercel.json` `rewrites` block pointing everything to `/index.html`.
+
+After deploying, also update Supabase function secret `ALLOWED_ORIGINS` to lock the contact endpoint to your production domain — see §7.

@@ -1,0 +1,4 @@
+# SPA fallback for Netlify / Cloudflare Pages.
+# Any path that doesn't match a real file falls through to /index.html
+# (status 200, NOT a redirect — the URL stays intact for react-router).
+/*    /index.html   200
