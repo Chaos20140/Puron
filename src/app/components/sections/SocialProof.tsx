@@ -94,6 +94,7 @@ export function SocialProof() {
               WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
               scrollPaddingLeft: "1.5rem",
               scrollPaddingRight: "1.5rem",
+              WebkitOverflowScrolling: "touch",
             }}
           >
             <div className="review-marquee-track flex gap-6 md:gap-8 w-max px-6 md:px-0">
