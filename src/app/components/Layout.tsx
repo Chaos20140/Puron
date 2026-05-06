@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router";
+import { motion } from "motion/react";
 import { PuronLogo } from "./PuronLogo";
 import { AnimatedBackground } from "./AnimatedBackground";
 import { AnimatedButton } from "./AnimatedButton";
@@ -29,9 +30,40 @@ export function Layout() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0D]/80 backdrop-blur-lg border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 md:gap-3 group">
-            <PuronLogo className="w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-105" />
-            <span className="font-['Space_Grotesk'] text-lg md:text-xl font-semibold tracking-tight text-[#F5F5F7]">Puron</span>
+          <Link
+            to="/"
+            aria-label="Puron Media — zur Startseite"
+            className="flex items-center gap-2.5 md:gap-3 group"
+          >
+            {/* Cascade reveal on app mount: icon → wordmark → tagline.
+                Layout is mounted once at app start, so this only plays
+                once per session — not on route changes. */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="shrink-0"
+            >
+              <PuronLogo className="w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-105" />
+            </motion.div>
+            <div className="flex flex-col leading-tight">
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
+                className="font-['Space_Grotesk'] text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
+              >
+                PURON MEDIA
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut", delay: 0.55 }}
+                className="hidden sm:block font-['Space_Grotesk'] text-[9px] md:text-[10px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap"
+              >
+                Social Media &amp; Creative Agency
+              </motion.span>
+            </div>
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
