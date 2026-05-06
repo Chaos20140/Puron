@@ -204,5 +204,17 @@ If you deploy to **Vercel**, translate the same rules into a `vercel.json` (the 
 For SPA fallback (so direct visits to `/services` etc. don't 404):
 - **Netlify / Cloudflare Pages**: [public/_redirects](public/_redirects) is committed (`/*    /index.html   200`).
 - **Vercel**: ignores `_redirects`. Add a `vercel.json` `rewrites` block pointing everything to `/index.html`.
+- **GitHub Pages**: ignores both. The `spa-404-fallback` Vite plugin in [vite.config.ts](vite.config.ts) copies `dist/index.html` → `dist/404.html` so unknown paths still render the SPA shell (status 404, but functional).
 
 After deploying, also update Supabase function secret `ALLOWED_ORIGINS` to lock the contact endpoint to your production domain — see §7.
+
+### GitHub Pages deploy
+
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) builds + deploys on every push to `main` via `actions/deploy-pages`. The workflow sets `GHP_BASE=/Puron/` so Vite emits asset URLs under the repo subpath. React Router reads the same value via `import.meta.env.BASE_URL` and applies it as `basename`.
+
+To switch to a custom domain at the apex (`https://puron-media.de`):
+1. Set GHP custom domain in repo Settings → Pages.
+2. Remove (or set to `/`) the `GHP_BASE` env var in [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+3. Add `public/CNAME` containing the domain on a single line.
+
+Note: GitHub Pages **ignores `public/_headers`** — security headers (CSP, HSTS, …) won't apply. If headers matter, deploy to Netlify or Cloudflare Pages instead.

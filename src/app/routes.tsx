@@ -9,19 +9,25 @@ import { ImprintPage } from "./components/pages/ImprintPage";
 import { PrivacyPage } from "./components/pages/PrivacyPage";
 import { NotFoundPage } from "./components/pages/NotFoundPage";
 
-export const router = createBrowserRouter([
-  {
-    path: "/",
-    Component: Layout,
-    children: [
-      { index: true, Component: HomePage },
-      { path: "services", Component: ServicesPage },
-      // { path: "projects", Component: ProjectsPage },
-      { path: "team", Component: TeamPage },
-      { path: "contact", Component: ContactPage },
-      { path: "imprint", Component: ImprintPage },
-      { path: "privacy", Component: PrivacyPage },
-      { path: "*", Component: NotFoundPage },
-    ],
-  },
-]);
+// `basename` mirrors Vite's `base` so the router works whether the site
+// is served from the domain root (custom domain → BASE_URL = "/") or a
+// repo subpath like /Puron/ on GitHub Pages.
+export const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      Component: Layout,
+      children: [
+        { index: true, Component: HomePage },
+        { path: "services", Component: ServicesPage },
+        // { path: "projects", Component: ProjectsPage },
+        { path: "team", Component: TeamPage },
+        { path: "contact", Component: ContactPage },
+        { path: "imprint", Component: ImprintPage },
+        { path: "privacy", Component: PrivacyPage },
+        { path: "*", Component: NotFoundPage },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" },
+);
