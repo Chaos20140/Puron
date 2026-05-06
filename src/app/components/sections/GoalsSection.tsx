@@ -1,80 +1,75 @@
 import { motion } from "motion/react";
-import { PuronLogo } from "../PuronLogo";
 
-// Vertical goal stream: large purple-gradient keywords flow continuously
-// upward behind a static center logo. Two duplicated columns make the
-// loop seamless. prefers-reduced-motion users get a static stack.
-const goalKeywords = [
-  "Mehr Kunden",
-  "Höherer Umsatz",
-  "Mehr Bewerber",
-  "Mehr Sichtbarkeit",
-  "Stärkere Marke",
-  "Echte Reichweite",
-  "Messbares Wachstum",
-  "Premium Content",
+// 5-step collaboration process. Each card slides in from alternating
+// sides as the user scrolls — `whileInView` with `viewport.once` so the
+// reveal only happens the first time each card crosses ~30% in view.
+// MotionConfig reducedMotion="user" in App.tsx makes this a snap-to-
+// final-state for users with prefers-reduced-motion.
+const steps = [
+  { title: "Erstgespräch", desc: "Wir lernen Dein Unternehmen kennen." },
+  { title: "Konzept", desc: "Wir entwickeln eine individuelle Social Media Strategie." },
+  { title: "Regelmäßige Drehtage", desc: "Wir erstellen hochwertigen Content vor Ort." },
+  { title: "Bespielung und Betreuung", desc: "Wir kümmern uns um Deine Kanäle." },
+  { title: "Werbekampagnen", desc: "Wir schalten gezielte Ads für maximale Reichweite." },
 ];
 
-const streamKeyframes = `
-@keyframes goal-stream { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-@media (prefers-reduced-motion: reduce) {
-  .goal-stream-anim { animation: none !important; }
-}
-`;
+// Purple gradient progression: lightest → deepest, mirrors the warm
+// yellow→pink palette of the reference but stays on-brand.
+const gradients = [
+  "from-[#C084FC] to-[#A855F7]",
+  "from-[#A855F7] to-[#9333EA]",
+  "from-[#9333EA] to-[#7C3AED]",
+  "from-[#7C3AED] to-[#6D28D9]",
+  "from-[#6D28D9] to-[#4C1D95]",
+];
 
 export function GoalsSection() {
   return (
-    <section className="py-16 md:py-32 relative bg-[#0A0A0D]/40 backdrop-blur-sm" style={{ isolation: "isolate" }}>
-      <style>{streamKeyframes}</style>
-      <div className="max-w-7xl mx-auto px-6 text-center">
+    <section
+      className="py-16 md:py-32 relative bg-[#0A0A0D]/40 backdrop-blur-sm"
+      style={{ isolation: "isolate" }}
+    >
+      <div className="max-w-3xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
+          className="text-center mb-12 md:mb-16"
         >
           <span className="inline-flex items-center gap-1.5 rounded-full bg-[#7C3AED]/10 px-3 py-1.5 text-xs text-[#A855F7] ring-1 ring-[#7C3AED]/20 uppercase tracking-widest font-medium mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
-            Unser Erfolg
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            Unser Prozess
           </span>
-          <h2 className="font-['Space_Grotesk'] text-3xl md:text-5xl font-semibold tracking-tight mb-4">Wir beherrschen Content, der konvertiert</h2>
-          <p className="text-lg text-[#B3B3C2] max-w-2xl mx-auto mb-16">
-            Wir sind nicht einfach nur eine weitere Agentur, die schöne Bilder macht. Wir sind Experten darin, Unternehmen durch strategischen Social Content zu skalieren. Wir wissen genau, wie man Algorithmen bedient, Zuschauer bindet und direkten ROI generiert.
-          </p>
+          <h2 className="font-['Space_Grotesk'] text-3xl md:text-5xl font-semibold tracking-tight">
+            So läuft unsere Zusammenarbeit ab
+          </h2>
         </motion.div>
 
-        {/* Stream — fixed-height window, gradient masks top + bottom for fade. */}
-        <div
-          className="relative mx-auto max-w-3xl h-[420px] md:h-[520px] overflow-hidden"
-          aria-hidden="true"
-        >
-          {/* Static logo anchor in the middle */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
-            <div className="absolute w-32 h-32 md:w-44 md:h-44 rounded-full bg-[#7C3AED]/10 border border-[#7C3AED]/30 shadow-[0_0_60px_rgba(124,58,237,0.35),0_0_120px_rgba(124,58,237,0.18)]" />
-            <div className="relative w-20 h-20 md:w-28 md:h-28 bg-[#0A0A0D] border border-white/10 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.4)]">
-              <PuronLogo className="w-9 h-9 md:w-12 md:h-12" />
-            </div>
-          </div>
-
-          {/* Top + bottom fade gradients */}
-          <div className="pointer-events-none absolute top-0 left-0 right-0 h-32 z-10 bg-gradient-to-b from-[#0A0A0D] via-[#0A0A0D]/80 to-transparent" />
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 z-10 bg-gradient-to-t from-[#0A0A0D] via-[#0A0A0D]/80 to-transparent" />
-
-          {/* Two duplicate stacks for seamless loop. The animated container
-              is taller than the viewport — translating it -50% loops back. */}
-          <div
-            className="goal-stream-anim absolute left-0 right-0 flex flex-col items-center gap-10 md:gap-14 will-change-transform"
-            style={{ animation: "goal-stream 28s linear infinite" }}
-          >
-            {[...goalKeywords, ...goalKeywords].map((label, i) => (
-              <span
+        <div className="space-y-6 md:space-y-8">
+          {steps.map((step, i) => {
+            const fromLeft = i % 2 === 0;
+            return (
+              <motion.div
                 key={i}
-                className="font-['Space_Grotesk'] text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED] whitespace-nowrap"
+                initial={{ opacity: 0, x: fromLeft ? -80 : 80 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
+                className={`bg-gradient-to-br ${gradients[i]} rounded-3xl px-6 py-10 md:px-12 md:py-14 shadow-[0_15px_40px_rgba(124,58,237,0.25)] ring-1 ring-white/10 hover:ring-white/30 transition-shadow text-center`}
               >
-                {label}
-              </span>
-            ))}
-          </div>
+                <h3 className="font-['Space_Grotesk'] text-2xl md:text-4xl font-bold tracking-tight text-[#0A0A0D] mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-base md:text-lg italic text-[#0A0A0D]/75 max-w-md mx-auto leading-relaxed">
+                  {step.desc}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
