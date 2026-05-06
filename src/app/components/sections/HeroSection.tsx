@@ -13,14 +13,14 @@ export function HeroSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center text-center lg:items-start lg:text-left"
         >
-          <h1 className="font-['Space_Grotesk'] text-[2.25rem] md:text-5xl lg:text-6xl font-semibold uppercase tracking-tight leading-[1.1] md:leading-[1.05] mb-5 md:mb-6 max-w-[340px] md:max-w-3xl">
+          <h1 className="font-['Space_Grotesk'] text-[1.6rem] sm:text-[2rem] md:text-5xl lg:text-6xl font-semibold uppercase tracking-tight leading-[1.15] md:leading-[1.05] mb-5 md:mb-6 max-w-[300px] sm:max-w-md md:max-w-3xl">
             Social Media Content,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">der funktioniert</span>
             {" – Sichtbarkeit ist "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">kein Zufall</span>
             .
           </h1>
-          <p className="text-[15px] md:text-xl text-[#B3B3C2] mb-8 md:mb-10 max-w-[280px] sm:max-w-md md:max-w-xl leading-relaxed">
+          <p className="text-sm sm:text-[15px] md:text-xl text-[#B3B3C2] mb-8 md:mb-10 max-w-[280px] sm:max-w-md md:max-w-xl leading-relaxed">
             Wir schaffen Inhalte nach dem Motto: Aus dem Auge, in den Sinn – für Unternehmen, die messbares Wachstum anstreben.
           </p>
           <AnimatedButton to="/contact" variant="primary" className="w-full max-w-[260px] sm:w-auto">

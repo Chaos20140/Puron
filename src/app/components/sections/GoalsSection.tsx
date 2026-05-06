@@ -59,12 +59,12 @@ export function GoalsSection() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
-                className={`bg-gradient-to-br ${gradients[i]} rounded-3xl px-6 py-10 md:px-12 md:py-14 shadow-[0_15px_40px_rgba(124,58,237,0.25)] ring-1 ring-white/10 hover:ring-white/30 transition-shadow text-center`}
+                className={`bg-gradient-to-br ${gradients[i]} rounded-3xl px-5 py-8 sm:px-6 sm:py-10 md:px-12 md:py-14 shadow-[0_15px_40px_rgba(124,58,237,0.25)] ring-1 ring-white/10 hover:ring-white/30 transition-shadow text-center`}
               >
-                <h3 className="font-['Space_Grotesk'] text-2xl md:text-4xl font-bold tracking-tight text-[#0A0A0D] mb-3">
+                <h3 className="font-['Space_Grotesk'] text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-[#0A0A0D] mb-2 sm:mb-3">
                   {step.title}
                 </h3>
-                <p className="text-base md:text-lg italic text-[#0A0A0D]/75 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg italic text-[#0A0A0D]/75 max-w-md mx-auto leading-relaxed">
                   {step.desc}
                 </p>
               </motion.div>

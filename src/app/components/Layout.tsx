@@ -51,15 +51,15 @@ export function Layout() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-                className="font-['Space_Grotesk'] text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
+                className="font-['Space_Grotesk'] text-sm sm:text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
               >
-                PURON MEDIA
+                PURON<span className="hidden sm:inline"> MEDIA</span>
               </motion.span>
               <motion.span
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.55 }}
-                className="hidden sm:block font-['Space_Grotesk'] text-[9px] md:text-[10px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap"
+                className="hidden md:block font-['Space_Grotesk'] text-[9px] md:text-[10px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap"
               >
                 Social Media &amp; Creative Agency
               </motion.span>
@@ -142,10 +142,10 @@ export function Layout() {
             >
               <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-['Space_Grotesk'] text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
-                  PURON MEDIA
+                <span className="font-['Space_Grotesk'] text-sm sm:text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
+                  PURON<span className="hidden sm:inline"> MEDIA</span>
                 </span>
-                <span className="font-['Space_Grotesk'] text-[9px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap">
+                <span className="hidden sm:block font-['Space_Grotesk'] text-[9px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap">
                   Social Media &amp; Creative Agency
                 </span>
               </div>
