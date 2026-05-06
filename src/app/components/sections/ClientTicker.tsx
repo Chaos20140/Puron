@@ -20,6 +20,19 @@ const clients = [
       </svg>
     ),
   },
+  {
+    name: "AutoWelt Sauerland",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-7 w-7 stroke-current fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="2.5" />
+        <path d="M12 2v7.5" />
+        <path d="M12 14.5V22" />
+        <path d="M2 12h7.5" />
+        <path d="M14.5 12H22" />
+      </svg>
+    ),
+  },
 ];
 
 const marqueeKeyframes = `@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`;
