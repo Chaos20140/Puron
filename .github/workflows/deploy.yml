@@ -38,11 +38,10 @@ jobs:
         env:
           GHP_BASE: /Puron/
 
+      # Pages must be enabled in the repo Settings (Settings → Pages →
+      # Source: "GitHub Actions") before this step works. The GITHUB_TOKEN
+      # used by the workflow doesn't have permission to enable Pages itself.
       - uses: actions/configure-pages@v5
-        with:
-          # Auto-enable GitHub Pages on the repo if it isn't already, and
-          # set the source to "GitHub Actions". Avoids the UI dance.
-          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
