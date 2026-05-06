@@ -51,15 +51,15 @@ export function Layout() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-                className="font-['Space_Grotesk'] text-sm sm:text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
+                className="font-['Space_Grotesk'] text-xs sm:text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
               >
-                PURON<span className="hidden sm:inline"> MEDIA</span>
+                PURON MEDIA
               </motion.span>
               <motion.span
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.55 }}
-                className="hidden md:block font-['Space_Grotesk'] text-[9px] md:text-[10px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap"
+                className="font-['Space_Grotesk'] text-[7px] sm:text-[9px] md:text-[10px] italic tracking-[0.1em] sm:tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap"
               >
                 Social Media &amp; Creative Agency
               </motion.span>
@@ -79,8 +79,8 @@ export function Layout() {
           </div>
 
           <div className="flex items-center gap-3 md:gap-4">
-            <AnimatedButton to="/contact" variant="nav" className="!px-3 !py-1.5 sm:!px-4 sm:!py-2 md:!px-5 md:!py-2.5 !text-[10px] sm:!text-[12px] md:!text-sm">
-              <span className="sm:hidden">Projekt starten</span>
+            <AnimatedButton to="/contact" variant="nav" className="!px-2.5 !py-1.5 sm:!px-4 sm:!py-2 md:!px-5 md:!py-2.5 !text-[10px] sm:!text-[12px] md:!text-sm">
+              <span className="sm:hidden">Anfrage</span>
               <span className="hidden sm:inline">Zusammenarbeit anfragen</span>
             </AnimatedButton>
             <button className="md:hidden p-2 -mr-2 text-[#B3B3C2] hover:text-white transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -142,10 +142,10 @@ export function Layout() {
             >
               <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
               <div className="flex flex-col leading-tight">
-                <span className="font-['Space_Grotesk'] text-sm sm:text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
-                  PURON<span className="hidden sm:inline"> MEDIA</span>
+                <span className="font-['Space_Grotesk'] text-xs sm:text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
+                  PURON MEDIA
                 </span>
-                <span className="hidden sm:block font-['Space_Grotesk'] text-[9px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap">
+                <span className="font-['Space_Grotesk'] text-[7px] sm:text-[9px] italic tracking-[0.1em] sm:tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap">
                   Social Media &amp; Creative Agency
                 </span>
               </div>

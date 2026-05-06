@@ -2,16 +2,25 @@ import { motion } from "motion/react";
 import { useGoogleReviews } from "../useGoogleReviews";
 import { GoogleReviewCard } from "../GoogleReviewCard";
 
-// Continuous right-to-left marquee of review cards. Hover anywhere in the
-// track pauses the scroll (CSS) and the hovered card scales up via
-// motion's whileHover. prefers-reduced-motion stops the loop entirely.
+// Desktop: continuous right-to-left marquee. Hover anywhere in the track
+// pauses the scroll (CSS) and the hovered card scales up via motion's
+// whileHover. prefers-reduced-motion stops the loop entirely.
+//
+// Mobile (<md): no auto-animation; the track becomes a touch-pan-x
+// scrollable container with snap points so users swipe through cards
+// manually. Hover-to-pause + hover-to-zoom are useless without a
+// pointer device anyway.
 const marqueeStyles = `
 @keyframes review-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.review-marquee-track { animation: review-marquee 60s linear infinite; }
-.review-marquee-wrap:hover .review-marquee-track { animation-play-state: paused; }
+@media (min-width: 768px) {
+  .review-marquee-track { animation: review-marquee 60s linear infinite; }
+  .review-marquee-wrap:hover .review-marquee-track { animation-play-state: paused; }
+}
 @media (prefers-reduced-motion: reduce) {
   .review-marquee-track { animation: none !important; }
 }
+.review-marquee-wrap::-webkit-scrollbar { display: none; }
+.review-marquee-wrap { scrollbar-width: none; -ms-overflow-style: none; }
 `;
 
 export function SocialProof() {
@@ -76,19 +85,23 @@ export function SocialProof() {
           </div>
         )}
 
-        {/* Marquee track */}
+        {/* Marquee on desktop, swipe-scroll carousel on mobile */}
         {showMarquee && (
           <div
-            className="review-marquee-wrap relative w-full overflow-hidden py-12 md:py-16"
+            className="review-marquee-wrap relative w-full overflow-x-auto md:overflow-x-hidden overflow-y-hidden touch-pan-x snap-x snap-mandatory md:snap-none py-12 md:py-16"
             style={{
               maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
               WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+              scrollPaddingLeft: "1.5rem",
+              scrollPaddingRight: "1.5rem",
             }}
           >
-            <div className="review-marquee-track flex gap-6 md:gap-8 w-max">
+            <div className="review-marquee-track flex gap-6 md:gap-8 w-max px-6 md:px-0">
               {Array.from({ length: repeats }).flatMap((_, repeatIdx) =>
                 realReviews.map((r, i) => (
-                  <GoogleReviewCard key={`${repeatIdx}-${i}`} review={r} />
+                  <div key={`${repeatIdx}-${i}`} className="snap-center">
+                    <GoogleReviewCard review={r} />
+                  </div>
                 )),
               )}
             </div>
