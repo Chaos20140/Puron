@@ -12,7 +12,7 @@ export function Layout() {
 
   const navLinks = [
     { to: "/services", label: "Dienstleistungen" },
-    { to: "/projects", label: "Projekte" },
+    // { to: "/projects", label: "Projekte" }, // hidden until we have a real portfolio
     { to: "/team", label: "Unser Team" },
     { to: "/contact", label: "Kontakt" },
   ];
@@ -135,31 +135,40 @@ export function Layout() {
       <footer className="border-t border-white/5 bg-[#050508]/80 backdrop-blur-md mt-auto relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-8 md:py-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-8">
-            <div className="flex items-center gap-3">
-              <PuronLogo className="w-6 h-6 md:w-8 md:h-8" />
-              <span className="font-['Space_Grotesk'] text-lg font-semibold tracking-tight text-[#F5F5F7]">Puron Agency</span>
-            </div>
+            <Link
+              to="/"
+              aria-label="Puron Media — zur Startseite"
+              className="flex items-center gap-2.5 md:gap-3 group"
+            >
+              <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-['Space_Grotesk'] text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
+                  PURON MEDIA
+                </span>
+                <span className="font-['Space_Grotesk'] text-[9px] italic tracking-[0.18em] text-[#B3B3C2] uppercase whitespace-nowrap">
+                  Social Media &amp; Creative Agency
+                </span>
+              </div>
+            </Link>
             <div className="flex flex-wrap items-center gap-6 md:gap-8 text-sm font-medium">
               <Link to="/services" className="text-[#B3B3C2] hover:text-white transition-colors">Dienstleistungen</Link>
               <Link to="/privacy" className="text-[#B3B3C2] hover:text-white transition-colors">Datenschutz</Link>
               <Link to="/imprint" className="text-[#B3B3C2] hover:text-white transition-colors">Impressum</Link>
             </div>
           </div>
-          
+
           <div className="h-px w-full bg-white/5 mb-8" />
-          
+
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-xs text-[#71717A] leading-relaxed">
             <div className="max-w-sm">
               <p className="text-[#F5F5F7] font-medium mb-1 uppercase tracking-widest text-[10px]">Büroadresse</p>
-              <p>Puron Agency GmbH</p>
-              <p>Creative Boulevard 42</p>
-              <p>10115 Berlin, Deutschland</p>
+              <p>Puron Media</p>
+              <p>Meschede, Deutschland</p>
             </div>
-            
+
             <div className="text-left md:text-right">
-              <p>Website aktiv seit 2024</p>
               <p>Erstellt / Gehostet von <span className="text-[#A855F7] font-medium">Tolunay Usul</span></p>
-              <p className="mt-2">&copy; {new Date().getFullYear()} Puron Agency. Alle Rechte vorbehalten.</p>
+              <p className="mt-2">&copy; {new Date().getFullYear()} Puron Media. Alle Rechte vorbehalten.</p>
             </div>
           </div>
         </div>

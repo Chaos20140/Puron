@@ -46,9 +46,10 @@ export function GoogleReviewCard({ review, variant, delay = 0 }: Props) {
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.06, y: -8, zIndex: 30 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8, delay, ease: "easeOut" }}
-        className="relative w-full max-w-[340px] md:w-[360px] h-auto min-h-[340px] md:h-[360px] rounded-2xl flex items-center justify-center bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 shadow-[0_25px_40px_rgba(0,0,0,0.8)] backdrop-blur-xl z-10 shrink-0"
+        transition={{ duration: 0.4, delay, ease: "easeOut" }}
+        className="relative w-full max-w-[340px] md:w-[360px] h-auto min-h-[340px] md:h-[360px] rounded-2xl flex items-center justify-center bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 shadow-[0_25px_40px_rgba(0,0,0,0.8)] backdrop-blur-xl z-10 shrink-0 cursor-pointer"
       >
         <div className="absolute inset-4 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] shadow-xl ring-1 ring-white/15 backdrop-blur overflow-hidden">
           <div className="p-6 h-full flex flex-col">
@@ -88,11 +89,18 @@ export function GoogleReviewCard({ review, variant, delay = 0 }: Props) {
     <motion.div
       initial={{ opacity: 0, x: isLeft ? -50 : 50, rotate: isLeft ? -15 : 15 }}
       whileInView={{ opacity: 1, x: 0, rotate: isLeft ? -6 : 6 }}
+      whileHover={{
+        scale: 1.08,
+        rotate: 0,
+        y: -8,
+        zIndex: 40,
+        x: isLeft ? "-15%" : "15%",
+      }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
+      transition={{ duration: 0.4, delay, ease: "easeOut" }}
       className={`md:absolute w-full max-w-[320px] md:w-[340px] h-auto min-h-[320px] md:h-[340px] rounded-2xl flex items-center justify-center ${
         isLeft ? "md:-translate-x-[15%]" : "md:translate-x-[15%]"
-      } bg-gradient-to-b from-[#7C3AED]/5 to-transparent border border-white/5 shadow-2xl backdrop-blur-md z-[1] shrink-0`}
+      } bg-gradient-to-b from-[#7C3AED]/5 to-transparent border border-white/5 shadow-2xl backdrop-blur-md z-[1] shrink-0 cursor-pointer hover:border-white/20`}
     >
       <div className="absolute inset-4 rounded-xl bg-[#121217]/90 text-[#F5F5F7] shadow-2xl ring-1 ring-white/10 overflow-hidden">
         <div className="p-6 h-full flex flex-col">

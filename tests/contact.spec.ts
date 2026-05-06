@@ -18,7 +18,7 @@ test.describe("Kontaktformular", () => {
     await page.getByLabel("Name").fill("Max Mustermann");
     await page.getByLabel("Unternehmen").fill("Muster GmbH");
     await page.getByLabel("E-Mail").fill("max@beispiel.de");
-    await page.getByLabel("Wobei benötigen Sie Hilfe?").fill("Test-Nachricht aus dem Playwright-E2E.");
+    await page.getByLabel("Worum geht's genau?").fill("Test-Nachricht aus dem Playwright-E2E.");
     await page.getByRole("button", { name: "Mehr Sichtbarkeit" }).click();
     await page.getByRole("button", { name: /anfrage senden/i }).click();
 
@@ -46,7 +46,7 @@ test.describe("Kontaktformular", () => {
     await page.goto("/contact");
     await page.getByLabel("Name").fill("Test");
     await page.getByLabel("E-Mail").fill("test@example.com");
-    await page.getByLabel("Wobei benötigen Sie Hilfe?").fill("Hallo");
+    await page.getByLabel("Worum geht's genau?").fill("Hallo");
     await page.getByRole("button", { name: /anfrage senden/i }).click();
 
     await expect(page.getByRole("alert")).toContainText("Zu viele Anfragen");
@@ -87,7 +87,7 @@ test.describe("Kontaktformular", () => {
     await page.goto("/contact");
     await page.getByLabel("Name").fill("Max");
     await page.getByLabel("E-Mail").fill("kein-at-zeichen-und-keine-domain");
-    await page.getByLabel("Wobei benötigen Sie Hilfe?").fill("Test");
+    await page.getByLabel("Worum geht's genau?").fill("Test");
     await page.getByRole("button", { name: /anfrage senden/i }).click();
 
     await expect(page.getByText(/sieht nicht wie eine gültige E-Mail aus/i)).toBeVisible();

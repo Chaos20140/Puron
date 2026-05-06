@@ -153,8 +153,8 @@ export function ContactPage() {
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-12">
-          <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Lassen Sie uns über Ihre Marke sprechen</h1>
-          <p className="text-lg text-[#B3B3C2]">Sagen Sie uns, was Sie brauchen, und hinterlassen Sie Ihre E-Mail. Wir melden uns bei Ihnen, um eine mögliche Zusammenarbeit zu besprechen.</p>
+          <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Bereit durchzustarten?</h1>
+          <p className="text-lg text-[#B3B3C2]">Schreib uns gerne ein paar Zeilen &amp; wir melden uns bei dir!</p>
         </div>
 
         <form
@@ -242,7 +242,7 @@ export function ContactPage() {
 
           <div>
             <div className="flex items-baseline justify-between mb-2">
-              <label htmlFor="message" className="block text-sm font-medium text-[#B3B3C2]">Wobei benötigen Sie Hilfe?</label>
+              <label htmlFor="message" className="block text-sm font-medium text-[#B3B3C2]">Worum geht's genau?</label>
               <span className={`text-xs tabular-nums ${form.message.length > MAX.message ? "text-red-400" : "text-[#71717A]"}`}>
                 {form.message.length}/{MAX.message}
               </span>
@@ -302,27 +302,20 @@ export function ContactPage() {
           </div>
         </form>
 
-        <div className="mt-16 grid sm:grid-cols-3 gap-6 text-center">
+        <div className="mt-16 grid sm:grid-cols-2 gap-6 text-center max-w-xl mx-auto">
           <div className="p-6 rounded-2xl bg-[#121217] border border-white/5">
             <div className="w-10 h-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center mx-auto mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
             </div>
             <p className="text-sm text-[#F5F5F7] font-medium mb-1">E-Mail</p>
-            <p className="text-xs text-[#B3B3C2]">hello@puron.agency</p>
+            <a href="mailto:info@puron-media.de" className="text-xs text-[#B3B3C2] hover:text-[#A855F7] transition-colors">info@puron-media.de</a>
           </div>
           <div className="p-6 rounded-2xl bg-[#121217] border border-white/5">
             <div className="w-10 h-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center mx-auto mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
             </div>
             <p className="text-sm text-[#F5F5F7] font-medium mb-1">Instagram</p>
-            <p className="text-xs text-[#B3B3C2]">@puron.agency</p>
-          </div>
-          <div className="p-6 rounded-2xl bg-[#121217] border border-white/5">
-            <div className="w-10 h-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center mx-auto mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>
-            </div>
-            <p className="text-sm text-[#F5F5F7] font-medium mb-1">LinkedIn</p>
-            <p className="text-xs text-[#B3B3C2]">Puron Agency</p>
+            <a href="https://instagram.com/puronmedia" target="_blank" rel="noopener noreferrer" className="text-xs text-[#B3B3C2] hover:text-[#A855F7] transition-colors">@puronmedia</a>
           </div>
         </div>
       </div>

@@ -1,20 +1,31 @@
 import { motion } from "motion/react";
 import { PuronLogo } from "../PuronLogo";
 
-const floatKeyframes = `@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }`;
-
-const goals = [
-  { label: "Mehr Kunden", cls: "top-[15%] left-[0%] md:top-[17%] md:left-[5%]" },
-  { label: "Höherer Umsatz", cls: "top-[2%] left-1/2 -translate-x-1/2 md:top-[5%]" },
-  { label: "Mehr Bewerber", cls: "top-[15%] right-[0%] md:top-[17%] md:right-[5%]" },
-  { label: "Mehr Sichtbarkeit", cls: "bottom-[10%] left-[2%] md:bottom-[12%] md:left-[5%]" },
-  { label: "Stärkere Marke", cls: "bottom-[10%] right-[2%] md:bottom-[12%] md:right-[5%]" },
+// Vertical goal stream: large purple-gradient keywords flow continuously
+// upward behind a static center logo. Two duplicated columns make the
+// loop seamless. prefers-reduced-motion users get a static stack.
+const goalKeywords = [
+  "Mehr Kunden",
+  "Höherer Umsatz",
+  "Mehr Bewerber",
+  "Mehr Sichtbarkeit",
+  "Stärkere Marke",
+  "Echte Reichweite",
+  "Messbares Wachstum",
+  "Premium Content",
 ];
+
+const streamKeyframes = `
+@keyframes goal-stream { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .goal-stream-anim { animation: none !important; }
+}
+`;
 
 export function GoalsSection() {
   return (
     <section className="py-16 md:py-32 relative bg-[#0A0A0D]/40 backdrop-blur-sm" style={{ isolation: "isolate" }}>
-      <style>{floatKeyframes}</style>
+      <style>{streamKeyframes}</style>
       <div className="max-w-7xl mx-auto px-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -32,48 +43,39 @@ export function GoalsSection() {
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="relative mx-auto max-w-3xl aspect-square max-h-[550px] flex items-center justify-center"
+        {/* Stream — fixed-height window, gradient masks top + bottom for fade. */}
+        <div
+          className="relative mx-auto max-w-3xl h-[420px] md:h-[520px] overflow-hidden"
+          aria-hidden="true"
         >
-          {/* Radial dotted lines from center */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 600" fill="none">
-            <line x1="300" y1="300" x2="120" y2="130" stroke="#7C3AED" strokeWidth="1" strokeDasharray="3 6" opacity="0.3" />
-            <line x1="300" y1="300" x2="300" y2="60" stroke="#7C3AED" strokeWidth="1" strokeDasharray="3 6" opacity="0.3" />
-            <line x1="300" y1="300" x2="480" y2="130" stroke="#7C3AED" strokeWidth="1" strokeDasharray="3 6" opacity="0.3" />
-            <line x1="300" y1="300" x2="100" y2="480" stroke="#7C3AED" strokeWidth="1" strokeDasharray="3 6" opacity="0.3" />
-            <line x1="300" y1="300" x2="490" y2="480" stroke="#7C3AED" strokeWidth="1" strokeDasharray="3 6" opacity="0.3" />
-            <line x1="300" y1="300" x2="50" y2="300" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.15" />
-            <line x1="300" y1="300" x2="550" y2="300" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.15" />
-            <line x1="300" y1="300" x2="300" y2="550" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.15" />
-            <line x1="300" y1="300" x2="150" y2="450" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.1" />
-            <line x1="300" y1="300" x2="450" y2="450" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.1" />
-            <line x1="300" y1="300" x2="150" y2="150" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.1" />
-            <line x1="300" y1="300" x2="450" y2="150" stroke="#7C3AED" strokeWidth="0.5" strokeDasharray="2 8" opacity="0.1" />
-          </svg>
-
-          <div className="absolute w-28 h-28 md:w-36 md:h-36 rounded-full bg-[#7C3AED]/5 border border-[#7C3AED]/20 shadow-[0_0_60px_rgba(124,58,237,0.2),0_0_120px_rgba(124,58,237,0.1)]" />
-          <div className="absolute w-20 h-20 md:w-28 md:h-28 bg-[#0A0A0D] border border-white/10 rounded-full flex items-center justify-center z-10 shadow-[0_0_40px_rgba(124,58,237,0.3)]">
-            <PuronLogo className="w-8 h-8 md:w-12 md:h-12" />
+          {/* Static logo anchor in the middle */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center">
+            <div className="absolute w-32 h-32 md:w-44 md:h-44 rounded-full bg-[#7C3AED]/10 border border-[#7C3AED]/30 shadow-[0_0_60px_rgba(124,58,237,0.35),0_0_120px_rgba(124,58,237,0.18)]" />
+            <div className="relative w-20 h-20 md:w-28 md:h-28 bg-[#0A0A0D] border border-white/10 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.4)]">
+              <PuronLogo className="w-9 h-9 md:w-12 md:h-12" />
+            </div>
           </div>
 
-          {goals.map((n, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
-              className={`absolute ${n.cls} bg-[#121217]/80 border border-white/10 hover:border-[#7C3AED]/40 px-4 py-2 md:px-6 md:py-3 rounded-full text-[11px] md:text-sm font-medium backdrop-blur-md whitespace-nowrap transition-all duration-300 hover:shadow-[0_0_20px_rgba(124,58,237,0.15)] cursor-default`}
-              style={{ animation: `float ${5 + i * 0.8}s ease-in-out infinite ${i * 0.4}s` }}
-            >
-              {n.label}
-            </motion.div>
-          ))}
-        </motion.div>
+          {/* Top + bottom fade gradients */}
+          <div className="pointer-events-none absolute top-0 left-0 right-0 h-32 z-10 bg-gradient-to-b from-[#0A0A0D] via-[#0A0A0D]/80 to-transparent" />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 z-10 bg-gradient-to-t from-[#0A0A0D] via-[#0A0A0D]/80 to-transparent" />
+
+          {/* Two duplicate stacks for seamless loop. The animated container
+              is taller than the viewport — translating it -50% loops back. */}
+          <div
+            className="goal-stream-anim absolute left-0 right-0 flex flex-col items-center gap-10 md:gap-14 will-change-transform"
+            style={{ animation: "goal-stream 28s linear infinite" }}
+          >
+            {[...goalKeywords, ...goalKeywords].map((label, i) => (
+              <span
+                key={i}
+                className="font-['Space_Grotesk'] text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED] whitespace-nowrap"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

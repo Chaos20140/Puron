@@ -3,21 +3,21 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 
 const services = [
   {
-    title: "Reels Produktion",
+    title: "Reels",
     desc: "Kurzvideo-Content, der für Reichweite, Relevanz und Aufmerksamkeit in einem schnelllebigen Feed entwickelt wurde.",
     details: "Wir konzipieren, filmen und schneiden hochbindende vertikale Videos, optimiert für Instagram Reels, TikTok und YouTube Shorts. Jedes Reel ist darauf ausgelegt, das Scrollen zu stoppen und Engagement zu fördern.",
     icon: <><path d="m22 8-6 4 6 4V8Z" /><rect width="14" height="12" x="2" y="6" rx="2" ry="2" /></>,
     features: ["Skripting & Storyboarding", "Professioneller Dreh", "Postproduktion & Effekte", "Plattformspezifische Optimierung"],
   },
   {
-    title: "Social Media Posts",
+    title: "Beiträge",
     desc: "Gebrandeter statischer und Karussell-Content, der Ihr Unternehmen aktiv, modern und hochprofessionell wirken lässt.",
     details: "Von Einzelbild-Posts bis zu Multi-Slide-Karussells – wir erstellen Inhalte, die Ihre Markengeschichte an jedem Berührungspunkt einheitlich erzählen.",
     icon: <><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></>,
     features: ["Markenkonformes Design", "Karussell-Storytelling", "Caption- & Hashtag-Strategie", "Content-Kalender-Planung"],
   },
   {
-    title: "Bezahlte Werbung",
+    title: "Ads",
     desc: "Werbemittel und Kampagnen-Assets, strategisch entwickelt, um direkte Sichtbarkeit und messbare Ergebnisse zu erzielen.",
     details: "Wir entwerfen und produzieren Werbemittel für Meta, Google und LinkedIn, die auf Konversion und ROI getestet und optimiert werden.",
     icon: <><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></>,
@@ -40,9 +40,12 @@ export function ServicesPage() {
         <div className="mb-16 md:mb-20 max-w-3xl">
           <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Unsere Dienstleistungen</span>
           <h1 className="font-['Space_Grotesk'] text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] mb-6">
-            Alles, was Ihre Marke braucht, um <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">herauszustechen</span>.
+            Was wir{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">zaubern</span>
+            {" "}– und wie wir's{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">angehen</span>
           </h1>
-          <p className="text-lg text-[#B3B3C2] leading-relaxed">Wir bieten eine komplette Palette von Social Media Dienstleistungen, von der Produktion bis zur Strategie. Jede Dienstleistung ist darauf ausgelegt, echte Geschäftsergebnisse zu liefern.</p>
+          <p className="text-lg text-[#B3B3C2] leading-relaxed">Wir bieten eine komplette Palette von Social Media Dienstleistungen, von der Produktion bis zur Strategie.</p>
         </div>
 
         <div className="space-y-8">
@@ -77,8 +80,8 @@ export function ServicesPage() {
         </div>
 
         <div className="mt-20 text-center">
-          <h2 className="font-['Space_Grotesk'] text-3xl font-semibold tracking-tight mb-4">Bereit loszulegen?</h2>
-          <p className="text-lg text-[#B3B3C2] mb-8">Lassen Sie uns besprechen, welche Dienstleistungen für Ihre Marke am besten geeignet sind.</p>
+          <h2 className="font-['Space_Grotesk'] text-3xl font-semibold tracking-tight mb-4">Bereit durchzustarten?</h2>
+          <p className="text-lg text-[#B3B3C2] mb-8">Lass uns besprechen, welche Dienstleistungen für deine Marke am besten geeignet ist.</p>
           <AnimatedButton to="/contact" variant="primary">
             Zusammenarbeit anfragen
           </AnimatedButton>
