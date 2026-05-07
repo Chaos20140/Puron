@@ -2,12 +2,16 @@ import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { motion } from "motion/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
+// Vite's BASE_URL is "/" in dev, "/Puron/" on the GitHub Pages build.
+// Using it lets the image resolve correctly in both environments.
+const ASSET_BASE = import.meta.env.BASE_URL;
+
 const team = [
   {
     name: "Mahsuni Akdemir",
     role: "Gründer & Creative",
     desc: "Nach meinem medienbasierten Studium und fünf Jahren paralleler Berufserfahrung habe ich 2026 den Schritt in die Selbstständigkeit gewagt. Mit Puron habe ich einen Raum geschaffen, in dem Kreativität frei entfaltet und in visuellen Konzepten zum Ausdruck gebracht werden kann. Gemeinsam mit unseren Kunden entwickeln wir nicht nur Visionen, sondern verwandeln sie in Inhalte mit nachhaltigem Mehrwert – messbar & wirkungsvoll.",
-    img: "https://images.unsplash.com/photo-1772987292949-4b1bdc01a612?q=80&w=800&auto=format&fit=crop",
+    img: `${ASSET_BASE}team/mahsuni.png`,
     socials: ["Instagram"],
   },
   // Hidden until additional team members are real:
@@ -55,13 +59,25 @@ export function TeamPage() {
               className="bg-[#0A0A0D]/50 border border-white/5 rounded-[2rem] p-6 md:p-10 flex flex-col lg:flex-row gap-10 lg:gap-16 items-start shadow-xl backdrop-blur-sm"
             >
               <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-6">
-                <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden bg-[#121217] shrink-0 border border-white/5 relative">
+                {/* Stage for the cut-out portrait. No card frame around the
+                    image — the figure floats on the dark page with an
+                    ambient purple glow behind it. The drop-shadow gives
+                    the cut-out a subtle lift so it doesn't look pasted. */}
+                <div className="w-full aspect-[4/5] relative">
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0 -z-10 blur-3xl"
+                    style={{
+                      background:
+                        "radial-gradient(60% 55% at 50% 45%, rgba(124,58,237,0.35), rgba(124,58,237,0.1) 55%, transparent 80%)",
+                    }}
+                  />
                   <ImageWithFallback
                     src={m.img}
                     alt={m.name}
-                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 grayscale hover:grayscale-0"
+                    className="w-full h-full object-contain object-bottom transition-transform duration-700 hover:scale-[1.03]"
+                    style={{ filter: "drop-shadow(0 25px 35px rgba(0,0,0,0.55))" }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0D]/80 via-transparent to-transparent pointer-events-none" />
                 </div>
               </div>
 
