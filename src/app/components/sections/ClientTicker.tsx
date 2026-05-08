@@ -23,57 +23,47 @@ const partners: { name: string; logo: string; scale?: number; whiten?: boolean }
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
 ];
 
-// Same architecture as the SocialProof carousel:
-// rAF-driven auto-flow, hover/touch pause, arrow nav (md+) with a
-// 5-second resume timer. The partner list is rendered twice so the
-// rAF loop can wrap by jumping back half the scrollWidth — looks
-// seamless because the two halves are visually identical.
+// Continuous auto-flow that NEVER pauses on hover or arrow click —
+// just gets briefly nudged in either direction when the arrows are
+// pressed. The arrow handler sets a "boost" multiplier on the rAF
+// step for ~200ms; while active, the flow either accelerates forward
+// or reverses, then settles back to the default speed. Native touch
+// on mobile is the only thing that still pauses (otherwise the user's
+// swipe would fight the auto-advance).
 const tickerStyles = `
 .partner-ticker-wrap::-webkit-scrollbar { display: none; }
 .partner-ticker-wrap { scrollbar-width: none; -ms-overflow-style: none; }
 `;
 
-const AUTO_FLOW_PX_PER_FRAME = 0.6; // ~36 px/s — matches the review carousel
-const ARROW_RESUME_MS = 5000;
+const AUTO_FLOW_PX_PER_FRAME = 1.0; // ~60 px/s
+const ARROW_BOOST_MULTIPLIER = 25;  // forward arrow → 25× speed (≈1500 px/s)
+const ARROW_BOOST_MS = 200;         // boost duration; ~3 frames × 25× ≈ 75 px nudge per click
 
 export function ClientTicker() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [paused, setPaused] = useState(false);
-  const resumeTimerRef = useRef<number | null>(null);
+  // Native touch on mobile is the only thing that pauses the flow —
+  // a user dragging the carousel shouldn't fight the rAF tick.
+  const [touchPaused, setTouchPaused] = useState(false);
+  // Boost = transient speed multiplier set by arrow clicks. While
+  // performance.now() < untilMs, the rAF tick uses
+  // AUTO_FLOW_PX_PER_FRAME * multiplier; after that it falls back to
+  // ×1 automatically. Negative multiplier reverses the flow briefly
+  // (left-arrow case).
+  const boostRef = useRef<{ untilMs: number; multiplier: number }>({ untilMs: 0, multiplier: 1 });
 
-  const clearResumeTimer = useCallback(() => {
-    if (resumeTimerRef.current !== null) {
-      window.clearTimeout(resumeTimerRef.current);
-      resumeTimerRef.current = null;
-    }
+  const advance = useCallback((dir: 1 | -1) => {
+    boostRef.current = {
+      untilMs: performance.now() + ARROW_BOOST_MS,
+      multiplier: dir * ARROW_BOOST_MULTIPLIER,
+    };
   }, []);
 
-  const advance = useCallback(
-    (dir: 1 | -1) => {
-      const el = wrapRef.current;
-      if (!el) return;
-      const trackEl = el.firstElementChild as HTMLElement | null;
-      const firstLogo = trackEl?.firstElementChild as HTMLElement | null;
-      // Move two logo widths per click — feels right for a row of small
-      // brand marks (one logo at a time would feel sluggish).
-      const step = firstLogo ? (firstLogo.offsetWidth + 32) * 2 : 360;
-      el.scrollBy({ left: step * dir, behavior: "smooth" });
-
-      setPaused(true);
-      clearResumeTimer();
-      resumeTimerRef.current = window.setTimeout(() => {
-        setPaused(false);
-        resumeTimerRef.current = null;
-      }, ARROW_RESUME_MS);
-    },
-    [clearResumeTimer],
-  );
-
   // rAF auto-flow with seamless wrap. The track is rendered twice;
-  // when scrollLeft passes half the total width, we instantly subtract
-  // that half so the user keeps seeing identical content.
+  // when scrollLeft passes half the total width, we wrap by half;
+  // and when the boost drives it below 0, we wrap forward by half so
+  // the reverse direction also stays seamless.
   useEffect(() => {
-    if (paused) return;
+    if (touchPaused) return;
     if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let raf = 0;
@@ -82,8 +72,11 @@ export function ClientTicker() {
       if (el) {
         const half = el.scrollWidth / 2;
         if (half > 0) {
-          let next = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME;
+          const now = performance.now();
+          const boost = boostRef.current.untilMs > now ? boostRef.current.multiplier : 1;
+          let next = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME * boost;
           if (next >= half) next -= half;
+          else if (next < 0) next += half;
           el.scrollLeft = next;
         }
       }
@@ -91,9 +84,7 @@ export function ClientTicker() {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [paused]);
-
-  useEffect(() => clearResumeTimer, [clearResumeTimer]);
+  }, [touchPaused]);
 
   // Render the partner list twice for the seamless wrap-around.
   const renderedPartners = [...partners, ...partners];
@@ -107,16 +98,8 @@ export function ClientTicker() {
 
       <div
         className="relative"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => {
-          clearResumeTimer();
-          setPaused(false);
-        }}
-        onTouchStart={() => setPaused(true)}
-        onTouchEnd={() => {
-          clearResumeTimer();
-          setPaused(false);
-        }}
+        onTouchStart={() => setTouchPaused(true)}
+        onTouchEnd={() => setTouchPaused(false)}
       >
         {/* Left arrow — md+ only; touch users swipe */}
         <button
