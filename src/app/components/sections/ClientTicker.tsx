@@ -18,7 +18,7 @@ const ASSET_BASE = import.meta.env.BASE_URL;
 //   that would vanish on the dark page background.
 const partners: { name: string; logo: string; scale?: number; whiten?: boolean }[] = [
   { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png`, whiten: true },
-  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
+  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png`, whiten: true },
   { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
 ];
