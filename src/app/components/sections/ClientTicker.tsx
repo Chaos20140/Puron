@@ -1,49 +1,38 @@
-const clients = [
-  {
-    name: "KFZ-Gutachter Akdemir",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 stroke-current fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 14l1.5-4.5A2 2 0 0 1 8.4 8h7.2a2 2 0 0 1 1.9 1.5L19 14" />
-        <path d="M3 18v-3a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3" />
-        <path d="M5 18v2H3v-2" />
-        <path d="M21 18v2h-2v-2" />
-        <circle cx="7.5" cy="16" r="1" />
-        <circle cx="16.5" cy="16" r="1" />
-      </svg>
-    ),
-  },
-  {
-    name: "Eddys Kfz-Meisterbetrieb",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 stroke-current fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4.5 4.5 0 0 0 5.4-5.4l-2.6 2.6a1.5 1.5 0 0 1-2.1 0l-1-1a1.5 1.5 0 0 1 0-2.1z" />
-      </svg>
-    ),
-  },
-  {
-    name: "AutoWelt Sauerland",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-7 w-7 stroke-current fill-none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <circle cx="12" cy="12" r="2.5" />
-        <path d="M12 2v7.5" />
-        <path d="M12 14.5V22" />
-        <path d="M2 12h7.5" />
-        <path d="M14.5 12H22" />
-      </svg>
-    ),
-  },
+// Vite's BASE_URL is "/" in dev, "/Puron/" on the GitHub Pages build.
+const ASSET_BASE = import.meta.env.BASE_URL;
+
+// Each entry expects a real logo PNG/SVG at public/partners/<filename>.
+// Logos render on a white card so light- and dark-on-light marks stay
+// readable against the dark page background (some of the source logos
+// — Eddys, Akdemir — have white backgrounds; without the white card
+// they'd vanish into the page).
+const partners = [
+  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png` },
+  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
+  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png` },
+  { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
 ];
 
 const marqueeKeyframes = `@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`;
 
 function ClientBlock({ ariaHidden = false }: { ariaHidden?: boolean }) {
   return (
-    <div className="flex items-center justify-around w-max gap-12 sm:gap-16 md:gap-24 px-8 sm:px-12 flex-shrink-0" aria-hidden={ariaHidden || undefined}>
-      {clients.map((c, i) => (
-        <div key={i} className="group flex items-center gap-3 text-[#71717A] hover:text-[#A855F7] transition-all duration-300 opacity-60 hover:opacity-100 cursor-default">
-          {c.icon}
-          <span className="font-['Space_Grotesk'] font-semibold text-base md:text-lg tracking-tight whitespace-nowrap">{c.name}</span>
+    <div
+      className="flex items-center justify-around w-max gap-10 sm:gap-14 md:gap-20 px-6 sm:px-10 flex-shrink-0"
+      aria-hidden={ariaHidden || undefined}
+    >
+      {partners.map((p, i) => (
+        <div
+          key={i}
+          className="flex items-center justify-center bg-white/95 rounded-xl px-4 py-2 h-12 sm:h-14 md:h-16 shrink-0 grayscale hover:grayscale-0 opacity-70 hover:opacity-100 transition-all duration-300"
+        >
+          <img
+            src={p.logo}
+            alt={p.name}
+            className="h-full w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[160px] object-contain"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
       ))}
     </div>
@@ -64,7 +53,7 @@ export function ClientTicker() {
           WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)",
         }}
       >
-        <div className="flex w-max" style={{ animation: "marquee 22s linear infinite" }}>
+        <div className="flex w-max" style={{ animation: "marquee 28s linear infinite" }}>
           <ClientBlock />
           <ClientBlock ariaHidden />
         </div>

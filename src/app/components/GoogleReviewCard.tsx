@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import type { GoogleReview } from "./useGoogleReviews";
 
@@ -36,6 +37,11 @@ type Props = { review: GoogleReview };
 // hover scales it up + lifts on top, MotionConfig handles reduced-motion.
 export function GoogleReviewCard({ review }: Props) {
   const initials = (review.author || "?").trim().charAt(0).toUpperCase();
+  // If the Google profile photo can't load (CORS, network, removed
+  // image, etc.), fall back to the initials avatar instead of showing
+  // a broken image icon.
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const showPhoto = review.authorPhoto && !photoFailed;
 
   return (
     <motion.div
@@ -47,12 +53,14 @@ export function GoogleReviewCard({ review }: Props) {
         <div className="p-6 h-full flex flex-col">
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-3">
-              {review.authorPhoto ? (
+              {showPhoto ? (
                 <img
-                  src={review.authorPhoto}
+                  src={review.authorPhoto!}
                   alt={review.author}
-                  className="h-10 w-10 rounded-full object-cover"
-                  referrerPolicy="no-referrer"
+                  className="h-10 w-10 rounded-full object-cover bg-[#1f1f2e]"
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => setPhotoFailed(true)}
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] text-sm font-medium">
