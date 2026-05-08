@@ -30,7 +30,10 @@ export function SocialProof() {
   const aggregateCount = reviewsData?.userRatingCount ?? null;
   const googleMapsUri = reviewsData?.googleMapsUri ?? null;
 
-  const trackRef = useRef<HTMLDivElement>(null);
+  // The ref goes on the SCROLLABLE wrap (overflow-x-auto), NOT on the
+  // inner flex track — the track has w-max which means it isn't
+  // scrollable itself; only its overflow-y-auto parent is.
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
   const resumeTimerRef = useRef<number | null>(null);
 
@@ -45,9 +48,11 @@ export function SocialProof() {
   // if the user goes idle for ARROW_RESUME_MS.
   const advance = useCallback(
     (dir: 1 | -1) => {
-      const el = trackRef.current;
+      const el = wrapRef.current;
       if (!el) return;
-      const firstCard = el.firstElementChild as HTMLElement | null;
+      // First card wrapper lives at: wrap → track → snap-center wrapper
+      const trackEl = el.firstElementChild as HTMLElement | null;
+      const firstCard = trackEl?.firstElementChild as HTMLElement | null;
       const step = firstCard ? firstCard.offsetWidth + 24 : 320;
       const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
       const atStart = el.scrollLeft <= 4;
@@ -81,7 +86,7 @@ export function SocialProof() {
 
     let raf = 0;
     const tick = () => {
-      const el = trackRef.current;
+      const el = wrapRef.current;
       if (el) {
         const max = el.scrollWidth - el.clientWidth;
         if (max > 0) {
@@ -176,6 +181,7 @@ export function SocialProof() {
             </button>
 
             <div
+              ref={wrapRef}
               className="review-carousel-wrap relative w-full overflow-x-auto overflow-y-hidden touch-pan-x snap-x snap-mandatory md:snap-none py-12 md:py-16"
               style={{
                 maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
@@ -185,7 +191,7 @@ export function SocialProof() {
                 WebkitOverflowScrolling: "touch",
               }}
             >
-              <div ref={trackRef} className="flex gap-6 md:gap-8 w-max px-6 md:px-16">
+              <div className="flex gap-6 md:gap-8 w-max px-6 md:px-16">
                 {realReviews.map((r, i) => (
                   <div key={i} className="snap-center">
                     <GoogleReviewCard review={r} />
