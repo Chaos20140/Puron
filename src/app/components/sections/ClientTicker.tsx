@@ -7,10 +7,14 @@ const ASSET_BASE = import.meta.env.BASE_URL;
 // stay vivid. Logos with white/light source backgrounds will show as
 // such; export them with transparent backgrounds (e.g. via remove.bg)
 // if they need to blend with the page.
-const partners = [
+// `scale` is an optional per-logo visual size override. Use it for
+// square logos that would otherwise look small in the wide container
+// (their height-constrained scale leaves a lot of empty horizontal
+// space) — AutoWelt's roughly 1:1 brand mark is the main case.
+const partners: { name: string; logo: string; scale?: number }[] = [
   { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png` },
   { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
-  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png` },
+  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
 ];
 
@@ -34,6 +38,7 @@ function ClientBlock({ ariaHidden = false }: { ariaHidden?: boolean }) {
             src={p.logo}
             alt={p.name}
             className="max-w-full max-h-full object-contain"
+            style={p.scale ? { transform: `scale(${p.scale})` } : undefined}
             loading="lazy"
             decoding="async"
           />

@@ -1,27 +1,23 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useGoogleReviews } from "../useGoogleReviews";
 import { GoogleReviewCard } from "../GoogleReviewCard";
 
-// Desktop: continuous right-to-left marquee. Hover anywhere in the track
-// pauses the scroll (CSS) and the hovered card scales up via motion's
-// whileHover. prefers-reduced-motion stops the loop entirely.
-//
-// Mobile (<md): no auto-animation; the track becomes a touch-pan-x
-// scrollable container with snap points so users swipe through cards
-// manually. Hover-to-pause + hover-to-zoom are useless without a
-// pointer device anyway.
-const marqueeStyles = `
-@keyframes review-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@media (min-width: 768px) {
-  .review-marquee-track { animation: review-marquee 60s linear infinite; }
-  .review-marquee-wrap:hover .review-marquee-track { animation-play-state: paused; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .review-marquee-track { animation: none !important; }
-}
-.review-marquee-wrap::-webkit-scrollbar { display: none; }
-.review-marquee-wrap { scrollbar-width: none; -ms-overflow-style: none; }
+// Reviews carousel:
+// - Native horizontal scroll (overflow-x-auto + scroll-snap) so the
+//   same DOM works for desktop arrows + mobile swipe with no special
+//   touch handling.
+// - Auto-advance every 6 seconds. Pauses on hover (desktop) or while
+//   the user is touching (mobile). Wraps at the ends so it loops.
+// - Arrow buttons (md+) trigger the same advance(); they're hidden on
+//   mobile because swipe is the natural UX there.
+// - prefers-reduced-motion stops the auto-advance entirely.
+const carouselStyles = `
+.review-carousel-wrap::-webkit-scrollbar { display: none; }
+.review-carousel-wrap { scrollbar-width: none; -ms-overflow-style: none; }
 `;
+
+const AUTO_ADVANCE_MS = 6000;
 
 export function SocialProof() {
   const { data: reviewsData, error: reviewsError, loading: reviewsLoading } = useGoogleReviews();
@@ -30,16 +26,42 @@ export function SocialProof() {
   const aggregateCount = reviewsData?.userRatingCount ?? null;
   const googleMapsUri = reviewsData?.googleMapsUri ?? null;
 
-  // Need at least 2 reviews for a believable infinite-loop marquee
-  // (otherwise duplicating the same card looks weird).
-  const showMarquee = !reviewsLoading && realReviews.length > 0;
-  // The track is duplicated to make the loop seamless. With <=2 reviews,
-  // duplicate further so the row looks populated.
-  const repeats = realReviews.length >= 4 ? 2 : realReviews.length >= 2 ? 3 : 4;
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [paused, setPaused] = useState(false);
+
+  const advance = useCallback((dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const step = firstCard ? firstCard.offsetWidth + 24 : 320;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    const atStart = el.scrollLeft <= 4;
+    if (dir === 1 && atEnd) {
+      el.scrollTo({ left: 0, behavior: "smooth" });
+    } else if (dir === -1 && atStart) {
+      el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+    } else {
+      el.scrollBy({ left: step * dir, behavior: "smooth" });
+    }
+  }, []);
+
+  // Auto-advance loop — paused on hover, on touch, and when
+  // prefers-reduced-motion is set.
+  useEffect(() => {
+    if (paused || realReviews.length === 0) return;
+    if (typeof window !== "undefined") {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion) return;
+    }
+    const id = window.setInterval(() => advance(1), AUTO_ADVANCE_MS);
+    return () => window.clearInterval(id);
+  }, [paused, advance, realReviews.length]);
+
+  const showCarousel = !reviewsLoading && realReviews.length > 0;
 
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-[#0A0A0D]/50 to-[#111116]/80 backdrop-blur-sm border-t border-white/5" style={{ isolation: "isolate" }}>
-      <style>{marqueeStyles}</style>
+      <style>{carouselStyles}</style>
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -73,7 +95,7 @@ export function SocialProof() {
           )}
         </motion.div>
 
-        {/* Status: loading or empty/error */}
+        {/* Loading + empty states */}
         {reviewsLoading && (
           <div className="text-center text-[#B3B3C2] text-sm py-12">Rezensionen werden geladen…</div>
         )}
@@ -85,27 +107,56 @@ export function SocialProof() {
           </div>
         )}
 
-        {/* Marquee on desktop, swipe-scroll carousel on mobile */}
-        {showMarquee && (
+        {showCarousel && (
           <div
-            className="review-marquee-wrap relative w-full overflow-x-auto md:overflow-x-hidden overflow-y-hidden touch-pan-x snap-x snap-mandatory md:snap-none py-12 md:py-16"
-            style={{
-              maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-              WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-              scrollPaddingLeft: "1.5rem",
-              scrollPaddingRight: "1.5rem",
-              WebkitOverflowScrolling: "touch",
-            }}
+            className="relative"
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onTouchStart={() => setPaused(true)}
+            onTouchEnd={() => setPaused(false)}
           >
-            <div className="review-marquee-track flex gap-6 md:gap-8 w-max px-6 md:px-0">
-              {Array.from({ length: repeats }).flatMap((_, repeatIdx) =>
-                realReviews.map((r, i) => (
-                  <div key={`${repeatIdx}-${i}`} className="snap-center">
+            {/* Left arrow — desktop only; touch users swipe */}
+            <button
+              type="button"
+              onClick={() => advance(-1)}
+              aria-label="Vorherige Rezension"
+              className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center rounded-full bg-[#0A0A0D]/80 backdrop-blur border border-white/10 text-white hover:bg-[#7C3AED]/30 hover:border-[#7C3AED]/40 hover:scale-110 transition-all duration-300 shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+
+            <div
+              className="review-carousel-wrap relative w-full overflow-x-auto overflow-y-hidden touch-pan-x snap-x snap-mandatory py-12 md:py-16"
+              style={{
+                maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+                WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+                scrollPaddingLeft: "1.5rem",
+                scrollPaddingRight: "1.5rem",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              <div ref={trackRef} className="flex gap-6 md:gap-8 w-max px-6 md:px-12">
+                {realReviews.map((r, i) => (
+                  <div key={i} className="snap-center">
                     <GoogleReviewCard review={r} />
                   </div>
-                )),
-              )}
+                ))}
+              </div>
             </div>
+
+            {/* Right arrow — desktop only */}
+            <button
+              type="button"
+              onClick={() => advance(1)}
+              aria-label="Nächste Rezension"
+              className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 h-12 w-12 items-center justify-center rounded-full bg-[#0A0A0D]/80 backdrop-blur border border-white/10 text-white hover:bg-[#7C3AED]/30 hover:border-[#7C3AED]/40 hover:scale-110 transition-all duration-300 shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
           </div>
         )}
 
