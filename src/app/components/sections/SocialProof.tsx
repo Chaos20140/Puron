@@ -20,6 +20,8 @@ const carouselStyles = `
 .review-carousel-wrap { scrollbar-width: none; -ms-overflow-style: none; }
 `;
 
+// Matches the partner-ticker pace (CSS marquee 28s × ~1024px ≈ 36 px/s).
+// Same vibe across both rows.
 const AUTO_FLOW_PX_PER_FRAME = 0.6; // ~36 px/s at 60 fps
 const ARROW_RESUME_MS = 5000;
 
