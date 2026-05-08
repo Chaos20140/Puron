@@ -77,11 +77,10 @@ export function SocialProof() {
     [clearResumeTimer],
   );
 
-  // rAF auto-flow. Continuously increments scrollLeft; wraps to 0 at
-  // the end. Skipped while paused or when prefers-reduced-motion is
-  // set. Half the scrollWidth of duplicated cards would let us wrap
-  // seamlessly; here we just snap to 0 at the end — happens once every
-  // ~30 s for a small number of reviews and is barely visible.
+  // rAF auto-flow with seamless wrap. The reviews are rendered twice;
+  // when scrollLeft passes half the total width, we instantly subtract
+  // that half so the user keeps seeing identical content — no visible
+  // jump-back at the end of the loop.
   useEffect(() => {
     if (paused || realReviews.length === 0) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -90,11 +89,11 @@ export function SocialProof() {
     const tick = () => {
       const el = wrapRef.current;
       if (el) {
-        const max = el.scrollWidth - el.clientWidth;
-        if (max > 0) {
-          el.scrollLeft = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME >= max
-            ? 0
-            : el.scrollLeft + AUTO_FLOW_PX_PER_FRAME;
+        const half = el.scrollWidth / 2;
+        if (half > 0) {
+          let next = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME;
+          if (next >= half) next -= half;
+          el.scrollLeft = next;
         }
       }
       raf = requestAnimationFrame(tick);
@@ -194,8 +193,15 @@ export function SocialProof() {
               }}
             >
               <div className="flex gap-6 md:gap-8 w-max px-6 md:px-16">
-                {realReviews.map((r, i) => (
-                  <div key={i} className="snap-center">
+                {/* Render the reviews twice for seamless looping — the
+                    second set is aria-hidden so screen readers don't
+                    announce duplicates. */}
+                {[...realReviews, ...realReviews].map((r, i) => (
+                  <div
+                    key={i}
+                    aria-hidden={i >= realReviews.length || undefined}
+                    className="snap-center"
+                  >
                     <GoogleReviewCard review={r} />
                   </div>
                 ))}

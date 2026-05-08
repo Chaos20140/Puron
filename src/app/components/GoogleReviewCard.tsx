@@ -57,8 +57,13 @@ export function GoogleReviewCard({ review }: Props) {
                 <img
                   src={review.authorPhoto!}
                   alt={review.author}
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded-full object-cover bg-[#1f1f2e]"
-                  loading="lazy"
+                  // Eager — avatars are tiny (~4KB) and lazy-loading them
+                  // would trigger decodes mid-scroll, which causes the jank
+                  // the user reported.
+                  loading="eager"
                   decoding="async"
                   onError={() => setPhotoFailed(true)}
                 />

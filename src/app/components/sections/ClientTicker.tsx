@@ -148,7 +148,9 @@ export function ClientTicker() {
                   alt={p.name}
                   className="max-w-full max-h-full object-contain"
                   style={p.scale ? { transform: `scale(${p.scale})` } : undefined}
-                  loading="lazy"
+                  // Eager + async — load all logos up front so the auto-flow
+                  // doesn't trigger lazy decode + layout shift mid-scroll.
+                  loading="eager"
                   decoding="async"
                 />
               </div>
