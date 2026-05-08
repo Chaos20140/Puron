@@ -9,12 +9,14 @@ const ASSET_BASE = import.meta.env.BASE_URL;
 // stay vivid. Logos with white/light source backgrounds will show as
 // such; export them with transparent backgrounds (e.g. via remove.bg)
 // if they need to blend with the page.
-// `scale` is an optional per-logo visual size override. Use it for
-// square logos that would otherwise look small in the wide container
-// (their height-constrained scale leaves a lot of empty horizontal
-// space) — AutoWelt's roughly 1:1 brand mark is the main case.
-const partners: { name: string; logo: string; scale?: number }[] = [
-  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png` },
+// Per-logo overrides:
+// - `scale`: visual size multiplier for logos that would otherwise look
+//   small inside the fixed container (e.g. AutoWelt's 1:1 mark).
+// - `framed`: render the logo on a white card. Needed when the logo's
+//   own elements are dark and would vanish against the dark page —
+//   KFZ-Akdemir is dark text on a transparent background.
+const partners: { name: string; logo: string; scale?: number; framed?: boolean }[] = [
+  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png`, framed: true },
   { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
   { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
@@ -141,7 +143,10 @@ export function ClientTicker() {
               <div
                 key={i}
                 aria-hidden={i >= partners.length || undefined}
-                className="flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0 transition-transform duration-300 hover:scale-105"
+                className={
+                  "flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0 transition-transform duration-300 hover:scale-105"
+                  + (p.framed ? " bg-white rounded-lg p-2 shadow-md" : "")
+                }
               >
                 <img
                   src={p.logo}
