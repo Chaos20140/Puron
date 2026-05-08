@@ -25,12 +25,15 @@ function ClientBlock({ ariaHidden = false }: { ariaHidden?: boolean }) {
       {partners.map((p, i) => (
         <div
           key={i}
-          className="flex items-center justify-center h-10 sm:h-12 md:h-14 shrink-0 transition-transform duration-300 hover:scale-105"
+          // Fixed-size container so all logos sit in the same visual
+          // footprint regardless of source aspect ratio. object-contain
+          // centers + scales each logo to fit within its box.
+          className="flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0 transition-transform duration-300 hover:scale-105"
         >
           <img
             src={p.logo}
             alt={p.name}
-            className="h-full w-auto max-w-[140px] sm:max-w-[160px] md:max-w-[180px] object-contain"
+            className="max-w-full max-h-full object-contain"
             loading="lazy"
             decoding="async"
           />
