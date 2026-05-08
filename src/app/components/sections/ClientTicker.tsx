@@ -12,11 +12,12 @@ const ASSET_BASE = import.meta.env.BASE_URL;
 // Per-logo overrides:
 // - `scale`: visual size multiplier for logos that would otherwise look
 //   small inside the fixed container (e.g. AutoWelt's 1:1 mark).
-// - `framed`: render the logo on a white card. Needed when the logo's
-//   own elements are dark and would vanish against the dark page —
-//   KFZ-Akdemir is dark text on a transparent background.
-const partners: { name: string; logo: string; scale?: number; framed?: boolean }[] = [
-  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png`, framed: true },
+// - `whiten`: paint every visible pixel pure white via CSS filter
+//   (brightness(0) crushes to black, invert(1) flips to white;
+//   transparency is preserved). Use for dark-on-transparent logos
+//   that would vanish on the dark page background.
+const partners: { name: string; logo: string; scale?: number; whiten?: boolean }[] = [
+  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png`, whiten: true },
   { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
   { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
@@ -143,16 +144,16 @@ export function ClientTicker() {
               <div
                 key={i}
                 aria-hidden={i >= partners.length || undefined}
-                className={
-                  "flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0 transition-transform duration-300 hover:scale-105"
-                  + (p.framed ? " bg-white rounded-lg p-2 shadow-md" : "")
-                }
+                className="flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0 transition-transform duration-300 hover:scale-105"
               >
                 <img
                   src={p.logo}
                   alt={p.name}
                   className="max-w-full max-h-full object-contain"
-                  style={p.scale ? { transform: `scale(${p.scale})` } : undefined}
+                  style={{
+                    ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
+                    ...(p.whiten ? { filter: "brightness(0) invert(1)" } : {}),
+                  }}
                   // Eager + async — load all logos up front so the auto-flow
                   // doesn't trigger lazy decode + layout shift mid-scroll.
                   loading="eager"
