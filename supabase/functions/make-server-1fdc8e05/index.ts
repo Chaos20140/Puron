@@ -274,20 +274,163 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     const cleanCompany = typeof company === "string" ? singleLine(company, 100) : "";
     const cleanGoal = typeof goal === "string" ? goal : "";
     const cleanMessage = message.trim().slice(0, 2000);
+    const cleanPhone = ""; // Form doesn't collect phone yet — render em-dash below.
 
-    const html = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px;">
-        <h2 style="color: #7C3AED;">Neue Anfrage über das Puron-Kontaktformular</h2>
-        <table cellpadding="6" cellspacing="0" border="0" style="border-collapse: collapse; margin-bottom: 16px;">
-          <tr><td><strong>Name:</strong></td><td>${escapeHtml(cleanName)}</td></tr>
-          <tr><td><strong>E-Mail:</strong></td><td>${escapeHtml(cleanEmail)}</td></tr>
-          <tr><td><strong>Unternehmen:</strong></td><td>${escapeHtml(cleanCompany || "—")}</td></tr>
-          <tr><td><strong>Primäres Ziel:</strong></td><td>${escapeHtml(cleanGoal || "—")}</td></tr>
-        </table>
-        <p><strong>Nachricht:</strong></p>
-        <div style="white-space: pre-wrap; padding: 12px; background: #f5f5f7; border-radius: 8px;">${escapeHtml(cleanMessage)}</div>
-      </div>
-    `;
+    // Local Berlin time, formatted in German.
+    const submittedAt = new Date().toLocaleString("de-DE", {
+      timeZone: "Europe/Berlin",
+      dateStyle: "long",
+      timeStyle: "short",
+    });
+    const fallback = (s: string) => (s.trim() ? escapeHtml(s) : "—");
+
+    const html = `<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Neue Kontaktanfrage | Puron Media</title>
+  </head>
+  <body style="margin:0; padding:0; background:#07080c; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; line-height:1px; font-size:1px;">
+      Neue Kontaktanfrage über das Kontaktformular von Puron Media.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#07080c; margin:0; padding:0;">
+      <tr>
+        <td align="center" style="padding:32px 14px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; width:100%; border-collapse:collapse;">
+            <tr>
+              <td style="padding:0 0 18px 0;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td align="left" style="vertical-align:middle;">
+                      <div style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#ffffff;">
+                        Puron <span style="color:#8a5cff;">Media</span>
+                      </div>
+                      <div style="font-size:13px; line-height:20px; color:#9ea6ba; margin-top:2px;">
+                        Social Media Content, das Unternehmen sichtbar macht
+                      </div>
+                    </td>
+                    <td align="right" style="vertical-align:top; font-size:12px; line-height:18px; color:#7f8798;">
+                      Kontaktformular<br>
+                      <span style="color:#c7cad6; font-weight:700;">Neue Anfrage</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#11131b; border:1px solid #252a3b; border-radius:28px; overflow:hidden;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="padding:34px 30px 28px 30px; background:linear-gradient(135deg,#171a27 0%,#10121a 48%,#21143b 100%);">
+                      <div style="display:inline-block; padding:8px 12px; background:rgba(138,92,255,0.16); border:1px solid rgba(138,92,255,0.38); border-radius:999px; color:#d5c9ff; font-size:13px; line-height:18px; font-weight:800;">
+                        Neue Kontaktanfrage eingegangen
+                      </div>
+                      <h1 style="margin:18px 0 10px 0; font-size:31px; line-height:38px; font-weight:900; letter-spacing:-0.9px; color:#ffffff;">
+                        Eine Person hat das Kontaktformular auf Puron Media ausgefüllt.
+                      </h1>
+                      <p style="margin:0; font-size:15px; line-height:25px; color:#c3c8d6;">
+                        Unten findest du die wichtigsten Angaben aus dem Formular sowie die übermittelte Nachricht.
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:26px 30px 8px 30px;">
+                      <h2 style="margin:0 0 16px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Kontaktdaten</h2>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate; border-spacing:0 10px;">
+                        <tr>
+                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Name</td>
+                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanName)}</td>
+                        </tr>
+                        <tr>
+                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">E-Mail</td>
+                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#cdbdff; text-decoration:none;">${escapeHtml(cleanEmail)}</a></td>
+                        </tr>
+                        <tr>
+                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Telefon</td>
+                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanPhone)}</td>
+                        </tr>
+                        <tr>
+                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Unternehmen</td>
+                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanCompany)}</td>
+                        </tr>
+                        <tr>
+                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Interesse</td>
+                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanGoal)}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 30px 28px 30px;">
+                      <h2 style="margin:0 0 14px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Nachricht</h2>
+                      <div style="background:#f7f8fb; border-radius:20px; padding:22px 22px; border:1px solid #e7e9f0; color:#181b24;">
+                        <div style="font-size:15px; line-height:26px; color:#242836; white-space:pre-line;">${escapeHtml(cleanMessage)}</div>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 30px 30px 30px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0d0f16; border:1px solid #252a3b; border-radius:20px;">
+                        <tr>
+                          <td style="padding:20px 20px 8px 20px;">
+                            <h2 style="margin:0 0 12px 0; font-size:18px; line-height:24px; font-weight:900; color:#ffffff;">Formular-Details</h2>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 20px 20px 20px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                              <tr>
+                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Quelle</td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">Kontaktformular Puron Media</td>
+                              </tr>
+                              <tr>
+                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Website</td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" style="color:#cdbdff; text-decoration:none;">chaos20140.github.io/Puron</a></td>
+                              </tr>
+                              <tr>
+                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Zeitpunkt</td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">${escapeHtml(submittedAt)}</td>
+                              </tr>
+                              <tr>
+                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Antwort an</td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#cdbdff; text-decoration:none;">${escapeHtml(cleanEmail)}</a></td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 30px 34px 30px;">
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                          <td align="center" bgcolor="#8a5cff" style="border-radius:16px;">
+                            <a href="mailto:${escapeHtml(cleanEmail)}?subject=Antwort auf deine Anfrage bei Puron Media" style="display:block; padding:16px 22px; font-size:15px; line-height:20px; font-weight:900; color:#ffffff; text-decoration:none; border-radius:16px;">Direkt auf Anfrage antworten</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:24px 18px 0 18px; font-size:12px; line-height:20px; color:#737b8f;">
+                <div style="font-size:13px; line-height:21px; font-weight:800; color:#ffffff; margin-bottom:4px;">Puron Media</div>
+                <div>Automatisch generierte E-Mail aus dem Kontaktformular.</div>
+                <div style="margin-top:10px; color:#5f6678;">Diese Nachricht wurde über die Website übermittelt. Bitte prüfe die Angaben vor einer Antwort.</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
