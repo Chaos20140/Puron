@@ -18,7 +18,7 @@ export function Layout() {
   ];
 
   return (
-    <div className="bg-transparent text-[#F5F5F7] font-['Inter'] antialiased overflow-x-hidden selection:bg-[#7C3AED]/30 selection:text-white min-h-screen">
+    <div className="bg-transparent text-[#F5F5F7] font-['Space_Grotesk'] antialiased overflow-x-hidden selection:bg-[#7C3AED]/30 selection:text-white min-h-screen">
       {/* Animated 3D Background — already paints purple auroras + nebula glow,
           so we don't add extra blurred radial divs here.
           Wrapped in a silent ErrorBoundary: a canvas crash should not

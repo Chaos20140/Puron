@@ -3,20 +3,62 @@ import { usePageTitle } from "../../hooks/usePageTitle";
 export function PrivacyPage() {
   usePageTitle("Datenschutz");
   const sections = [
-    { title: "1. Verantwortliche Stelle", content: "Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:\n\nPuron Agency GmbH\nCreative Boulevard 42\n10115 Berlin, Deutschland\nE-Mail: hello@puron.agency" },
-    { title: "2. Datenerfassung auf unserer Website", content: "Wenn Sie unsere Website besuchen, erfasst unser Webserver automatisch technische Daten wie Ihre IP-Adresse, den Browsertyp, das Betriebssystem, die verweisende URL, Datum und Uhrzeit des Zugriffs sowie die besuchten Seiten. Diese Daten werden auf Grundlage unseres berechtigten Interesses verarbeitet, um die technische Funktionalität und Sicherheit unserer Website zu gewährleisten." },
-    { title: "3. Kontaktformular", content: "Wenn Sie eine Anfrage über unser Kontaktformular senden, werden die von Ihnen angegebenen Daten (Name, Unternehmen, E-Mail, Nachricht und ausgewähltes Ziel) zum Zwecke der Bearbeitung Ihrer Anfrage verarbeitet. Wir verwenden diese Daten ausschließlich zur Beantwortung Ihrer Anfrage und geben sie ohne Ihre Zustimmung nicht an Dritte weiter." },
-    { title: "4. Cookies", content: "Unsere Website verwendet Cookies, um die bestmögliche Benutzererfahrung zu gewährleisten. Cookies sind kleine Textdateien, die auf Ihrem Gerät gespeichert werden. Sie können Ihren Browser so konfigurieren, dass er Cookies ablehnt, was jedoch die Funktionalität der Website einschränken kann." },
-    { title: "5. Dienste von Drittanbietern", content: "Wir nutzen folgende Dienste von Drittanbietern:\n\n- Google Fonts: Zur Darstellung von Web-Schriftarten. Google kann dabei Ihre IP-Adresse erfassen.\n- Unsplash: Für die auf unserer Website verwendeten Stockfotos.\n\nDiese Dienste können Daten gemäß ihren eigenen Datenschutzrichtlinien erfassen." },
-    { title: "6. Ihre Rechte", content: "Sie haben das Recht auf:\n\n- Auskunft über die von uns über Sie gespeicherten personenbezogenen Daten\n- Berichtigung unrichtiger Daten\n- Löschung Ihrer Daten\n- Einschränkung der Verarbeitung Ihrer Daten\n- Datenübertragbarkeit\n- Widerspruch gegen die Verarbeitung\n\nUm diese Rechte auszuüben, kontaktieren Sie uns bitte unter hello@puron.agency." },
-    { title: "7. Datenaufbewahrung", content: "Wir bewahren personenbezogene Daten nur so lange auf, wie es für die Zwecke, für die sie erhoben wurden, erforderlich ist, oder wie es das Gesetz vorschreibt. Über das Kontaktformular gesendete Daten werden in der Regel nach 12 Monaten gelöscht, sofern keine laufende Geschäftsbeziehung besteht." },
-    { title: "8. Änderungen dieser Richtlinie", content: "Wir können diese Datenschutzrichtlinie von Zeit zu Zeit aktualisieren. Die neueste Version wird immer auf dieser Seite verfügbar sein. Zuletzt aktualisiert: Januar 2024." },
+    {
+      title: "1. Verantwortliche Stelle",
+      content:
+        "Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist:\n\nMahsuni Akdemir\nPuron Media (Einzelunternehmen)\n[Straße + Hausnummer — bitte ergänzen]\n[PLZ + Ort — bitte ergänzen]\nDeutschland\n\nE-Mail: info@puron-media.de",
+    },
+    {
+      title: "2. Zugriffsdaten (Hosting)",
+      content:
+        "Diese Website wird auf GitHub Pages (GitHub, Inc., USA) gehostet. Beim Aufruf erfasst GitHub automatisch Zugriffsdaten in Server-Logs: anonymisierte IP-Adresse, Datum und Uhrzeit des Zugriffs, übertragene Datenmenge, Quelle/Verweis, Browsertyp und Betriebssystem. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer technisch fehlerfreien und sicheren Auslieferung der Website (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen findest du in der Datenschutzerklärung von GitHub: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement",
+    },
+    {
+      title: "3. Kontaktformular",
+      content:
+        "Wenn du eine Anfrage über das Kontaktformular sendest, werden die von dir angegebenen Pflichtfelder (Name, E-Mail-Adresse, Nachricht) sowie optionale Angaben (Unternehmen, primäres Ziel) verarbeitet, um dein Anliegen zu bearbeiten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahme) bzw. lit. f (berechtigtes Interesse an der Beantwortung).\n\nTechnischer Ablauf: Die Daten werden über eine Edge-Funktion auf der Supabase-Plattform (Supabase Inc., Singapore) entgegengenommen und sofort als E-Mail an unsere Postfach-Adresse weitergeleitet — sie werden NICHT in einer Datenbank gespeichert. Der E-Mail-Versand erfolgt über den Drittanbieter Resend (Resend, Inc., USA). Eine pro IP-Adresse vorgehaltene Rate-Limit-Zählung (max. 3 Anfragen pro Stunde) wird kurzfristig in einem Schlüssel-Wert-Speicher bei Supabase gehalten und nach Ablauf des Zeitfensters automatisch gelöscht. Im Honeypot-Feld erkannte Bot-Submissions werden verworfen, ohne dass eine E-Mail versendet wird.",
+    },
+    {
+      title: "4. Google-Rezensionen",
+      content:
+        "Auf der Startseite zeigen wir öffentliche Google-Rezensionen unseres Unternehmens an. Die Rezensionen werden serverseitig über unsere Edge-Funktion bei Supabase aus der Google Places API (New) abgerufen und für maximal eine Stunde in einem Schlüssel-Wert-Speicher zwischengespeichert. Direkt vom Browser des Besuchers gehen keine Anfragen an Google. Profilbilder der Rezensent:innen werden von Google-Servern (lh3.googleusercontent.com) geladen — dabei wird die IP-Adresse des Besuchers an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Außendarstellung).",
+    },
+    {
+      title: "5. Schriftarten (Google Fonts)",
+      content:
+        "Diese Website lädt die Schriftarten Inter und Space Grotesk vom Google-Fonts-Dienst (Google Ireland Limited / Google LLC). Beim Laden der Schriftdateien wird deine IP-Adresse an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer ansprechenden und schnell ladenden Darstellung). Weitere Informationen: https://policies.google.com/privacy",
+    },
+    {
+      title: "6. Stockfotos (Unsplash)",
+      content:
+        "Einzelne Bilder werden über das Content-Delivery-Network von Unsplash (Unsplash Inc., Kanada) eingebunden. Beim Laden eines Bildes wird die IP-Adresse deines Geräts an Unsplash übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.",
+    },
+    {
+      title: "7. Cookies",
+      content:
+        "Diese Website setzt aktuell keine Cookies — weder eigene noch von Drittanbietern. Es kommt ausschließlich technisch notwendige lokale Funktionalität des Browsers (z.B. localStorage / sessionStorage) zum Einsatz, sofern überhaupt vom Browser angefragt.",
+    },
+    {
+      title: "8. Deine Rechte",
+      content:
+        "Du hast jederzeit das Recht auf:\n\n- Auskunft über deine bei uns gespeicherten personenbezogenen Daten (Art. 15 DSGVO)\n- Berichtigung unrichtiger Daten (Art. 16 DSGVO)\n- Löschung deiner Daten (Art. 17 DSGVO)\n- Einschränkung der Verarbeitung (Art. 18 DSGVO)\n- Datenübertragbarkeit (Art. 20 DSGVO)\n- Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)\n- Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGVO)\n\nUm diese Rechte auszuüben, kontaktiere uns bitte unter info@puron-media.de.",
+    },
+    {
+      title: "9. Datenaufbewahrung",
+      content:
+        "Personenbezogene Daten werden nur so lange aufbewahrt, wie es für die Zwecke ihrer Erhebung erforderlich ist oder das Gesetz es vorschreibt. Über das Kontaktformular eingegangene E-Mails werden in unserem Postfach abgelegt und nach Abschluss der Korrespondenz spätestens nach 12 Monaten gelöscht, sofern keine laufende Geschäftsbeziehung besteht oder gesetzliche Aufbewahrungsfristen entgegenstehen.",
+    },
+    {
+      title: "10. Änderungen dieser Datenschutzerklärung",
+      content:
+        "Diese Datenschutzerklärung kann von Zeit zu Zeit aktualisiert werden, um Änderungen in unseren Diensten oder der Rechtslage abzubilden. Die jeweils aktuelle Version findest du immer auf dieser Seite.\n\nStand: Mai 2026.",
+    },
   ];
 
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-3xl mx-auto px-6">
-        <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-12">Datenschutzrichtlinien</h1>
+        <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-12">Datenschutzerklärung</h1>
 
         <div className="space-y-6">
           {sections.map((s, i) => (
