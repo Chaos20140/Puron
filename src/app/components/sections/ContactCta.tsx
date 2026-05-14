@@ -11,7 +11,7 @@ export function ContactCta() {
         transition={{ duration: 0.8 }}
         className="max-w-3xl mx-auto px-6 text-center relative z-10"
       >
-        <h2 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">„Lass uns schauen, ob's passt"</h2>
+        <h2 className="font-['Space_Grotesk'] text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-4">Lass uns schauen, ob's passt</h2>
         <p className="text-lg text-[#B3B3C2] mb-10">Erzähl uns kurz, worum's geht – wir melden uns und schauen gemeinsam, wie wir die Reise beginnen werden.</p>
         <AnimatedButton to="/contact" variant="primary">
           Kontakt aufnehmen

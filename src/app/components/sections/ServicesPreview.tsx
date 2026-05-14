@@ -5,7 +5,7 @@ import { AnimatedButton } from "../AnimatedButton";
 const services = [
   {
     keyword: "Reels",
-    desc: "– die nicht überscrollt werden",
+    desc: "die nicht überscrollt werden",
     icon: (
       <>
         <path d="m22 8-6 4 6 4V8Z" />
@@ -15,7 +15,7 @@ const services = [
   },
   {
     keyword: "Beiträge",
-    desc: "– die nach deiner Marke aussehen",
+    desc: "die nach deiner Marke aussehen",
     icon: (
       <>
         <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
@@ -26,7 +26,7 @@ const services = [
   },
   {
     keyword: "Ads",
-    desc: "– die nicht nur laufen, sondern liefern",
+    desc: "die nicht nur laufen, sondern liefern",
     icon: (
       <>
         <path d="M12 2v20" />
@@ -36,7 +36,7 @@ const services = [
   },
   {
     keyword: "Content Strategie",
-    desc: "– die wirklich Sinn macht",
+    desc: "die wirklich Sinn macht",
     icon: (
       <>
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
@@ -58,13 +58,10 @@ export function ServicesPreview() {
           className="mb-12 md:mb-16 max-w-2xl"
         >
           <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Was wir zaubern</span>
-          <h2 className="font-['Space_Grotesk'] text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-6 leading-[1.15]">
+          <h2 className="font-['Space_Grotesk'] text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-6 md:mb-8 leading-[1.15]">
             Viele quatschen über Trends – doch wir überzeugen mit{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">visueller Qualität</span>.
           </h2>
-          <p className="text-lg text-[#B3B3C2] leading-relaxed mb-8">
-            Wir folgen keinen Trends - wir setzen sie. Unser Team besteht aus branchenführenden Experten, die die Kunst der Social Media Produktion und Strategie beherrschen. Wir zeichnen uns dadurch aus, gewöhnliche Marken mit unübertroffener visueller Qualität, datengesteuerter Präzision und Content, der die Konkurrenz konstant übertrifft, in Marktführer zu verwandeln.
-          </p>
           <AnimatedButton to="/services" variant="outline">
             Unsere Dienstleistungen
           </AnimatedButton>
@@ -94,12 +91,10 @@ export function ServicesPreview() {
                       {s.icon}
                     </svg>
                   </div>
-                  <h3 className="font-['Space_Grotesk'] text-2xl md:text-3xl font-bold mb-2 tracking-tight text-[#A855F7]">
-                    {s.keyword}
+                  <h3 className="font-['Space_Grotesk'] text-2xl sm:text-3xl md:text-[2rem] lg:text-4xl font-bold tracking-tight leading-tight">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">{s.keyword}</span>
+                    <span className="text-[#F5F5F7]"> – {s.desc}</span>
                   </h3>
-                  <p className="text-base md:text-lg text-[#B3B3C2] leading-relaxed">
-                    {s.desc}
-                  </p>
                 </Link>
               </motion.div>
             );

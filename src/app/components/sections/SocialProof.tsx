@@ -65,29 +65,36 @@ export function SocialProof() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center"
         >
-          <p className="text-xs uppercase text-[#B3B3C2] tracking-widest mb-2">Von ambitionierten Marken vertraut</p>
           <h2 className="font-['Space_Grotesk'] text-3xl md:text-4xl font-semibold tracking-tight">Echte Google-Rezensionen</h2>
-          {aggregateRating != null && (
-            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#B3B3C2]">
-              <span className="text-[#FBBC05] font-semibold">{aggregateRating.toFixed(1)}</span>
-              <div className="flex gap-0.5">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={i < Math.round(aggregateRating) ? "#FBBC05" : "#3a3a44"}>
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                  </svg>
-                ))}
-              </div>
-              {aggregateCount != null && (
-                <span>({aggregateCount} Bewertungen{googleMapsUri ? " · " : ""}
-                  {googleMapsUri && (
-                    <a href={googleMapsUri} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#A855F7]">
-                      auf Google ansehen
-                    </a>
-                  )})
-                </span>
-              )}
-            </div>
-          )}
+          {aggregateRating != null && (() => {
+            const stars = (
+              <>
+                <span className="text-[#FBBC05] font-semibold">{aggregateRating.toFixed(1)}</span>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={i < Math.round(aggregateRating) ? "#FBBC05" : "#3a3a44"}>
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  ))}
+                </div>
+                {aggregateCount != null && (
+                  <span>({aggregateCount} Bewertungen{googleMapsUri ? " · auf Google ansehen" : ""})</span>
+                )}
+              </>
+            );
+            return googleMapsUri ? (
+              <a
+                href={googleMapsUri}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center justify-center gap-2 text-sm text-[#B3B3C2] hover:text-white transition-colors underline decoration-[#A855F7]/40 hover:decoration-[#A855F7] underline-offset-4"
+              >
+                {stars}
+              </a>
+            ) : (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-[#B3B3C2]">{stars}</div>
+            );
+          })()}
         </motion.div>
 
         {/* Loading + empty states */}
@@ -128,7 +135,7 @@ export function SocialProof() {
                   aria-hidden={i >= realReviews.length || undefined}
                   className="snap-center"
                 >
-                  <GoogleReviewCard review={r} />
+                  <GoogleReviewCard review={r} href={googleMapsUri} />
                 </div>
               ))}
             </div>

@@ -304,11 +304,11 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     <meta name="supported-color-schemes" content="light dark">
     <title>Neue Kontaktanfrage | Puron Media</title>
   </head>
-  <body style="margin:0; padding:0; background:#07080c; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
+  <body style="margin:0; padding:0; background:#0A0814; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; line-height:1px; font-size:1px;">
       Neue Kontaktanfrage &uuml;ber das Kontaktformular von Puron Media.
     </div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#07080c; margin:0; padding:0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0A0814; margin:0; padding:0;">
       <tr>
         <td align="center" style="padding:32px 14px;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; width:100%; border-collapse:collapse;">
@@ -319,7 +319,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                     <td align="left" style="vertical-align:middle;">
                       <img src="https://chaos20140.github.io/Puron/logo.png" width="56" height="56" alt="Puron Media" style="display:block; border:0; outline:none; text-decoration:none; margin-bottom:8px;">
                       <div style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#ffffff;">
-                        Puron <span style="color:#a78bfa;">Media</span>
+                        Puron <span style="color:#A855F7;">Media</span>
                       </div>
                       <div style="font-size:13px; line-height:20px; color:#c3c8d6; margin-top:2px;">
                         Social Media Content, das Unternehmen sichtbar macht
@@ -334,11 +334,11 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
               </td>
             </tr>
             <tr>
-              <td style="background:#11131b; border:1px solid #252a3b; border-radius:28px; overflow:hidden;">
+              <td style="background:#15101F; border:1px solid #2A2040; border-radius:28px; overflow:hidden;">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td style="padding:34px 30px 28px 30px; background:linear-gradient(135deg,#171a27 0%,#10121a 48%,#21143b 100%);">
-                      <div style="display:inline-block; padding:8px 12px; background:rgba(138,92,255,0.16); border:1px solid rgba(138,92,255,0.38); border-radius:999px; color:#d5c9ff; font-size:13px; line-height:18px; font-weight:800;">
+                    <td style="padding:34px 30px 28px 30px; background:linear-gradient(135deg,#1A1330 0%,#15101F 48%,#2A1B4A 100%);">
+                      <div style="display:inline-block; padding:8px 12px; background:rgba(124,58,237,0.18); border:1px solid rgba(168,85,247,0.45); border-radius:999px; color:#D9CCFF; font-size:13px; line-height:18px; font-weight:800;">
                         Neue Kontaktanfrage eingegangen
                       </div>
                       <h1 style="margin:18px 0 10px 0; font-size:31px; line-height:38px; font-weight:900; letter-spacing:-0.9px; color:#ffffff;">
@@ -354,24 +354,24 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                       <h2 style="margin:0 0 16px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Kontaktdaten</h2>
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate; border-spacing:0 10px;">
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Name</td>
-                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanName)}</td>
+                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Name</td>
+                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanName)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">E-Mail</td>
-                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#cdbdff; text-decoration:none;">${escapeHtml(cleanEmail)}</a></td>
+                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">E-Mail</td>
+                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#A855F7; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Telefon</td>
-                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanPhone)}</td>
+                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Telefon</td>
+                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanPhone)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Unternehmen</td>
-                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanCompany)}</td>
+                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Unternehmen</td>
+                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanCompany)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#171a24; border-radius:14px 0 0 14px; border:1px solid #2a3042; border-right:0; color:#8f98ad; font-size:13px; line-height:20px; font-weight:700;">Interesse</td>
-                          <td style="padding:14px 16px; background:#171a24; border-radius:0 14px 14px 0; border:1px solid #2a3042; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanGoal)}</td>
+                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Interesse</td>
+                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanGoal)}</td>
                         </tr>
                       </table>
                     </td>
@@ -379,14 +379,14 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                   <tr>
                     <td style="padding:14px 30px 28px 30px;">
                       <h2 style="margin:0 0 14px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Nachricht</h2>
-                      <div style="background:#f7f8fb; border-radius:20px; padding:22px 22px; border:1px solid #e7e9f0; color:#181b24;">
-                        <div style="font-size:15px; line-height:26px; color:#242836; white-space:pre-line;">${escapeHtml(cleanMessage)}</div>
+                      <div style="background:#1B1430; border-radius:20px; padding:22px 22px; border:1px solid #2E2350; color:#F0EAFE;">
+                        <div style="font-size:15px; line-height:26px; color:#F0EAFE; white-space:pre-line;">${escapeHtml(cleanMessage)}</div>
                       </div>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding:0 30px 30px 30px;">
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0d0f16; border:1px solid #252a3b; border-radius:20px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#120D1C; border:1px solid #2A2040; border-radius:20px;">
                         <tr>
                           <td style="padding:20px 20px 8px 20px;">
                             <h2 style="margin:0 0 12px 0; font-size:18px; line-height:24px; font-weight:900; color:#ffffff;">Formular-Details</h2>
@@ -401,7 +401,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                               </tr>
                               <tr>
                                 <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Website</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" style="color:#cdbdff; text-decoration:none;">chaos20140.github.io/Puron</a></td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" style="color:#A855F7; text-decoration:none; font-weight:700;">chaos20140.github.io/Puron</a></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Zeitpunkt</td>
@@ -409,7 +409,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                               </tr>
                               <tr>
                                 <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Antwort an</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#cdbdff; text-decoration:none;">${escapeHtml(cleanEmail)}</a></td>
+                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#A855F7; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
                               </tr>
                             </table>
                           </td>
@@ -421,7 +421,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                     <td style="padding:0 30px 34px 30px;">
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                         <tr>
-                          <td align="center" bgcolor="#8a5cff" style="border-radius:16px;">
+                          <td align="center" bgcolor="#7C3AED" style="border-radius:16px;">
                             <a href="mailto:${escapeHtml(cleanEmail)}?subject=Antwort auf deine Anfrage bei Puron Media" style="display:block; padding:16px 22px; font-size:15px; line-height:20px; font-weight:900; color:#ffffff; text-decoration:none; border-radius:16px;">Direkt auf Anfrage antworten</a>
                           </td>
                         </tr>

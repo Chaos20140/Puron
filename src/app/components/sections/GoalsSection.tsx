@@ -44,8 +44,10 @@ export function GoalsSection() {
             </svg>
             Unser Prozess
           </span>
-          <h2 className="font-['Space_Grotesk'] text-3xl md:text-5xl font-semibold tracking-tight">
-            So läuft unsere Zusammenarbeit ab
+          <h2 className="font-['Space_Grotesk'] text-3xl md:text-5xl font-semibold tracking-tight leading-tight">
+            So läuft
+            <br />
+            unsere Zusammenarbeit ab
           </h2>
         </motion.div>
 

@@ -5,6 +5,7 @@ import { ServicesPreview } from "../sections/ServicesPreview";
 // import { SelectedWorks } from "../sections/SelectedWorks"; // hidden until we have real portfolio entries
 import { GoalsSection } from "../sections/GoalsSection";
 // import { WhyPuronSection } from "../sections/WhyPuronSection"; // section removed per design
+import { InstagramReels } from "../sections/InstagramReels";
 import { SocialProof } from "../sections/SocialProof";
 import { ContactCta } from "../sections/ContactCta";
 
@@ -18,6 +19,7 @@ export function HomePage() {
       {/* <SelectedWorks /> */}
       <GoalsSection />
       {/* <WhyPuronSection /> */}
+      <InstagramReels />
       <SocialProof />
       <ContactCta />
     </>

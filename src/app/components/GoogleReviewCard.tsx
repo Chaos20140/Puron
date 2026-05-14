@@ -31,60 +31,78 @@ const Stars = ({ rating }: { rating: number }) => {
   );
 };
 
-type Props = { review: GoogleReview };
+type Props = { review: GoogleReview; href?: string | null };
 
-// Single uniform card. Used inside a horizontal marquee in SocialProof —
-// hover scales it up + lifts on top, MotionConfig handles reduced-motion.
-export function GoogleReviewCard({ review }: Props) {
+// When `href` is set the whole card becomes a link to the business's Google
+// reviews page — the card already had `cursor-pointer`, this makes that
+// invitation actually pay off.
+export function GoogleReviewCard({ review, href }: Props) {
   const initials = (review.author || "?").trim().charAt(0).toUpperCase();
-  // If the Google profile photo can't load (CORS, network, removed
-  // image, etc.), fall back to the initials avatar instead of showing
-  // a broken image icon.
   const [photoFailed, setPhotoFailed] = useState(false);
   const showPhoto = review.authorPhoto && !photoFailed;
+
+  const inner = (
+    <div className="absolute inset-3 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] ring-1 ring-white/10 backdrop-blur overflow-hidden">
+      <div className="p-6 h-full flex flex-col">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            {showPhoto ? (
+              <img
+                src={review.authorPhoto!}
+                alt={review.author}
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full object-cover bg-[#1f1f2e]"
+                loading="eager"
+                decoding="async"
+                onError={() => setPhotoFailed(true)}
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] text-sm font-medium">
+                {initials}
+              </div>
+            )}
+            <div>
+              <div className="text-sm font-medium text-white">{review.author}</div>
+              <div className="text-xs text-[#B3B3C2]">{review.relativeTime}</div>
+            </div>
+          </div>
+          <GoogleLogo />
+        </div>
+        <Stars rating={review.rating} />
+        <p className="text-[15px] leading-relaxed text-[#E0E0E5] mb-auto font-medium line-clamp-[8]">
+          "{review.text}"
+        </p>
+      </div>
+    </div>
+  );
+
+  const wrapperClass =
+    "relative block w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 hover:border-white/30 shadow-[0_15px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_50px_rgba(124,58,237,0.35)] backdrop-blur-xl shrink-0 cursor-pointer transition-shadow duration-500";
+
+  if (href) {
+    return (
+      <motion.a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Google-Rezension von ${review.author} – auf Google ansehen`}
+        whileHover={{ scale: 1.08, y: -10, zIndex: 30 }}
+        transition={{ duration: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
+        className={wrapperClass}
+      >
+        {inner}
+      </motion.a>
+    );
+  }
 
   return (
     <motion.div
       whileHover={{ scale: 1.08, y: -10, zIndex: 30 }}
       transition={{ duration: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
-      className="relative w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 hover:border-white/30 shadow-[0_15px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_50px_rgba(124,58,237,0.35)] backdrop-blur-xl shrink-0 cursor-pointer transition-shadow duration-500"
+      className={wrapperClass}
     >
-      <div className="absolute inset-3 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] ring-1 ring-white/10 backdrop-blur overflow-hidden">
-        <div className="p-6 h-full flex flex-col">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-3">
-              {showPhoto ? (
-                <img
-                  src={review.authorPhoto!}
-                  alt={review.author}
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 rounded-full object-cover bg-[#1f1f2e]"
-                  // Eager — avatars are tiny (~4KB) and lazy-loading them
-                  // would trigger decodes mid-scroll, which causes the jank
-                  // the user reported.
-                  loading="eager"
-                  decoding="async"
-                  onError={() => setPhotoFailed(true)}
-                />
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] text-sm font-medium">
-                  {initials}
-                </div>
-              )}
-              <div>
-                <div className="text-sm font-medium text-white">{review.author}</div>
-                <div className="text-xs text-[#B3B3C2]">{review.relativeTime}</div>
-              </div>
-            </div>
-            <GoogleLogo />
-          </div>
-          <Stars rating={review.rating} />
-          <p className="text-[15px] leading-relaxed text-[#E0E0E5] mb-auto font-medium line-clamp-[8]">
-            "{review.text}"
-          </p>
-        </div>
-      </div>
+      {inner}
     </motion.div>
   );
 }

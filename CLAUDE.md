@@ -69,13 +69,17 @@ src/
       PuronLogo.tsx         ← inline SVG hex logo
       GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration
       figma/ImageWithFallback.tsx  ← <img> wrapper with placeholder on error; defaults to loading="lazy" + decoding="async"
-      sections/             ← section components composed by HomePage (HeroSection, ClientTicker, ServicesPreview, SelectedWorks, GoalsSection, WhyPuronSection, SocialProof, ContactCta)
+      sections/             ← section components composed by HomePage (HeroSection, ClientTicker, ServicesPreview, SelectedWorks, GoalsSection, WhyPuronSection, InstagramReels, SocialProof, ContactCta)
+      CustomCursor.tsx      ← replaces the OS pointer with the Puron hex logo on fine-pointer devices. Mounted at App.tsx root. Hidden on touch + skips scale-up on prefers-reduced-motion. CSS in [src/styles/cursor.css](src/styles/cursor.css) hides the native cursor via `.custom-cursor-active` on <html>.
       pages/                ← one component per route (HomePage, ServicesPage, ProjectsPage, TeamPage, ContactPage, ImprintPage, PrivacyPage, NotFoundPage)
 public/
   favicon.svg               ← Puron logo as SVG favicon
+  logo.png                  ← rasterized 256×256 logo for emails (built via [scripts/svg-to-png.mjs](scripts/svg-to-png.mjs))
   manifest.webmanifest      ← PWA manifest
   robots.txt                ← Allow all
   _headers                  ← Netlify/Cloudflare Pages security headers (see §9)
+  reels/                    ← Cover images for the Instagram-reels grid on HomePage. Currently SVG placeholders (placeholder-1..4.svg); replace with real cover stills as reels go live. See [InstagramReels.tsx](src/app/components/sections/InstagramReels.tsx).
+  partners/                 ← Partner logos for the ClientTicker marquee.
 ```
 
 Routes (defined in [src/app/routes.tsx](src/app/routes.tsx)):

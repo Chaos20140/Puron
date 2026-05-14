@@ -16,15 +16,20 @@ export function HeroSection() {
           <h1 className="font-['Space_Grotesk'] text-[1.6rem] sm:text-[2rem] md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.15] md:leading-[1.05] mb-5 md:mb-6 max-w-[300px] sm:max-w-md md:max-w-3xl">
             Social Media Content,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">der funktioniert</span>
-            {" – Sichtbarkeit ist "}
+            {" – Sichtbarkeit ist"}
+            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">kein Zufall</span>
             .
           </h1>
           <p className="text-sm sm:text-[15px] md:text-xl text-[#B3B3C2] mb-8 md:mb-10 max-w-[280px] sm:max-w-md md:max-w-xl leading-relaxed">
-            Wir schaffen Inhalte nach dem Motto: Aus dem Auge, in den Sinn – für Unternehmen, die messbares Wachstum anstreben.
+            Wir schaffen Inhalte nach dem Motto:{" "}
+            <em className="not-italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
+              Aus dem Auge, in den Sinn
+            </em>
+            {" – für Unternehmen, die messbares Wachstum anstreben."}
           </p>
           <AnimatedButton to="/contact" variant="primary" className="w-full max-w-[260px] sm:w-auto">
-            Zusammenarbeit anfragen
+            Kontakt aufnehmen
           </AnimatedButton>
         </motion.div>
 

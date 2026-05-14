@@ -46,20 +46,24 @@ export function Layout() {
             >
               <PuronLogo className="w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-105" />
             </motion.div>
-            <div className="flex flex-col leading-tight max-w-[110px] sm:max-w-none">
+            <div className="flex flex-col leading-tight items-start">
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-                className="font-['Space_Grotesk'] text-xs sm:text-base md:text-xl font-bold tracking-tight text-[#A855F7] whitespace-nowrap"
+                className="font-['Space_Grotesk'] text-sm sm:text-base md:text-xl font-bold tracking-[0.05em] text-[#A855F7] whitespace-nowrap"
               >
                 PURON MEDIA
               </motion.span>
+              {/* Tagline auto-shrinks via clamp so it never overflows the
+                  PURON MEDIA wordmark above it. Tracking is tuned so the
+                  glyph run lands at roughly the same width across breakpoints. */}
               <motion.span
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.55 }}
-                className="font-['Space_Grotesk'] text-[7px] sm:text-[9px] md:text-[10px] italic tracking-[0.05em] sm:tracking-[0.18em] text-[#B3B3C2] uppercase leading-snug sm:whitespace-nowrap"
+                className="font-['Space_Grotesk'] italic text-[#B3B3C2] uppercase leading-snug whitespace-nowrap self-stretch text-center"
+                style={{ fontSize: "clamp(7px, 1.6vw, 9.5px)", letterSpacing: "0.04em" }}
               >
                 Social Media &amp; Creative Agency
               </motion.span>
@@ -80,8 +84,8 @@ export function Layout() {
 
           <div className="flex items-center gap-3 md:gap-4">
             <AnimatedButton to="/contact" variant="nav" className="!px-2.5 !py-1.5 sm:!px-4 sm:!py-2 md:!px-5 md:!py-2.5 !text-[10px] sm:!text-[12px] md:!text-sm">
-              <span className="sm:hidden">Anfrage</span>
-              <span className="hidden sm:inline">Zusammenarbeit anfragen</span>
+              <span className="sm:hidden">Kontakt</span>
+              <span className="hidden sm:inline">Kontakt aufnehmen</span>
             </AnimatedButton>
             <button className="md:hidden p-2 -mr-2 text-[#B3B3C2] hover:text-white transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -119,7 +123,7 @@ export function Layout() {
             </div>
             <div className="mt-4 pb-8">
               <AnimatedButton to="/contact" fullWidth onClick={() => setMobileOpen(false)}>
-                Zusammenarbeit anfragen
+                Kontakt aufnehmen
               </AnimatedButton>
             </div>
           </div>
@@ -141,11 +145,14 @@ export function Layout() {
               className="flex items-center gap-2.5 md:gap-3 group"
             >
               <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
-              <div className="flex flex-col leading-tight max-w-[120px] sm:max-w-none">
-                <span className="font-['Space_Grotesk'] text-xs sm:text-base md:text-lg font-bold tracking-tight text-[#A855F7] whitespace-nowrap">
+              <div className="flex flex-col leading-tight items-start">
+                <span className="font-['Space_Grotesk'] text-sm sm:text-base md:text-lg font-bold tracking-[0.05em] text-[#A855F7] whitespace-nowrap">
                   PURON MEDIA
                 </span>
-                <span className="font-['Space_Grotesk'] text-[7px] sm:text-[9px] italic tracking-[0.05em] sm:tracking-[0.18em] text-[#B3B3C2] uppercase leading-snug sm:whitespace-nowrap">
+                <span
+                  className="font-['Space_Grotesk'] italic text-[#B3B3C2] uppercase leading-snug whitespace-nowrap self-stretch text-center"
+                  style={{ fontSize: "clamp(7px, 1.6vw, 9px)", letterSpacing: "0.04em" }}
+                >
                   Social Media &amp; Creative Agency
                 </span>
               </div>

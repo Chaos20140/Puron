@@ -12,7 +12,9 @@ const team = [
     role: "Gründer & Creative",
     desc: "Nach meinem medienbasierten Studium und fünf Jahren paralleler Berufserfahrung habe ich 2026 den Schritt in die Selbstständigkeit gewagt. Mit Puron habe ich einen Raum geschaffen, in dem Kreativität frei entfaltet und in visuellen Konzepten zum Ausdruck gebracht werden kann. Gemeinsam mit unseren Kunden entwickeln wir nicht nur Visionen, sondern verwandeln sie in Inhalte mit nachhaltigem Mehrwert – messbar & wirkungsvoll.",
     img: `${ASSET_BASE}team/mahsuni.png`,
-    socials: ["Instagram"],
+    socials: [
+      { label: "Instagram", href: "https://www.instagram.com/puronmedia?igsh=MXhqM2VnOGRxOWkzag==" },
+    ],
   },
   // Hidden until additional team members are real:
   // {
@@ -91,9 +93,15 @@ export function TeamPage() {
                 <p className="text-[#B3B3C2] text-base md:text-lg leading-relaxed mb-6">{m.desc}</p>
                 <div className="flex flex-wrap gap-2">
                   {m.socials.map((s, j) => (
-                    <span key={j} className="text-[11px] font-medium tracking-wider uppercase text-[#E0E0E5] px-3 py-1.5 bg-white/5 border border-white/5 rounded-full hover:border-[#7C3AED]/40 hover:text-white hover:bg-white/10 cursor-pointer transition-all">
-                      {s}
-                    </span>
+                    <a
+                      key={j}
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-medium tracking-wider uppercase text-[#E0E0E5] px-3 py-1.5 bg-white/5 border border-white/5 rounded-full hover:border-[#7C3AED]/40 hover:text-white hover:bg-white/10 transition-all"
+                    >
+                      {s.label}
+                    </a>
                   ))}
                 </div>
               </div>
