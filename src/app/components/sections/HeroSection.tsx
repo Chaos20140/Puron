@@ -13,7 +13,7 @@ export function HeroSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center text-center lg:items-start lg:text-left"
         >
-          <h1 className="font-['Space_Grotesk'] text-[1.6rem] sm:text-[2rem] md:text-5xl lg:text-6xl font-semibold uppercase tracking-tight leading-[1.15] md:leading-[1.05] mb-5 md:mb-6 max-w-[300px] sm:max-w-md md:max-w-3xl">
+          <h1 className="font-['Space_Grotesk'] text-[1.6rem] sm:text-[2rem] md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.15] md:leading-[1.05] mb-5 md:mb-6 max-w-[300px] sm:max-w-md md:max-w-3xl">
             Social Media Content,{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">der funktioniert</span>
             {" – Sichtbarkeit ist "}
