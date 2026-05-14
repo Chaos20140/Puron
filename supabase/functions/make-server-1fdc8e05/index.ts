@@ -176,12 +176,22 @@ const ALLOWED_GOALS = new Set([
 ]);
 
 function escapeHtml(s: string): string {
+  // Standard HTML escape + named entities for German umlauts/ß so the
+  // output renders correctly regardless of the email client's charset
+  // handling.
   return s
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll("'", "&#39;")
+    .replaceAll("ä", "&auml;")
+    .replaceAll("ö", "&ouml;")
+    .replaceAll("ü", "&uuml;")
+    .replaceAll("Ä", "&Auml;")
+    .replaceAll("Ö", "&Ouml;")
+    .replaceAll("Ü", "&Uuml;")
+    .replaceAll("ß", "&szlig;");
 }
 
 function singleLine(s: string, max = 200): string {
@@ -290,11 +300,13 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>Neue Kontaktanfrage | Puron Media</title>
   </head>
   <body style="margin:0; padding:0; background:#07080c; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; line-height:1px; font-size:1px;">
-      Neue Kontaktanfrage über das Kontaktformular von Puron Media.
+      Neue Kontaktanfrage &uuml;ber das Kontaktformular von Puron Media.
     </div>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#07080c; margin:0; padding:0;">
       <tr>
@@ -305,16 +317,17 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td align="left" style="vertical-align:middle;">
+                      <img src="https://chaos20140.github.io/Puron/logo.png" width="56" height="56" alt="Puron Media" style="display:block; border:0; outline:none; text-decoration:none; margin-bottom:8px;">
                       <div style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#ffffff;">
-                        Puron <span style="color:#8a5cff;">Media</span>
+                        Puron <span style="color:#a78bfa;">Media</span>
                       </div>
-                      <div style="font-size:13px; line-height:20px; color:#9ea6ba; margin-top:2px;">
+                      <div style="font-size:13px; line-height:20px; color:#c3c8d6; margin-top:2px;">
                         Social Media Content, das Unternehmen sichtbar macht
                       </div>
                     </td>
-                    <td align="right" style="vertical-align:top; font-size:12px; line-height:18px; color:#7f8798;">
+                    <td align="right" style="vertical-align:top; font-size:12px; line-height:18px; color:#a8b0c4;">
                       Kontaktformular<br>
-                      <span style="color:#c7cad6; font-weight:700;">Neue Anfrage</span>
+                      <span style="color:#ffffff; font-weight:700;">Neue Anfrage</span>
                     </td>
                   </tr>
                 </table>
@@ -329,10 +342,10 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                         Neue Kontaktanfrage eingegangen
                       </div>
                       <h1 style="margin:18px 0 10px 0; font-size:31px; line-height:38px; font-weight:900; letter-spacing:-0.9px; color:#ffffff;">
-                        Eine Person hat das Kontaktformular auf Puron Media ausgefüllt.
+                        Eine Person hat das Kontaktformular auf Puron Media ausgef&uuml;llt.
                       </h1>
-                      <p style="margin:0; font-size:15px; line-height:25px; color:#c3c8d6;">
-                        Unten findest du die wichtigsten Angaben aus dem Formular sowie die übermittelte Nachricht.
+                      <p style="margin:0; font-size:15px; line-height:25px; color:#d7dbea;">
+                        Unten findest du die wichtigsten Angaben aus dem Formular sowie die &uuml;bermittelte Nachricht.
                       </p>
                     </td>
                   </tr>
@@ -422,7 +435,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
               <td align="center" style="padding:24px 18px 0 18px; font-size:12px; line-height:20px; color:#737b8f;">
                 <div style="font-size:13px; line-height:21px; font-weight:800; color:#ffffff; margin-bottom:4px;">Puron Media</div>
                 <div>Automatisch generierte E-Mail aus dem Kontaktformular.</div>
-                <div style="margin-top:10px; color:#5f6678;">Diese Nachricht wurde über die Website übermittelt. Bitte prüfe die Angaben vor einer Antwort.</div>
+                <div style="margin-top:10px; color:#9098ad;">Diese Nachricht wurde &uuml;ber die Website &uuml;bermittelt. Bitte pr&uuml;fe die Angaben vor einer Antwort.</div>
               </td>
             </tr>
           </table>
