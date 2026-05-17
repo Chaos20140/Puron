@@ -46,24 +46,33 @@ export function Layout() {
             >
               <PuronLogo className="w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-105" />
             </motion.div>
-            <div className="flex flex-col leading-tight items-start">
+            {/* Typographic wordmark — matches the standalone Puron-Media
+                wordmark image: heavy black weight, solid bright purple,
+                tagline below in thin uppercase. Built with CSS instead of
+                a raster so it stays crisp at every breakpoint. */}
+            <div className="flex flex-col leading-none items-start">
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-                className="font-['Space_Grotesk'] text-sm sm:text-base md:text-xl font-bold tracking-[0.05em] text-[#A855F7] whitespace-nowrap"
+                className="font-['Space_Grotesk'] font-black uppercase text-[#A855F7] whitespace-nowrap"
+                style={{
+                  fontSize: "clamp(15px, 4vw, 26px)",
+                  letterSpacing: "0.01em",
+                  lineHeight: 1,
+                }}
               >
                 PURON MEDIA
               </motion.span>
-              {/* Tagline auto-shrinks via clamp so it never overflows the
-                  PURON MEDIA wordmark above it. Tracking is tuned so the
-                  glyph run lands at roughly the same width across breakpoints. */}
               <motion.span
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.55 }}
-                className="font-['Space_Grotesk'] italic text-[#B3B3C2] uppercase leading-snug whitespace-nowrap self-stretch text-center"
-                style={{ fontSize: "clamp(7px, 1.6vw, 9.5px)", letterSpacing: "0.04em" }}
+                className="font-['Space_Grotesk'] font-light text-[#F5F5F7] uppercase whitespace-nowrap self-stretch text-center mt-1"
+                style={{
+                  fontSize: "clamp(6.5px, 1.5vw, 9px)",
+                  letterSpacing: "0.05em",
+                }}
               >
                 Social Media &amp; Creative Agency
               </motion.span>
@@ -145,13 +154,16 @@ export function Layout() {
               className="flex items-center gap-2.5 md:gap-3 group"
             >
               <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
-              <div className="flex flex-col leading-tight items-start">
-                <span className="font-['Space_Grotesk'] text-sm sm:text-base md:text-lg font-bold tracking-[0.05em] text-[#A855F7] whitespace-nowrap">
+              <div className="flex flex-col leading-none items-start">
+                <span
+                  className="font-['Space_Grotesk'] font-black uppercase text-[#A855F7] whitespace-nowrap"
+                  style={{ fontSize: "clamp(14px, 3.6vw, 22px)", letterSpacing: "0.01em", lineHeight: 1 }}
+                >
                   PURON MEDIA
                 </span>
                 <span
-                  className="font-['Space_Grotesk'] italic text-[#B3B3C2] uppercase leading-snug whitespace-nowrap self-stretch text-center"
-                  style={{ fontSize: "clamp(7px, 1.6vw, 9px)", letterSpacing: "0.04em" }}
+                  className="font-['Space_Grotesk'] font-light text-[#F5F5F7] uppercase whitespace-nowrap self-stretch text-center mt-1"
+                  style={{ fontSize: "clamp(6.5px, 1.4vw, 8.5px)", letterSpacing: "0.05em" }}
                 >
                   Social Media &amp; Creative Agency
                 </span>

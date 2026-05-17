@@ -42,7 +42,11 @@ export function ServicesPage() {
             und wie wir's{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">angehen</span>
           </h1>
-          <p className="text-base md:text-lg text-[#B3B3C2] leading-relaxed">Wir bieten eine komplette Palette von Social Media Dienstleistungen, von der Produktion bis zur Strategie.</p>
+          <p className="text-base md:text-lg text-[#B3B3C2] leading-relaxed">
+            Wir bieten eine komplette Palette von Social Media Dienstleistungen,
+            <br />
+            von der Produktion bis zur Strategie.
+          </p>
         </div>
 
         <div className="space-y-8">

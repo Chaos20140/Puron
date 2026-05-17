@@ -1,16 +1,14 @@
 /* Custom cursor: hides the OS pointer on fine-pointer devices once the
    CustomCursor component mounts and adds .custom-cursor-active to <html>.
    Coarse-pointer (touch) devices never get the class, so nothing changes
-   for them. */
+   for them.
+
+   We use a wildcard selector so the rule wins against any element-level
+   `cursor: pointer` declarations from Tailwind utilities. The !important
+   is necessary because Tailwind classes like `cursor-pointer` emit
+   utility-level rules that would otherwise override us. */
 html.custom-cursor-active,
 html.custom-cursor-active body,
-html.custom-cursor-active a,
-html.custom-cursor-active button,
-html.custom-cursor-active [role="button"],
-html.custom-cursor-active input,
-html.custom-cursor-active textarea,
-html.custom-cursor-active select,
-html.custom-cursor-active label,
-html.custom-cursor-active summary {
+html.custom-cursor-active * {
   cursor: none !important;
 }

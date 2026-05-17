@@ -91,9 +91,13 @@ export function ServicesPreview() {
                       {s.icon}
                     </svg>
                   </div>
-                  <h3 className="font-['Space_Grotesk'] text-2xl sm:text-3xl md:text-[2rem] lg:text-4xl font-bold tracking-tight leading-tight">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">{s.keyword}</span>
-                    <span className="text-[#F5F5F7]"> – {s.desc}</span>
+                  <h3 className="font-['Space_Grotesk'] tracking-tight leading-tight flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span className="text-2xl sm:text-3xl md:text-[2rem] lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
+                      {s.keyword}
+                    </span>
+                    <span className="text-sm sm:text-base md:text-lg font-light text-[#B3B3C2] leading-snug">
+                      {s.desc}
+                    </span>
                   </h3>
                 </Link>
               </motion.div>

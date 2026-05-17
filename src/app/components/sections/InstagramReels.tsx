@@ -26,28 +26,19 @@ type Reel = {
 
 const reels: Reel[] = [
   {
-    href: PROFILE_URL,
-    caption: "Reel 1 — Cover folgt",
-    cover: `${ASSET_BASE}reels/placeholder-1.svg`,
-    placeholder: true,
+    href: "https://www.instagram.com/reel/DWv9gjODUsQ/?igsh=MTRzNDV6cjYwMnZmbw==",
+    caption: "Was wir tun bei Puron",
+    cover: `${ASSET_BASE}reels/reel-1.jpg`,
   },
   {
-    href: PROFILE_URL,
-    caption: "Reel 2 — Cover folgt",
-    cover: `${ASSET_BASE}reels/placeholder-2.svg`,
-    placeholder: true,
+    href: "https://www.instagram.com/p/DX6rcYXDbwv/?igsh=am55MTltbHZ2emZn",
+    caption: "Der erste Eindruck zählt",
+    cover: `${ASSET_BASE}reels/reel-2.jpg`,
   },
   {
-    href: PROFILE_URL,
-    caption: "Reel 3 — Cover folgt",
-    cover: `${ASSET_BASE}reels/placeholder-3.svg`,
-    placeholder: true,
-  },
-  {
-    href: PROFILE_URL,
-    caption: "Reel 4 — Cover folgt",
-    cover: `${ASSET_BASE}reels/placeholder-4.svg`,
-    placeholder: true,
+    href: "https://www.instagram.com/reel/DV6e3FBjXKV/?igsh=bWdjNXIwYXA2cXBi",
+    caption: "3 Gründe – keine 0815-Starter",
+    cover: `${ASSET_BASE}reels/reel-3.jpg`,
   },
 ];
 
@@ -81,7 +72,7 @@ export function InstagramReels() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-6">
           {reels.map((r, i) => (
             <motion.a
               key={i}
@@ -96,11 +87,20 @@ export function InstagramReels() {
               whileHover={{ y: -6 }}
               className="group relative block aspect-[9/16] rounded-2xl overflow-hidden border border-white/10 hover:border-[#7C3AED]/50 bg-[#0A0A0D] shadow-[0_15px_30px_rgba(0,0,0,0.45)] hover:shadow-[0_25px_50px_rgba(124,58,237,0.35)] transition-all duration-500"
             >
+              {/* Fall back to the lila SVG placeholder if the real cover
+                  isn't dropped into public/reels/ yet. The on-error swap
+                  runs once and replaces the broken-image icon. */}
               <img
                 src={r.cover}
                 alt=""
                 loading="lazy"
                 decoding="async"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  const fallback = `${ASSET_BASE}reels/placeholder-${(i % 4) + 1}.svg`;
+                  if (img.src.endsWith(fallback)) return;
+                  img.src = fallback;
+                }}
                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
               />
               {/* Gradient + glow overlays so the cover always reads against
