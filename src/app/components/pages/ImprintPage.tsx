@@ -18,15 +18,15 @@ export function ImprintPage() {
             <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Anbieter</h2>
             <p className="text-[#F5F5F7] font-medium">Mahsuni Akdemir</p>
             <p>Puron Media (Einzelunternehmen)</p>
-            <p className="mt-3">[Straße und Hausnummer — bitte ergänzen]</p>
-            <p>[PLZ und Ort — bitte ergänzen]</p>
+            <p className="mt-3">Birmecker Weg 20</p>
+            <p>59872 Meschede</p>
             <p>Deutschland</p>
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
             <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Kontakt</h2>
             <p>E-Mail: <a href="mailto:info@puron-media.de" className="text-[#A855F7] hover:underline">info@puron-media.de</a></p>
-            <p>Telefon: [bitte ergänzen]</p>
+            <p>Telefon: <a href="tel:+491638843453" className="text-[#A855F7] hover:underline">+49 163 8843453</a></p>
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
