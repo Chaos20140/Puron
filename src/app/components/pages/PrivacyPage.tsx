@@ -6,7 +6,7 @@ export function PrivacyPage() {
     {
       title: "1. Verantwortliche Stelle",
       content:
-        "Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist:\n\nMahsuni Akdemir\nPuron Media (Einzelunternehmen)\n[Straße + Hausnummer — bitte ergänzen]\n[PLZ + Ort — bitte ergänzen]\nDeutschland\n\nE-Mail: info@puron-media.de",
+        "Verantwortlich für die Datenverarbeitung auf dieser Website im Sinne der DSGVO ist:\n\nMahsuni Akdemir\nPuron Media (Einzelunternehmen)\nBirmecker Weg 20\n59872 Meschede\nDeutschland\n\nE-Mail: info@puron-media.de\nTelefon: +49 163 8843453",
     },
     {
       title: "2. Zugriffsdaten (Hosting)",
