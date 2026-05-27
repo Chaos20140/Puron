@@ -66,7 +66,7 @@ src/
                               — pauses on document.hidden, single static frame on prefers-reduced-motion
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — same pause/reduced-motion logic
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
-      PuronLogo.tsx         ← inline SVG hex logo
+      PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)
       GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration
       figma/ImageWithFallback.tsx  ← <img> wrapper with placeholder on error; defaults to loading="lazy" + decoding="async"
       sections/             ← section components composed by HomePage (HeroSection, ClientTicker, ServicesPreview, SelectedWorks, GoalsSection, WhyPuronSection, InstagramReels, SocialProof, ContactCta)
@@ -75,6 +75,7 @@ src/
 public/
   favicon.svg               ← Puron logo as SVG favicon
   logo.png                  ← rasterized 256×256 logo for emails (built via [scripts/svg-to-png.mjs](scripts/svg-to-png.mjs))
+  wordmark.png              ← 841×232 transparent "PURON MEDIA" lettering shown next to the hex symbol in the nav + footer ([Layout.tsx](src/app/components/Layout.tsx)). Client-supplied brand image, used 1:1 instead of CSS text.
   manifest.webmanifest      ← PWA manifest
   robots.txt                ← Allow all
   _headers                  ← Netlify/Cloudflare Pages security headers (see §9)
@@ -109,8 +110,7 @@ The Hono handler in [supabase/functions/make-server-1fdc8e05/index.ts](supabase/
 1. Reads `GOOGLE_PLACES_API_KEY` from Deno env.
 2. Resolves the Place ID for `"Puron Media Meschede"` via Places API (New) `places:searchText` and caches it forever in KV (`google_reviews:puron_media_meschede:place_id`).
 3. Fetches place details (`rating`, `userRatingCount`, `googleMapsUri`, `reviews[]`) with `languageCode=de`.
-4. Caches the normalized payload in KV (`google_reviews:puron_media_meschede`) for **1 hour**, but **only on success with at least one review** — error states never poison the cache.
-5. `?force=1` bypasses the read-cache (still writes to it). The frontend never sends it; it's a manual debug knob.
+4. Caches the normalized payload in KV (`google_reviews:puron_media_meschede`) for **1 hour**, but **only on success with at least one review** — error states never poison the cache. Error responses return a generic German message only — they **never** echo the upstream Google body / exception text (avoids leaking API-key/quota diagnostics to callers). There is **no `?force=1` cache-bypass** anymore — it was a public, unauthenticated way to hammer the *paid* Places API, so it was removed. To bust the cache manually, delete the `google_reviews:puron_media_meschede` row in the Supabase KV table.
 
 **`POST /contact`** — accepts contact-form submissions and forwards them via Resend.
 1. Validates required fields (`name`, `email`, `message`), enforces length limits, and checks `goal` against a whitelist.
@@ -183,7 +183,9 @@ If you ever need to re-snapshot:
 
 ## 9. Production hosting / security headers
 
-[public/_headers](public/_headers) ships a Netlify / Cloudflare Pages compatible header file with HSTS, CSP, X-Frame-Options DENY, X-Content-Type-Options nosniff, Permissions-Policy, and a strict Referrer-Policy. The CSP allows: self, Google Fonts, Unsplash images, Google profile photos, and the Supabase Edge Function origin — and forbids inline `<script>` (allows inline `style` because motion + section keyframes need it).
+[public/_headers](public/_headers) ships a Netlify / Cloudflare Pages compatible header file with HSTS, CSP, X-Frame-Options DENY, X-Content-Type-Options nosniff, Permissions-Policy, and a strict Referrer-Policy. The CSP allows: self, Google Fonts, Unsplash images, Google profile photos, and the Supabase Edge Function origin — and forbids inline `<script>` (allows inline `style` because motion + section keyframes need it). It also sets `object-src 'none'`, `frame-ancestors 'none'`, and `upgrade-insecure-requests`.
+
+**CSP also ships as a build-time `<meta>` tag** (the `inject-security-meta` plugin in [vite.config.ts](vite.config.ts)) so the GitHub Pages deployment — which ignores `_headers` — still gets a CSP + `Referrer-Policy`. The plugin is `apply: 'build'`, so it never runs in `pnpm dev` (a strict `script-src`/`connect-src` would break Vite's HMR eval + websocket). Keep the meta CSP directives in sync with `_headers` when you change either. Caveat: `frame-ancestors` / `X-Frame-Options` and `HSTS` **cannot** be delivered via `<meta>`, so clickjacking + HSTS protection still require real HTTP headers (i.e. Netlify/Cloudflare Pages, not GitHub Pages).
 
 If you deploy to **Vercel**, translate the same rules into a `vercel.json` (the `_headers` file is ignored). Skeleton:
 
@@ -197,8 +199,8 @@ If you deploy to **Vercel**, translate the same rules into a `vercel.json` (the 
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), interest-cohort=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.googleusercontent.com; connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" }
+        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com https://*.googleusercontent.com; connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests" }
       ]
     }
   ]
@@ -221,4 +223,4 @@ To switch to a custom domain at the apex (`https://puron-media.de`):
 2. Remove (or set to `/`) the `GHP_BASE` env var in [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
 3. Add `public/CNAME` containing the domain on a single line.
 
-Note: GitHub Pages **ignores `public/_headers`** — security headers (CSP, HSTS, …) won't apply. If headers matter, deploy to Netlify or Cloudflare Pages instead.
+Note: GitHub Pages **ignores `public/_headers`**, so HTTP-header-only protections (HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`) won't apply there. The CSP + `Referrer-Policy` are still delivered via the build-time `<meta>` injection (see above), so the main XSS vectors are covered — but for full clickjacking + HSTS protection deploy to Netlify or Cloudflare Pages instead.

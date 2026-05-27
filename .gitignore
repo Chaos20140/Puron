@@ -3,6 +3,7 @@ dist
 playwright-report
 test-results
 .playwright
+.playwright-mcp
 supabase/.temp
 supabase/.env
 .env

@@ -85,12 +85,11 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
       return c.json({ error: "Missing GOOGLE_PLACES_API_KEY" }, 500);
     }
 
-    const force = c.req.query("force") === "1";
     const cached = await kv.get(REVIEWS_CACHE_KEY) as
       | { fetchedAt: number; payload: unknown }
       | null;
 
-    if (!force && cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
       return c.json({ ...((cached.payload ?? {}) as object), cached: true });
     }
 
@@ -110,8 +109,9 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
     if (!detailsRes.ok) {
       const text = await detailsRes.text();
       console.log(`Places details failed (${detailsRes.status}) for placeId=${placeId}: ${text}`);
-      // IMPORTANT: never cache error responses. Return error directly.
-      return c.json({ error: `Places details failed: ${detailsRes.status}`, details: text }, 502);
+      // IMPORTANT: never cache error responses, and never leak the upstream
+      // body to the client — it can contain API-key/quota diagnostics.
+      return c.json({ error: "Reviews konnten nicht geladen werden." }, 502);
     }
 
     const data = await detailsRes.json();
@@ -137,10 +137,9 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
       fetchedAt: Date.now(),
     };
 
-    // Only cache when we actually got reviews back from Google.
-    // This guarantees error states (403, API_KEY_INVALID, REQUEST_DENIED, …)
-    // never poison the cache, and a successful ?force=1 call overwrites
-    // the stored payload so later non-force calls also return real reviews.
+    // Only cache when we actually got reviews back from Google. This
+    // guarantees error states (403, API_KEY_INVALID, REQUEST_DENIED, …)
+    // never poison the cache.
     if (reviews.length > 0) {
       await kv.set(REVIEWS_CACHE_KEY, { fetchedAt: Date.now(), payload });
     }
@@ -148,8 +147,8 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
     return c.json({ ...payload, cached: false });
   } catch (error) {
     console.log(`Unexpected error in /google-reviews: ${error instanceof Error ? error.stack ?? error.message : error}`);
-    // IMPORTANT: never cache error responses. Return error directly.
-    return c.json({ error: "Failed to fetch Google reviews", details: String(error) }, 500);
+    // IMPORTANT: never cache error responses, and never leak internals.
+    return c.json({ error: "Reviews konnten nicht geladen werden." }, 500);
   }
 });
 

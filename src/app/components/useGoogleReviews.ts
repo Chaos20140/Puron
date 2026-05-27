@@ -20,9 +20,13 @@ export type GoogleReviewsData = {
   fetchedAt: number;
 };
 
-// No `?force=1` here — we WANT to hit the 1-hour KV cache on every page load.
-// Pass `?force=1` manually only when debugging stale data.
 const REVIEWS_URL = `${SUPABASE_FUNCTION_URL}/google-reviews`;
+
+// Diagnostics are noisy and would expose the internal endpoint + payloads in
+// every visitor's console. Keep them in dev only.
+const debug = (...args: unknown[]) => {
+  if (import.meta.env.DEV) console.log("[GoogleReviews]", ...args);
+};
 
 export function useGoogleReviews() {
   const [data, setData] = useState<GoogleReviewsData | null>(null);
@@ -34,38 +38,36 @@ export function useGoogleReviews() {
 
     (async () => {
       try {
-        console.log("[GoogleReviews] Fetching:", REVIEWS_URL);
         const res = await fetch(REVIEWS_URL);
-        console.log("[GoogleReviews] HTTP status:", res.status);
+        debug("HTTP status:", res.status);
 
         const text = await res.text();
         let json: Record<string, unknown> | null = null;
         try {
           json = JSON.parse(text) as Record<string, unknown>;
         } catch {
-          console.error("[GoogleReviews] Non-JSON response body:", text);
+          debug("Non-JSON response body:", text);
         }
-        console.log("[GoogleReviews] Response body:", json ?? text);
 
         if (!res.ok || !json || json.error) {
           const message = json?.error ?? `HTTP ${res.status}`;
-          console.warn("[GoogleReviews] API error:", message, json?.details ?? "");
+          debug("API error:", message);
           if (!cancelled) setError(typeof message === "string" ? message : JSON.stringify(message));
           return;
         }
 
         if (!Array.isArray(json.reviews)) {
-          console.warn("[GoogleReviews] Unexpected payload shape — reviews missing:", json);
+          debug("Unexpected payload shape — reviews missing:", json);
           if (!cancelled) setError("Unerwartetes Antwortformat");
           return;
         }
 
         if (!cancelled) {
-          console.log(`[GoogleReviews] Loaded ${json.reviews.length} reviews`);
+          debug(`Loaded ${json.reviews.length} reviews`);
           setData(json as GoogleReviewsData);
         }
       } catch (err) {
-        console.error("[GoogleReviews] Network error:", err);
+        debug("Network error:", err);
         if (!cancelled) setError(String(err));
       } finally {
         if (!cancelled) setLoading(false);
