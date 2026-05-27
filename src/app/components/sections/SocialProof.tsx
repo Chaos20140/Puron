@@ -3,20 +3,40 @@ import { motion } from "motion/react";
 import { useGoogleReviews } from "../useGoogleReviews";
 import { GoogleReviewCard } from "../GoogleReviewCard";
 
-// Reviews carousel:
-// - Continuous right-to-left rAF flow at the same pace as the partner
-//   ticker (~60 px/s).
-// - Hover (desktop): pauses the flow so the user can read a card —
-//   the GoogleReviewCard's own whileHover scales the focused card up.
-// - Touch (mobile): native scroll. Touch pauses the flow so the
-//   user's swipe doesn't fight the rAF tick.
-// - prefers-reduced-motion stops the auto-flow entirely.
+// Reviews carousel — a GPU-composited CSS transform marquee (right→left).
+// The previous version animated scrollLeft on every rAF tick, which runs on
+// the main thread and stutters on phones, and fought the user's inertial
+// swipe ("hektisch"). A `translateX` keyframe animation runs on the
+// compositor instead → buttery smooth, and the user's touch simply pauses it.
+// - The track holds two identical copies; animating to translateX(-50%) loops
+//   seamlessly (a trailing padding equal to the gap keeps the two halves
+//   symmetric so the wrap point is invisible).
+// - Duration is derived from the rendered width for a constant px/s pace
+//   regardless of review count or breakpoint.
+// - Hover (mouse only) and active touch pause the animation so a card can be
+//   read / tapped; touch resumes a beat after the finger lifts.
+// - prefers-reduced-motion: no animation, fall back to a manual scroll strip.
 const carouselStyles = `
 .review-carousel-wrap::-webkit-scrollbar { display: none; }
 .review-carousel-wrap { scrollbar-width: none; -ms-overflow-style: none; }
+@keyframes review-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.review-marquee-track {
+  animation: review-marquee var(--review-marquee-duration, 60s) linear infinite;
+  will-change: transform;
+}
+@media (hover: hover) {
+  .review-carousel-wrap:hover .review-marquee-track { animation-play-state: paused; }
+}
+.review-carousel-wrap[data-paused="true"] .review-marquee-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .review-marquee-track { animation: none; transform: none; }
+}
 `;
 
-const AUTO_FLOW_PX_PER_FRAME = 1.0; // ~60 px/s — matches the partner ticker
+const MARQUEE_PX_PER_SEC = 50; // readable, steady flow
 
 export function SocialProof() {
   const { data: reviewsData, error: reviewsError, loading: reviewsLoading } = useGoogleReviews();
@@ -26,31 +46,46 @@ export function SocialProof() {
   const googleMapsUri = reviewsData?.googleMapsUri ?? null;
 
   const wrapRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const resumeTimer = useRef<number>(0);
   const [paused, setPaused] = useState(false);
+  const [reduced, setReduced] = useState(false);
 
-  // rAF auto-flow with seamless wrap. The reviews are rendered twice;
-  // when scrollLeft passes half the total width, we wrap by half so
-  // the user keeps seeing identical content with no visible jump.
   useEffect(() => {
-    if (paused || realReviews.length === 0) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
-    let raf = 0;
-    const tick = () => {
-      const el = wrapRef.current;
-      if (el) {
-        const half = el.scrollWidth / 2;
-        if (half > 0) {
-          let next = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME;
-          if (next >= half) next -= half;
-          el.scrollLeft = next;
-        }
+  // Derive the animation duration from the rendered track width so the flow
+  // keeps a constant px/s pace across breakpoints and review counts. The
+  // track is two copies wide; translateX(-50%) travels exactly one copy.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || realReviews.length === 0 || reduced) return;
+
+    const setDuration = () => {
+      const half = track.scrollWidth / 2;
+      if (half > 0) {
+        track.style.setProperty("--review-marquee-duration", `${half / MARQUEE_PX_PER_SEC}s`);
       }
-      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [paused, realReviews.length]);
+    setDuration();
+
+    const ro = new ResizeObserver(setDuration);
+    ro.observe(track);
+    return () => ro.disconnect();
+  }, [realReviews.length, reduced]);
+
+  // Touch pauses the marquee so a card can be read/tapped; it resumes a beat
+  // after the finger lifts. Desktop hover-pause is pure CSS (hover: hover).
+  const handleTouchStart = () => {
+    window.clearTimeout(resumeTimer.current);
+    setPaused(true);
+  };
+  const handleTouchEnd = () => {
+    window.clearTimeout(resumeTimer.current);
+    resumeTimer.current = window.setTimeout(() => setPaused(false), 1200);
+  };
+  useEffect(() => () => window.clearTimeout(resumeTimer.current), []);
 
   const showCarousel = !reviewsLoading && realReviews.length > 0;
 
@@ -112,29 +147,27 @@ export function SocialProof() {
         {showCarousel && (
           <div
             ref={wrapRef}
-            className="review-carousel-wrap relative w-full overflow-x-auto overflow-y-hidden touch-pan-x snap-x snap-mandatory md:snap-none py-12 md:py-16"
+            data-paused={paused || undefined}
+            className={`review-carousel-wrap relative w-full py-12 md:py-16 ${reduced ? "overflow-x-auto overflow-y-hidden" : "overflow-hidden"}`}
             style={{
               maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
               WebkitMaskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-              scrollPaddingLeft: "1.5rem",
-              scrollPaddingRight: "1.5rem",
               WebkitOverflowScrolling: "touch",
             }}
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-            onTouchStart={() => setPaused(true)}
-            onTouchEnd={() => setPaused(false)}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           >
-            <div className="flex gap-6 md:gap-8 w-max px-6 md:px-16">
-              {/* Render the reviews twice for seamless looping — the
-                  second set is aria-hidden so screen readers don't
-                  announce duplicates. */}
+            {/* Trailing pr-* equals the gap so the two copies stay symmetric
+                and translateX(-50%) wraps seamlessly. The reviews are rendered
+                twice; the second set is aria-hidden so screen readers don't
+                announce duplicates. */}
+            <div
+              ref={trackRef}
+              className="review-marquee-track flex gap-6 md:gap-8 w-max pr-6 md:pr-8"
+            >
               {[...realReviews, ...realReviews].map((r, i) => (
-                <div
-                  key={i}
-                  aria-hidden={i >= realReviews.length || undefined}
-                  className="snap-center"
-                >
+                <div key={i} aria-hidden={i >= realReviews.length || undefined} className="shrink-0">
                   <GoogleReviewCard review={r} href={googleMapsUri} />
                 </div>
               ))}
