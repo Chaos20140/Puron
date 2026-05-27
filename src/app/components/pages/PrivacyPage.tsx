@@ -58,7 +58,11 @@ export function PrivacyPage() {
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-3xl mx-auto px-6">
-        <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-12">Datenschutzerklärung</h1>
+        {/* Soft hyphen so this long compound wraps cleanly as
+            "Datenschutz-/erklärung" on narrow phones instead of overflowing.
+            More reliable than hyphens-auto, which needs a browser hyphenation
+            dictionary that isn't always present. */}
+        <h1 className="font-['Space_Grotesk'] text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight mb-12">{"Datenschutz­erklärung"}</h1>
 
         <div className="space-y-6">
           {sections.map((s, i) => (

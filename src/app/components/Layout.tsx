@@ -57,7 +57,7 @@ export function Layout() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-              className="h-12 md:h-14 w-auto select-none"
+              className="h-10 md:h-14 w-auto select-none"
               draggable={false}
             />
           </Link>
