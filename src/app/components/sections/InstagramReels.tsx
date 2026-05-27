@@ -12,9 +12,9 @@ const PROFILE_URL = "https://www.instagram.com/puronmedia?igsh=MXhqM2VnOGRxOWkza
 // Tip: shortcodes (the bit after /reel/) are stable, so the URL won't rot
 // even if the post is edited.
 //
-// Until the user provides real reels, this section shows the four most
-// recent posts as placeholders so the layout is reviewable. Replace
-// `placeholder: true` entries with real ones as content drops.
+// Covers live in public/reels/ as reel-1.jpg … (one per entry, in order).
+// If a cover file is missing the <img> onError swaps in a lila SVG
+// placeholder so the layout never shows a broken-image icon.
 const ASSET_BASE = import.meta.env.BASE_URL;
 
 type Reel = {

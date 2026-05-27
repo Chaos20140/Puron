@@ -79,7 +79,7 @@ public/
   manifest.webmanifest      ← PWA manifest
   robots.txt                ← Allow all
   _headers                  ← Netlify/Cloudflare Pages security headers (see §9)
-  reels/                    ← Cover images for the Instagram-reels grid on HomePage. Currently SVG placeholders (placeholder-1..4.svg); replace with real cover stills as reels go live. See [InstagramReels.tsx](src/app/components/sections/InstagramReels.tsx).
+  reels/                    ← Cover images for the Instagram-reels grid on HomePage. Real covers are `reel-1.jpg`…`reel-3.jpg` (one per reel, in order); `placeholder-1..4.svg` remain as the on-error fallback. To add/replace a cover, drop `reel-N.jpg` here matching the entry order in [InstagramReels.tsx](src/app/components/sections/InstagramReels.tsx).
   partners/                 ← Partner logos for the ClientTicker marquee.
 ```
 
