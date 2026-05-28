@@ -62,7 +62,7 @@ src/
     components/
       ErrorBoundary.tsx     ← class boundary + PageErrorFallback. Wrapped at app root + around each canvas.
       Layout.tsx            ← fixed nav + footer + <ErrorBoundary><AnimatedBackground/></...> + <Outlet/>
-      AnimatedBackground.tsx← full-screen canvas (rotating particle sphere, auroras, dust)
+      AnimatedBackground.tsx← full-screen canvas (rotating particle sphere, auroras [desktop only], dust)
                               — pauses on document.hidden, single static frame on prefers-reduced-motion
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — same pause/reduced-motion logic
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)

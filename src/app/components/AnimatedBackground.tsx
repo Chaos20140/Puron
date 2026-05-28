@@ -73,29 +73,33 @@ export function AnimatedBackground() {
 
       ctx.globalCompositeOperation = "screen";
 
-      // Soft Abstract Auroras
-      const curves = [
-        { hue: 270, amplitude: h * 0.25, yOffset: h * 0.3, speed: 0.8, frequency: 0.0015 },
-        { hue: 285, amplitude: h * 0.3, yOffset: h * 0.6, speed: 0.5, frequency: 0.001 },
-        { hue: 260, amplitude: h * 0.2, yOffset: h * 0.8, speed: 1.1, frequency: 0.002 },
-      ];
+      // Soft Abstract Auroras — the wavy sine bands. Skipped on mobile per
+      // user request (they read as distracting "waves" on small screens);
+      // the sphere network + dust carry the backdrop there.
+      if (!isMobile) {
+        const curves = [
+          { hue: 270, amplitude: h * 0.25, yOffset: h * 0.3, speed: 0.8, frequency: 0.0015 },
+          { hue: 285, amplitude: h * 0.3, yOffset: h * 0.6, speed: 0.5, frequency: 0.001 },
+          { hue: 260, amplitude: h * 0.2, yOffset: h * 0.8, speed: 1.1, frequency: 0.002 },
+        ];
 
-      curves.forEach((curve, i) => {
-        ctx.beginPath();
-        for (let x = 0; x <= w; x += 50) {
-          const y = curve.yOffset + Math.sin(x * curve.frequency + time * curve.speed + i) * curve.amplitude;
-          if (x === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        ctx.lineWidth = isMobile ? 60 : 120;
-        ctx.strokeStyle = `hsla(${curve.hue}, 90%, 60%, 0.03)`;
-        ctx.stroke();
-        
-        // Inner brighter core of the aurora
-        ctx.lineWidth = isMobile ? 30 : 60;
-        ctx.strokeStyle = `hsla(${curve.hue}, 90%, 70%, 0.04)`;
-        ctx.stroke();
-      });
+        curves.forEach((curve, i) => {
+          ctx.beginPath();
+          for (let x = 0; x <= w; x += 50) {
+            const y = curve.yOffset + Math.sin(x * curve.frequency + time * curve.speed + i) * curve.amplitude;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.lineWidth = 120;
+          ctx.strokeStyle = `hsla(${curve.hue}, 90%, 60%, 0.03)`;
+          ctx.stroke();
+
+          // Inner brighter core of the aurora
+          ctx.lineWidth = 60;
+          ctx.strokeStyle = `hsla(${curve.hue}, 90%, 70%, 0.04)`;
+          ctx.stroke();
+        });
+      }
 
       // 3D Rotating Sphere Network
       const projected: { x: number; y: number; z: number; size: number }[] = [];
