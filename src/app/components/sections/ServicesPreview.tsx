@@ -91,7 +91,13 @@ export function ServicesPreview() {
                       {s.icon}
                     </svg>
                   </div>
-                  <h3 className="font-['Space_Grotesk'] tracking-tight leading-tight flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  {/* flex-col on every breakpoint keeps all four cards
+                      visually identical: bold purple keyword on its own
+                      line, muted tagline below. The previous flex-wrap
+                      let the tagline sit inline next to short keywords
+                      ("Reels", "Ads") but wrap under long ones
+                      ("Content Strategie") — inconsistent. */}
+                  <h3 className="font-['Space_Grotesk'] tracking-tight leading-tight flex flex-col gap-y-1.5">
                     <span className="text-2xl sm:text-3xl md:text-[2rem] lg:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
                       {s.keyword}
                     </span>

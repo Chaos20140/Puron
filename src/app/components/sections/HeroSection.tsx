@@ -23,7 +23,9 @@ export function HeroSection() {
           </h1>
           <p className="text-sm sm:text-[15px] md:text-xl text-[#B3B3C2] mb-8 md:mb-10 max-w-[280px] sm:max-w-md md:max-w-xl leading-relaxed">
             Wir schaffen Inhalte nach dem Motto:{" "}
-            <em className="not-italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">
+            {/* whitespace-nowrap keeps the slogan on one line so it doesn't
+                split awkwardly across two lines on narrow phones. */}
+            <em className="not-italic font-semibold text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED] whitespace-nowrap">
               Aus dem Auge, in den Sinn
             </em>
             {" – für Unternehmen, die messbares Wachstum anstreben."}

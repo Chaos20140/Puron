@@ -44,10 +44,13 @@ export function GoalsSection() {
             </svg>
             Unser Prozess
           </span>
+          {/* Break after "unsere" so neither line ends up with a single
+              orphan word ("ab" used to drop alone on a third line on
+              narrow phones). Same balanced 2-line wrap on desktop. */}
           <h2 className="font-['Space_Grotesk'] text-3xl md:text-5xl font-semibold tracking-tight leading-tight">
-            So läuft
+            So läuft unsere
             <br />
-            unsere Zusammenarbeit ab
+            Zusammenarbeit ab
           </h2>
         </motion.div>
 
