@@ -12,9 +12,18 @@ export function AnimatedBackground() {
     let animationId: number | null = null;
     let time = 0;
 
+    // The deep-space radial gradient only depends on the canvas size, so we
+    // build it once per resize instead of allocating it every single frame.
+    let bgGrad: CanvasGradient | null = null;
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvas.width, canvas.height) * 1.2);
+      bgGrad.addColorStop(0, "#1A0B2E"); // Deep saturated purple in center
+      bgGrad.addColorStop(0.4, "#0A0514"); // Darker
+      bgGrad.addColorStop(1, "#020104"); // Almost pitch black at edges
     };
     resize();
     window.addEventListener("resize", resize);
@@ -22,8 +31,9 @@ export function AnimatedBackground() {
     const isMobile = window.innerWidth < 768;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // 3D Network Sphere Particles
-    const particleCount = isMobile ? 70 : 180;
+    // 3D Network Sphere Particles. Fewer points → far fewer O(n²) connection
+    // pairs per frame, the main scroll-jank cost.
+    const particleCount = isMobile ? 50 : 120;
     const particles: { x0: number; y0: number; z0: number; offset: number; size: number }[] = [];
     
     for (let i = 0; i < particleCount; i++) {
@@ -43,7 +53,7 @@ export function AnimatedBackground() {
     }
 
     // Foreground floating bokeh dust
-    const dustCount = isMobile ? 15 : 30;
+    const dustCount = isMobile ? 12 : 20;
     const dust: { x: number; y: number; s: number; speedY: number; speedX: number; hue: number }[] = [];
     for (let i = 0; i < dustCount; i++) {
       dust.push({
@@ -63,12 +73,8 @@ export function AnimatedBackground() {
       const cy = h / 2;
       time += 0.002;
 
-      // Deep Space / Nebula Background Gradient
-      const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 1.2);
-      bgGrad.addColorStop(0, "#1A0B2E"); // Deep saturated purple in center
-      bgGrad.addColorStop(0.4, "#0A0514"); // Darker
-      bgGrad.addColorStop(1, "#020104"); // Almost pitch black at edges
-      ctx.fillStyle = bgGrad;
+      // Deep Space / Nebula Background Gradient (cached, see resize())
+      ctx.fillStyle = bgGrad ?? "#020104";
       ctx.fillRect(0, 0, w, h);
 
       ctx.globalCompositeOperation = "screen";
@@ -142,36 +148,34 @@ export function AnimatedBackground() {
         projected.push({ x: x2d, y: y2d, z, size: p.size * scale });
       }
 
-      // Draw Network Connections
+      // Draw Network Connections. A solid mid-purple stroke replaces the
+      // former per-line createLinearGradient — allocating a gradient object
+      // for every connection every frame was the single biggest cost here,
+      // and the fade between two near-identical purples is imperceptible.
       const connectDistance = isMobile ? 120 : 160;
+      const connectDistanceSq = connectDistance * connectDistance;
+      ctx.lineWidth = isMobile ? 0.5 : 1;
       for (let i = 0; i < projected.length; i++) {
         for (let j = i + 1; j < projected.length; j++) {
           const p1 = projected[i];
           const p2 = projected[j];
-          
+
           const dx = p1.x - p2.x;
           const dy = p1.y - p2.y;
           const distSq = dx * dx + dy * dy;
 
-          if (distSq < connectDistance * connectDistance) {
+          if (distSq < connectDistanceSq) {
             const dist = Math.sqrt(distSq);
             // Opacity based on distance and depth (z)
             const opacity = (1 - dist / connectDistance) * 0.4;
             const depthOpacity = Math.max(0, Math.min(1, 1500 / p1.z));
             const finalAlpha = opacity * depthOpacity;
-            
+
             if (finalAlpha > 0.01) {
               ctx.beginPath();
               ctx.moveTo(p1.x, p1.y);
               ctx.lineTo(p2.x, p2.y);
-              
-              // Gradient line for a glowing energy effect
-              const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-              grad.addColorStop(0, `rgba(168, 85, 247, ${finalAlpha})`); // #A855F7
-              grad.addColorStop(1, `rgba(124, 58, 237, ${finalAlpha})`); // #7C3AED
-              
-              ctx.strokeStyle = grad;
-              ctx.lineWidth = isMobile ? 0.5 : 1;
+              ctx.strokeStyle = `rgba(146, 71, 242, ${finalAlpha})`;
               ctx.stroke();
             }
           }

@@ -23,42 +23,55 @@ const partners: { name: string; logo: string; scale?: number; whiten?: boolean }
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
 ];
 
-// Continuous auto-flow. Native touch on mobile is the only thing that
-// pauses (otherwise the user's swipe would fight the rAF tick).
+// GPU-composited transform marquee (same approach as the reviews carousel):
+// a translateX keyframe runs on the compositor thread, so it stays smooth and
+// never fights scrolling — unlike the old per-frame scrollLeft writes, which
+// ran on the main thread and stuttered. The track holds two identical copies;
+// animating to translateX(-50%) loops seamlessly (trailing padding == the gap
+// keeps the two halves symmetric).
 const tickerStyles = `
 .partner-ticker-wrap::-webkit-scrollbar { display: none; }
 .partner-ticker-wrap { scrollbar-width: none; -ms-overflow-style: none; }
+@keyframes partner-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.partner-marquee-track {
+  animation: partner-marquee var(--partner-marquee-duration, 40s) linear infinite;
+  will-change: transform;
+}
+@media (hover: hover) {
+  .partner-ticker-wrap:hover .partner-marquee-track { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .partner-marquee-track { animation: none; transform: none; }
+}
 `;
 
-const AUTO_FLOW_PX_PER_FRAME = 1.0; // ~60 px/s
+const MARQUEE_PX_PER_SEC = 60;
 
 export function ClientTicker() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [touchPaused, setTouchPaused] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [reduced, setReduced] = useState(false);
 
-  // rAF auto-flow with seamless wrap. The track is rendered twice;
-  // when scrollLeft passes half the total width, we wrap by half so
-  // the user keeps seeing identical content.
   useEffect(() => {
-    if (touchPaused) return;
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
-    let raf = 0;
-    const tick = () => {
-      const el = wrapRef.current;
-      if (el) {
-        const half = el.scrollWidth / 2;
-        if (half > 0) {
-          let next = el.scrollLeft + AUTO_FLOW_PX_PER_FRAME;
-          if (next >= half) next -= half;
-          el.scrollLeft = next;
-        }
-      }
-      raf = requestAnimationFrame(tick);
+  // Derive the duration from the rendered width so the speed stays constant
+  // across breakpoints. translateX(-50%) travels exactly one copy.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || reduced) return;
+    const setDuration = () => {
+      const half = track.scrollWidth / 2;
+      if (half > 0) track.style.setProperty("--partner-marquee-duration", `${half / MARQUEE_PX_PER_SEC}s`);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [touchPaused]);
+    setDuration();
+    const ro = new ResizeObserver(setDuration);
+    ro.observe(track);
+    return () => ro.disconnect();
+  }, [reduced]);
 
   const renderedPartners = [...partners, ...partners];
 
@@ -70,17 +83,19 @@ export function ClientTicker() {
       </div>
 
       <div
-        ref={wrapRef}
-        className="partner-ticker-wrap relative w-full overflow-x-auto overflow-y-hidden touch-pan-x"
+        className={`partner-ticker-wrap relative w-full ${reduced ? "overflow-x-auto" : "overflow-hidden"}`}
         style={{
           maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitMaskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitOverflowScrolling: "touch",
         }}
-        onTouchStart={() => setTouchPaused(true)}
-        onTouchEnd={() => setTouchPaused(false)}
       >
-        <div className="flex items-center w-max gap-10 sm:gap-14 md:gap-20 px-6 sm:px-10">
+        {/* Trailing pr-* equals the gap so the two copies stay symmetric and
+            translateX(-50%) wraps seamlessly. Second copy is aria-hidden. */}
+        <div
+          ref={trackRef}
+          className="partner-marquee-track flex items-center w-max gap-10 sm:gap-14 md:gap-20 pr-10 sm:pr-14 md:pr-20"
+        >
           {renderedPartners.map((p, i) => (
             <div
               key={i}
@@ -95,7 +110,7 @@ export function ClientTicker() {
                   ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
                   ...(p.whiten ? { filter: "brightness(0) invert(1)" } : {}),
                 }}
-                // Eager + async — load all logos up front so the auto-flow
+                // Eager + async — load all logos up front so the marquee
                 // doesn't trigger lazy decode + layout shift mid-scroll.
                 loading="eager"
                 decoding="async"

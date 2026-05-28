@@ -6,6 +6,15 @@
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="theme-color" content="#0A0A0D" />
 
+      <!-- Load fonts directly in the head (with preconnect) instead of via a
+           CSS @import. The @import created a request waterfall — the browser
+           had to fetch the bundled CSS first, discover the @import, then fetch
+           Google Fonts. A <link> here is discovered immediately and fetched in
+           parallel with the JS. display=swap shows fallback text instantly. -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+
       <title>Puron Agency — Social Media Content, das Unternehmen sichtbar macht</title>
       <meta name="description" content="Puron Agency aus Meschede produziert Reels, Posts, Ads und Content-Strategien, die Unternehmen Kunden, Bewerber und langfristige Aufmerksamkeit gewinnen lassen." />
 

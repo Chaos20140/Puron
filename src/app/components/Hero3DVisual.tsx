@@ -269,6 +269,17 @@ export function Hero3DVisual() {
       }
     };
 
+    // Only run while the canvas is actually on screen AND the tab is visible.
+    // This stops the loop once the hero scrolls away (smoother scrolling
+    // through the rest of the page) and on mobile, where the canvas is
+    // display:none (lg+ only) but the rAF would otherwise still spin.
+    let onScreen = true;
+    const sync = () => {
+      if (prefersReducedMotion) return;
+      if (document.hidden || !onScreen) stop();
+      else start();
+    };
+
     if (prefersReducedMotion) {
       animate();
       stop();
@@ -276,17 +287,19 @@ export function Hero3DVisual() {
       start();
     }
 
-    const onVisibility = () => {
-      if (prefersReducedMotion) return;
-      if (document.hidden) stop();
-      else start();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
+    const io = new IntersectionObserver((entries) => {
+      onScreen = entries[0]?.isIntersecting ?? true;
+      sync();
+    });
+    io.observe(canvas);
+
+    document.addEventListener("visibilitychange", sync);
 
     return () => {
       stop();
+      io.disconnect();
       window.removeEventListener("resize", resize);
-      document.removeEventListener("visibilitychange", onVisibility);
+      document.removeEventListener("visibilitychange", sync);
     };
   }, []);
 

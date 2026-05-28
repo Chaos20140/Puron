@@ -52,7 +52,7 @@ E2E tests live under [tests/](tests/) and use Playwright with chromium only. The
 ```
 src/
   main.tsx                  ← creates root, imports styles/index.css
-  styles/                   ← fonts.css → Google Fonts; tailwind.css; theme.css (shadcn tokens — see §5)
+  styles/                   ← fonts.css (now just a note — fonts load via a <link> in index.html, not @import, to avoid a request waterfall); tailwind.css; theme.css (shadcn tokens — see §5)
   app/
     api.ts                  ← shared SUPABASE_FUNCTION_URL constant for all backend calls
     App.tsx                 ← <ErrorBoundary><MotionConfig reducedMotion="user"><RouterProvider/></...></...>
@@ -64,7 +64,7 @@ src/
       Layout.tsx            ← fixed nav + footer + <ErrorBoundary><AnimatedBackground/></...> + <Outlet/>
       AnimatedBackground.tsx← full-screen canvas (rotating particle sphere, auroras [desktop only], dust)
                               — pauses on document.hidden, single static frame on prefers-reduced-motion
-      Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — same pause/reduced-motion logic
+      Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — pauses on prefers-reduced-motion, tab-hidden, AND when scrolled offscreen (IntersectionObserver; also stops the wasted loop on mobile where it's display:none)
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
       PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)
       GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration
@@ -98,7 +98,7 @@ The project does **not** use the shadcn theme tokens. Pages use raw Tailwind arb
 | Muted text | `#B3B3C2`, `#71717A` | secondary text |
 | Brand purple | `#7C3AED` (deep), `#A855F7` (bright) | accents, gradients, glows |
 | Borders | `white/5`, `white/10` | hairlines |
-| Fonts | `Inter` (body), `Space Grotesk` (display) | imported via Google Fonts in [src/styles/fonts.css](src/styles/fonts.css) |
+| Fonts | `Inter` (body), `Space Grotesk` (display) | loaded via a Google Fonts `<link>` (with preconnect) in [index.html](index.html) |
 
 When adding UI, copy this convention rather than reaching for `bg-primary`/`text-foreground`. Note: [index.html](index.html) sets `<html class="dark">` so the theme.css `.dark` variant is the one that applies.
 

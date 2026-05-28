@@ -1,1 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* Fonts (Inter + Space Grotesk) are loaded via a <link> in index.html, not
+   here — that avoids the CSS @import request waterfall and lets the browser
+   fetch them in parallel with the JS bundle. Keep this file in the import
+   chain (styles/index.css) in case font-related @font-face/overrides are
+   needed later. */
