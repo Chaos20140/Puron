@@ -63,13 +63,21 @@ src/
       ErrorBoundary.tsx     ← class boundary + PageErrorFallback. Wrapped at app root + around each canvas.
       Layout.tsx            ← fixed nav + footer + <ErrorBoundary><AnimatedBackground/></...> + <Outlet/>
       AnimatedBackground.tsx← full-screen canvas (rotating particle sphere, auroras [desktop only], dust)
-                              — pauses on document.hidden, single static frame on prefers-reduced-motion
+                              — pauses on document.hidden, single static frame on prefers-reduced-motion,
+                              AND pauses during active scroll on mobile (holds last frame, resumes ~200ms
+                              after scroll stops) so the full-viewport repaint stops stealing scroll frames
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — pauses on prefers-reduced-motion, tab-hidden, AND when scrolled offscreen (IntersectionObserver; also stops the wasted loop on mobile where it's display:none)
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
       PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)
-      GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration
+      GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration (the card's backdrop-blur is gated to md+ — re-sampling a blur over the live canvas every frame is too costly while scrolling on phones)
       figma/ImageWithFallback.tsx  ← <img> wrapper with placeholder on error; defaults to loading="lazy" + decoding="async"
       sections/             ← section components composed by HomePage (HeroSection, ClientTicker, ServicesPreview, SelectedWorks, GoalsSection, WhyPuronSection, InstagramReels, SocialProof, ContactCta)
+                              — ClientTicker + SocialProof run GPU CSS-transform marquees that PAUSE
+                              off-screen via IntersectionObserver: a `data-active` attr on the wrap toggles
+                              animation-play-state + applies `will-change:transform` only while visible
+                              (avoids a permanently-promoted, always-ticking compositor layer). Their
+                              backdrop-blur is gated to md+. SocialProof also wraps the skeleton/empty/carousel
+                              in one fixed min-height box so the data swap can't reflow the page mid-scroll.
       CustomCursor.tsx      ← replaces the OS pointer with the Puron hex logo on fine-pointer devices. Mounted at App.tsx root. Hidden on touch + skips scale-up on prefers-reduced-motion. CSS in [src/styles/cursor.css](src/styles/cursor.css) hides the native cursor via `.custom-cursor-active` on <html>.
       pages/                ← one component per route (HomePage, ServicesPage, ProjectsPage, TeamPage, ContactPage, ImprintPage, PrivacyPage, NotFoundPage)
 public/
@@ -116,7 +124,7 @@ The Hono handler in [supabase/functions/make-server-1fdc8e05/index.ts](supabase/
 1. Validates required fields (`name`, `email`, `message`), enforces length limits, and checks `goal` against a whitelist.
 2. **Honeypot**: if the hidden `website` field has any value, returns `200 OK` silently without sending — bots see success and don't learn the field name.
 3. **Per-IP rate limit**: max 3 submissions per IP per hour, tracked in KV under `contact_rl:<ip>`. IP comes from `CF-Connecting-IP` or `X-Forwarded-For`.
-4. Sends a formatted HTML email via the Resend API to `CONTACT_EMAIL_TO` (default `Tolunay.u@outlook.de`) from `CONTACT_EMAIL_FROM` (default `onboarding@resend.dev`). `reply_to` is set to the submitter's email.
+4. Sends a formatted HTML email via the Resend API to `CONTACT_EMAIL_TO` (default `Tolunay.u@outlook.de`) from `CONTACT_EMAIL_FROM` (default `onboarding@resend.dev`). `reply_to` is set to the submitter's email. The template is **hardened against forced dark-mode inversion** (the Gmail mobile app especially — it ignores `color-scheme`/`prefers-color-scheme` and remaps colors with its own algorithm, which previously turned the white hero heading invisible and flipped the cards to light lavender). Hardening: the hero is a flat solid `#1E1530` (NO CSS gradient — gradients can't be inverted so the bg stayed dark while Gmail darkened the text → invisible); all surfaces are a uniform near-black (`#120C1E` card / `#181030` rows+message / `#150E26` panel) so no block reads as a "light card" to flip; every background is set via both the `bgcolor` attribute AND inline CSS (Outlook/Word); the message box is a single-cell `<table>` (`bgcolor` on a `<div>` is invalid in Outlook); text is off-pure `#fffffe` (dodges Apple Mail's exact-match #fff/#000 swap); accent links are `#C39BFF`; and the `<head>` carries a `<style>` with `:root{color-scheme:dark}` + `@media (prefers-color-scheme:dark)` + `[data-ogsc]/[data-ogsb]` overrides driven by class hooks `.hero/.card/.row/.panel/.heading/.body-text/.muted/.accent/.btn/.btn-a` (so every element re-pinned MUST keep its class). The CTA is a VML `<v:roundrect>` for Outlook desktop + a non-MSO `<a>` fallback. **If the hero heading still darkens in the Gmail app** after this, the documented last-resort is a surgical `u + .body` mix-blend-mode double-invert wrapped around that one `<h1>` (fragile — apply only to the heading, never blanket-wrap).
 5. Form data is **never persisted** — only forwarded as email. Keeps DSGVO position simple.
 
 **CORS** is read from `ALLOWED_ORIGINS` env var (comma-separated origins, default `*`). Once the production domain is known, set it to e.g. `https://puron.agency,https://www.puron.agency` so the `POST /contact` endpoint can't be abused by other sites.

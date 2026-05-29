@@ -30,8 +30,9 @@ export function ImprintPage() {
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
-            <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Umsatzsteuer</h2>
-            <p>
+            <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Steuerangaben</h2>
+            <p><span className="text-[#F5F5F7] font-medium">Steuernummer:</span> <span className="font-mono">334/5000/5604</span></p>
+            <p className="mt-3 text-sm">
               [Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: <span className="font-mono">DEXXXXXXXXX</span> — bitte ergänzen,
               oder ersetzen durch: <em>„Kleinunternehmer gemäß § 19 UStG, daher kein Ausweis der Umsatzsteuer."</em>]
             </p>

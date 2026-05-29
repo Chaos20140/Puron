@@ -25,8 +25,11 @@ const carouselStyles = `
 }
 .review-marquee-track {
   animation: review-marquee var(--review-marquee-duration, 60s) linear infinite;
-  will-change: transform;
 }
+/* will-change only while on-screen + animating, so the GPU layer is created
+   just-in-time and released when scrolled away (toggled via data-active). */
+.review-carousel-wrap[data-active="true"] .review-marquee-track { will-change: transform; }
+.review-carousel-wrap:not([data-active="true"]) .review-marquee-track { animation-play-state: paused; }
 @media (hover: hover) {
   .review-carousel-wrap:hover .review-marquee-track { animation-play-state: paused; }
 }
@@ -50,6 +53,7 @@ export function SocialProof() {
   const resumeTimer = useRef<number>(0);
   const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -89,8 +93,24 @@ export function SocialProof() {
 
   const showCarousel = !reviewsLoading && realReviews.length > 0;
 
+  // Pause the marquee + release its will-change layer when the section scrolls
+  // off-screen — a permanently-promoted, always-animating compositor layer
+  // competes with scroll for the mobile GPU (mirrors the IntersectionObserver
+  // pattern in Hero3DVisual). rootMargin promotes it just before it enters view
+  // so there's no scroll-in pop. Desktop hover-pause + reduced-motion stay CSS.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? true),
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [showCarousel]);
+
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-[#0A0A0D]/50 to-[#111116]/80 backdrop-blur-sm border-t border-white/5" style={{ isolation: "isolate" }}>
+    <section className="py-16 md:py-24 bg-gradient-to-b from-[#0A0A0D]/80 to-[#111116]/95 md:from-[#0A0A0D]/50 md:to-[#111116]/80 md:backdrop-blur-sm border-t border-white/5" style={{ isolation: "isolate" }}>
       <style>{carouselStyles}</style>
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
@@ -132,6 +152,10 @@ export function SocialProof() {
           })()}
         </motion.div>
 
+        {/* All three states (skeleton, empty/error, carousel) render into one
+            fixed-height box so a mid-scroll data arrival can't reflow the page
+            below it. min-h = card height + the py-12/md:py-16 vertical padding. */}
+        <div className="relative min-h-[416px] sm:min-h-[436px] md:min-h-[488px]">
         {/* Loading skeleton — three shimmer cards matching the real card
             dimensions so the section holds its height while the API fetch
             settles. This eliminates the blank-area flash on mobile. */}
@@ -157,6 +181,7 @@ export function SocialProof() {
           <div
             ref={wrapRef}
             data-paused={paused || undefined}
+            data-active={!reduced && inView && !paused ? "true" : undefined}
             className={`review-carousel-wrap relative w-full py-12 md:py-16 ${reduced ? "overflow-x-auto overflow-y-hidden" : "overflow-hidden"}`}
             style={{
               maskImage: "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
@@ -183,6 +208,7 @@ export function SocialProof() {
             </div>
           </div>
         )}
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

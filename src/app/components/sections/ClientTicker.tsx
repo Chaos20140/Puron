@@ -38,8 +38,10 @@ const tickerStyles = `
 }
 .partner-marquee-track {
   animation: partner-marquee var(--partner-marquee-duration, 40s) linear infinite;
-  will-change: transform;
 }
+/* will-change only while on-screen + animating (toggled via data-active). */
+.partner-ticker-wrap[data-active="true"] .partner-marquee-track { will-change: transform; }
+.partner-ticker-wrap:not([data-active="true"]) .partner-marquee-track { animation-play-state: paused; }
 @media (hover: hover) {
   .partner-ticker-wrap:hover .partner-marquee-track { animation-play-state: paused; }
 }
@@ -52,10 +54,26 @@ const MARQUEE_PX_PER_SEC = 60;
 
 export function ClientTicker() {
   const trackRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [reduced, setReduced] = useState(false);
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+
+  // Pause the marquee + release its will-change layer when the ticker is
+  // off-screen, so a second always-animating compositor layer doesn't compete
+  // with scroll while the user reads further down (mirrors Hero3DVisual).
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? true),
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   // Derive the duration from the rendered width so the speed stays constant
@@ -76,13 +94,15 @@ export function ClientTicker() {
   const renderedPartners = [...partners, ...partners];
 
   return (
-    <section className="py-12 border-t border-white/5 bg-[#0A0A0D]/50 relative z-20 overflow-hidden backdrop-blur-[2px]">
+    <section className="py-12 border-t border-white/5 bg-[#0A0A0D]/50 relative z-20 overflow-hidden md:backdrop-blur-[2px]">
       <style>{tickerStyles}</style>
       <div className="max-w-7xl mx-auto px-6 mb-6">
         <p className="text-center text-[10px] sm:text-xs uppercase tracking-[0.2em] text-[#B3B3C2] font-medium">Partner, die uns vertrauen</p>
       </div>
 
       <div
+        ref={wrapRef}
+        data-active={!reduced && inView ? "true" : undefined}
         className={`partner-ticker-wrap relative w-full ${reduced ? "overflow-x-auto" : "overflow-hidden"}`}
         style={{
           maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",

@@ -42,7 +42,7 @@ export function GoogleReviewCard({ review, href }: Props) {
   const showPhoto = review.authorPhoto && !photoFailed;
 
   const inner = (
-    <div className="absolute inset-3 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] ring-1 ring-white/10 backdrop-blur overflow-hidden">
+    <div className="absolute inset-3 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] ring-1 ring-white/10 md:backdrop-blur overflow-hidden">
       <div className="p-6 h-full flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export function GoogleReviewCard({ review, href }: Props) {
   );
 
   const wrapperClass =
-    "relative block w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 hover:border-white/30 shadow-[0_15px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_50px_rgba(124,58,237,0.35)] backdrop-blur-xl shrink-0 cursor-pointer transition-shadow duration-500";
+    "relative block w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-gradient-to-b from-[#7C3AED]/10 to-transparent border border-white/10 hover:border-white/30 shadow-[0_15px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_25px_50px_rgba(124,58,237,0.35)] md:backdrop-blur-xl shrink-0 cursor-pointer transition-shadow duration-500";
 
   if (href) {
     return (

@@ -299,17 +299,60 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="color-scheme" content="light dark">
-    <meta name="supported-color-schemes" content="light dark">
+    <!-- Force dark-only intent for clients that honor it (Apple Mail, iOS Mail,
+         Outlook.com, Samsung Mail, Thunderbird). The Gmail mobile app ignores all
+         of this and force-remaps colors with its own algorithm — Gmail is handled
+         instead by the solid near-black surfaces + bgcolor attributes in the body
+         below (a flat dark solid reads as "already dark" so Gmail leaves it). -->
+    <meta name="color-scheme" content="dark">
+    <meta name="supported-color-schemes" content="dark">
     <title>Neue Kontaktanfrage | Puron Media</title>
+    <!--[if mso]>
+    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+    <![endif]-->
+    <style type="text/css">
+      :root { color-scheme: dark; supported-color-schemes: dark; }
+      /* Clients that honor an authored dark scheme (Apple Mail, iOS Mail, Samsung
+         Mail, Thunderbird, Outlook 2019+ Mac): re-pin the EXACT brand colors so
+         the client can't invent its own after its remap pass. Needs the matching
+         class hooks below to be present on the elements. */
+      @media (prefers-color-scheme: dark) {
+        .puron-body, body { background-color:#0A0814 !important; }
+        .wrap   { background-color:#0A0814 !important; }
+        .card   { background-color:#120C1E !important; }
+        .hero   { background-color:#1E1530 !important; }
+        .row    { background-color:#181030 !important; }
+        .panel  { background-color:#150E26 !important; }
+        .heading, h1, h2 { color:#fffffe !important; }
+        .body-text, p, .msg { color:#F2ECFF !important; }
+        .muted  { color:#CFC6E6 !important; }
+        .accent, a.accent { color:#C39BFF !important; }
+        .btn    { background-color:#7C3AED !important; }
+        .btn-a  { color:#fffffe !important; }
+      }
+      /* Outlook.com + Yahoo inject data-ogsc (text) / data-ogsb (background)
+         wrappers when they remap to dark — force the brand surfaces + white text
+         back. (Gmail never injects these, so this hardens Outlook.com/Yahoo only.) */
+      [data-ogsb] .puron-body, [data-ogsb] .wrap { background-color:#0A0814 !important; }
+      [data-ogsb] .card  { background-color:#120C1E !important; }
+      [data-ogsb] .hero  { background-color:#1E1530 !important; }
+      [data-ogsb] .row   { background-color:#181030 !important; }
+      [data-ogsb] .panel { background-color:#150E26 !important; }
+      [data-ogsb] .btn   { background-color:#7C3AED !important; }
+      [data-ogsc] .heading, [data-ogsc] h1, [data-ogsc] h2 { color:#fffffe !important; }
+      [data-ogsc] .body-text, [data-ogsc] p, [data-ogsc] .msg { color:#F2ECFF !important; }
+      [data-ogsc] .muted  { color:#CFC6E6 !important; }
+      [data-ogsc] .accent { color:#C39BFF !important; }
+      [data-ogsc] .btn-a  { color:#fffffe !important; }
+    </style>
   </head>
-  <body style="margin:0; padding:0; background:#0A0814; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
+  <body class="puron-body body" bgcolor="#0A0814" style="margin:0; padding:0; background-color:#0A0814; font-family:Arial, Helvetica, sans-serif; color:#fffffe;">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; line-height:1px; font-size:1px;">
       Neue Kontaktanfrage &uuml;ber das Kontaktformular von Puron Media.
     </div>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0A0814; margin:0; padding:0;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#0A0814" class="wrap" style="background-color:#0A0814; margin:0; padding:0;">
       <tr>
-        <td align="center" style="padding:32px 14px;">
+        <td align="center" bgcolor="#0A0814" style="background-color:#0A0814; padding:32px 14px;">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; width:100%; border-collapse:collapse;">
             <tr>
               <td style="padding:0 0 18px 0;">
@@ -317,98 +360,100 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                   <tr>
                     <td align="left" style="vertical-align:middle;">
                       <img src="https://chaos20140.github.io/Puron/logo.png" width="56" height="56" alt="Puron Media" style="display:block; border:0; outline:none; text-decoration:none; margin-bottom:8px;">
-                      <div style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#ffffff;">
+                      <div class="heading" style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#fffffe;">
                         Puron <span style="color:#A855F7;">Media</span>
                       </div>
-                      <div style="font-size:13px; line-height:20px; color:#c3c8d6; margin-top:2px;">
+                      <div class="muted" style="font-size:13px; line-height:20px; color:#c3c8d6; margin-top:2px;">
                         Social Media Content, das Unternehmen sichtbar macht
                       </div>
                     </td>
                     <td align="right" style="vertical-align:top; font-size:12px; line-height:18px; color:#a8b0c4;">
                       Kontaktformular<br>
-                      <span style="color:#ffffff; font-weight:700;">Neue Anfrage</span>
+                      <span class="heading" style="color:#fffffe; font-weight:700;">Neue Anfrage</span>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
             <tr>
-              <td style="background:#15101F; border:1px solid #2A2040; border-radius:28px; overflow:hidden;">
+              <td bgcolor="#120C1E" class="card" style="background-color:#120C1E; border:1px solid #2A2040; border-radius:28px; overflow:hidden;">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td style="padding:34px 30px 28px 30px; background:linear-gradient(135deg,#1A1330 0%,#15101F 48%,#2A1B4A 100%);">
-                      <div style="display:inline-block; padding:8px 12px; background:rgba(124,58,237,0.18); border:1px solid rgba(168,85,247,0.45); border-radius:999px; color:#D9CCFF; font-size:13px; line-height:18px; font-weight:800;">
+                    <td bgcolor="#1E1530" class="hero" style="padding:34px 30px 28px 30px; background-color:#1E1530;">
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr><td bgcolor="#241640" style="padding:8px 12px; background-color:#241640; border:1px solid #4A2E7A; border-radius:999px; color:#D9CCFF; font-size:13px; line-height:18px; font-weight:800;">
                         Neue Kontaktanfrage eingegangen
-                      </div>
-                      <h1 style="margin:18px 0 10px 0; font-size:31px; line-height:38px; font-weight:900; letter-spacing:-0.9px; color:#ffffff;">
+                      </td></tr></table>
+                      <h1 class="heading" style="margin:18px 0 10px 0; font-size:31px; line-height:38px; font-weight:900; letter-spacing:-0.9px; color:#fffffe;">
                         Eine Person hat das Kontaktformular auf Puron Media ausgef&uuml;llt.
                       </h1>
-                      <p style="margin:0; font-size:15px; line-height:25px; color:#d7dbea;">
+                      <p class="body-text" style="margin:0; font-size:15px; line-height:25px; color:#d7dbea;">
                         Unten findest du die wichtigsten Angaben aus dem Formular sowie die &uuml;bermittelte Nachricht.
                       </p>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding:26px 30px 8px 30px;">
-                      <h2 style="margin:0 0 16px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Kontaktdaten</h2>
+                      <h2 class="heading" style="margin:0 0 16px 0; font-size:20px; line-height:26px; font-weight:900; color:#fffffe;">Kontaktdaten</h2>
                       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate; border-spacing:0 10px;">
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Name</td>
-                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanName)}</td>
+                          <td width="36%" bgcolor="#181030" class="row muted" style="padding:14px 16px; background-color:#181030; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#CFC6E6; font-size:13px; line-height:20px; font-weight:700;">Name</td>
+                          <td bgcolor="#181030" class="row body-text" style="padding:14px 16px; background-color:#181030; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#fffffe; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanName)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">E-Mail</td>
-                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#A855F7; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
+                          <td width="36%" bgcolor="#181030" class="row muted" style="padding:14px 16px; background-color:#181030; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#CFC6E6; font-size:13px; line-height:20px; font-weight:700;">E-Mail</td>
+                          <td bgcolor="#181030" class="row body-text" style="padding:14px 16px; background-color:#181030; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#fffffe; font-size:15px; line-height:22px; font-weight:800;"><a href="mailto:${escapeHtml(cleanEmail)}" class="accent" style="color:#C39BFF; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Telefon</td>
-                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanPhone)}</td>
+                          <td width="36%" bgcolor="#181030" class="row muted" style="padding:14px 16px; background-color:#181030; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#CFC6E6; font-size:13px; line-height:20px; font-weight:700;">Telefon</td>
+                          <td bgcolor="#181030" class="row body-text" style="padding:14px 16px; background-color:#181030; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#fffffe; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanPhone)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Unternehmen</td>
-                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanCompany)}</td>
+                          <td width="36%" bgcolor="#181030" class="row muted" style="padding:14px 16px; background-color:#181030; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#CFC6E6; font-size:13px; line-height:20px; font-weight:700;">Unternehmen</td>
+                          <td bgcolor="#181030" class="row body-text" style="padding:14px 16px; background-color:#181030; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#fffffe; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanCompany)}</td>
                         </tr>
                         <tr>
-                          <td width="36%" style="padding:14px 16px; background:#1B1430; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#A89FBE; font-size:13px; line-height:20px; font-weight:700;">Interesse</td>
-                          <td style="padding:14px 16px; background:#1B1430; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#ffffff; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanGoal)}</td>
+                          <td width="36%" bgcolor="#181030" class="row muted" style="padding:14px 16px; background-color:#181030; border-radius:14px 0 0 14px; border:1px solid #2E2350; border-right:0; color:#CFC6E6; font-size:13px; line-height:20px; font-weight:700;">Interesse</td>
+                          <td bgcolor="#181030" class="row body-text" style="padding:14px 16px; background-color:#181030; border-radius:0 14px 14px 0; border:1px solid #2E2350; border-left:0; color:#fffffe; font-size:15px; line-height:22px; font-weight:800;">${fallback(cleanGoal)}</td>
                         </tr>
                       </table>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding:14px 30px 28px 30px;">
-                      <h2 style="margin:0 0 14px 0; font-size:20px; line-height:26px; font-weight:900; color:#ffffff;">Nachricht</h2>
-                      <div style="background:#1B1430; border-radius:20px; padding:22px 22px; border:1px solid #2E2350; color:#F0EAFE;">
-                        <div style="font-size:15px; line-height:26px; color:#F0EAFE; white-space:pre-line;">${escapeHtml(cleanMessage)}</div>
-                      </div>
+                      <h2 class="heading" style="margin:0 0 14px 0; font-size:20px; line-height:26px; font-weight:900; color:#fffffe;">Nachricht</h2>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#181030" class="row" style="background-color:#181030; border-radius:20px; border:1px solid #2E2350;">
+                        <tr>
+                          <td class="msg body-text" style="padding:22px; color:#F2ECFF; font-size:15px; line-height:26px; white-space:pre-line;">${escapeHtml(cleanMessage)}</td>
+                        </tr>
+                      </table>
                     </td>
                   </tr>
                   <tr>
                     <td style="padding:0 30px 30px 30px;">
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#120D1C; border:1px solid #2A2040; border-radius:20px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#150E26" class="panel" style="background-color:#150E26; border:1px solid #2A2040; border-radius:20px;">
                         <tr>
                           <td style="padding:20px 20px 8px 20px;">
-                            <h2 style="margin:0 0 12px 0; font-size:18px; line-height:24px; font-weight:900; color:#ffffff;">Formular-Details</h2>
+                            <h2 class="heading" style="margin:0 0 12px 0; font-size:18px; line-height:24px; font-weight:900; color:#fffffe;">Formular-Details</h2>
                           </td>
                         </tr>
                         <tr>
                           <td style="padding:0 20px 20px 20px;">
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                               <tr>
-                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Quelle</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">Kontaktformular Puron Media</td>
+                                <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Quelle</td>
+                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">Kontaktformular Puron Media</td>
                               </tr>
                               <tr>
-                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Website</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" style="color:#A855F7; text-decoration:none; font-weight:700;">chaos20140.github.io/Puron</a></td>
+                                <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Website</td>
+                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" class="accent" style="color:#C39BFF; text-decoration:none; font-weight:700;">chaos20140.github.io/Puron</a></td>
                               </tr>
                               <tr>
-                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Zeitpunkt</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">${escapeHtml(submittedAt)}</td>
+                                <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Zeitpunkt</td>
+                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;">${escapeHtml(submittedAt)}</td>
                               </tr>
                               <tr>
-                                <td width="40%" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Antwort an</td>
-                                <td style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="mailto:${escapeHtml(cleanEmail)}" style="color:#A855F7; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
+                                <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Antwort an</td>
+                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="mailto:${escapeHtml(cleanEmail)}" class="accent" style="color:#C39BFF; text-decoration:none; font-weight:700;">${escapeHtml(cleanEmail)}</a></td>
                               </tr>
                             </table>
                           </td>
@@ -420,8 +465,16 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                     <td style="padding:0 30px 34px 30px;">
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                         <tr>
-                          <td align="center" bgcolor="#7C3AED" style="border-radius:16px;">
-                            <a href="mailto:${escapeHtml(cleanEmail)}?subject=Antwort auf deine Anfrage bei Puron Media" style="display:block; padding:16px 22px; font-size:15px; line-height:20px; font-weight:900; color:#ffffff; text-decoration:none; border-radius:16px;">Direkt auf Anfrage antworten</a>
+                          <td align="center" bgcolor="#7C3AED" class="btn" style="background-color:#7C3AED; border-radius:16px;">
+                            <!--[if mso]>
+                            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="mailto:${escapeHtml(cleanEmail)}" style="height:52px;v-text-anchor:middle;width:300px;" arcsize="31%" fillcolor="#7C3AED" stroke="f">
+                              <w:anchorlock/>
+                              <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:900;">Direkt auf Anfrage antworten</center>
+                            </v:roundrect>
+                            <![endif]-->
+                            <!--[if !mso]><!-->
+                            <a href="mailto:${escapeHtml(cleanEmail)}?subject=Antwort auf deine Anfrage bei Puron Media" class="btn-a" style="display:block; padding:16px 22px; font-size:15px; line-height:20px; font-weight:900; color:#fffffe; text-decoration:none; border-radius:16px; background-color:#7C3AED;">Direkt auf Anfrage antworten</a>
+                            <!--<![endif]-->
                           </td>
                         </tr>
                       </table>
@@ -432,7 +485,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
             </tr>
             <tr>
               <td align="center" style="padding:24px 18px 0 18px; font-size:12px; line-height:20px; color:#737b8f;">
-                <div style="font-size:13px; line-height:21px; font-weight:800; color:#ffffff; margin-bottom:4px;">Puron Media</div>
+                <div class="heading" style="font-size:13px; line-height:21px; font-weight:800; color:#fffffe; margin-bottom:4px;">Puron Media</div>
                 <div>Automatisch generierte E-Mail aus dem Kontaktformular.</div>
                 <div style="margin-top:10px; color:#9098ad;">Diese Nachricht wurde &uuml;ber die Website &uuml;bermittelt. Bitte pr&uuml;fe die Angaben vor einer Antwort.</div>
               </td>

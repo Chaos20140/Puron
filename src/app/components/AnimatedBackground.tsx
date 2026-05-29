@@ -260,10 +260,33 @@ export function AnimatedBackground() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Mobile scroll-idle pause: this full-viewport canvas repainting on every
+    // frame (the O(n²) particle network + every backdrop-blur section having to
+    // re-sample it) is the single biggest per-frame cost during a scroll. Hold
+    // the last frame while the finger is actively scrolling — yielding the
+    // GPU/main thread to the scroll itself — then resume ~200ms after it stops.
+    // Imperceptible on a field that drifts at time += 0.002. Desktop and
+    // prefers-reduced-motion are left untouched.
+    const isMobileNow = window.innerWidth < 768;
+    let scrollIdle = 0;
+    const onScroll = () => {
+      if (prefersReducedMotion) return;
+      stop();
+      window.clearTimeout(scrollIdle);
+      scrollIdle = window.setTimeout(() => {
+        if (!document.hidden) start();
+      }, 200);
+    };
+    if (isMobileNow && !prefersReducedMotion) {
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
+
     return () => {
       stop();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(scrollIdle);
     };
   }, []);
 
