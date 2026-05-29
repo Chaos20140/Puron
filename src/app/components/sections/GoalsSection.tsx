@@ -62,7 +62,7 @@ export function GoalsSection() {
                 key={i}
                 initial={{ opacity: 0, x: fromLeft ? -80 : 80 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
                 className={`bg-gradient-to-br ${gradients[i]} rounded-3xl px-5 py-8 sm:px-6 sm:py-10 md:px-12 md:py-14 shadow-[0_15px_40px_rgba(124,58,237,0.25)] ring-1 ring-white/10 hover:ring-white/30 transition-shadow text-center`}
               >

@@ -2,48 +2,13 @@ import { Link } from "react-router";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../AnimatedButton";
 
+// No pictographic icons per client request — each card leads with a large
+// gradient index number (01–04) instead. Keyword + tagline carry the meaning.
 const services = [
-  {
-    keyword: "Reels",
-    desc: "die nicht überscrollt werden",
-    icon: (
-      <>
-        <path d="m22 8-6 4 6 4V8Z" />
-        <rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
-      </>
-    ),
-  },
-  {
-    keyword: "Beiträge",
-    desc: "die nach deiner Marke aussehen",
-    icon: (
-      <>
-        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-        <circle cx="9" cy="9" r="2" />
-        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-      </>
-    ),
-  },
-  {
-    keyword: "Ads",
-    desc: "die nicht nur laufen, sondern liefern",
-    icon: (
-      <>
-        <path d="M12 2v20" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </>
-    ),
-  },
-  {
-    keyword: "Content Strategie",
-    desc: "die wirklich Sinn macht",
-    icon: (
-      <>
-        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-      </>
-    ),
-  },
+  { keyword: "Reels", desc: "die nicht überscrollt werden" },
+  { keyword: "Beiträge", desc: "die nach deiner Marke aussehen" },
+  { keyword: "Ads", desc: "die nicht nur laufen, sondern liefern" },
+  { keyword: "Content Strategie", desc: "die wirklich Sinn macht" },
 ];
 
 export function ServicesPreview() {
@@ -78,7 +43,7 @@ export function ServicesPreview() {
                 key={i}
                 initial={{ opacity: 0, x: fromX }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
               >
                 <Link
@@ -86,11 +51,12 @@ export function ServicesPreview() {
                   className="group block p-8 rounded-3xl bg-white/[0.04] backdrop-blur-md border border-white/10 hover:border-[#7C3AED]/40 hover:bg-white/[0.06] transition-all duration-500 relative overflow-hidden h-full"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#7C3AED] rounded-full blur-[80px] opacity-0 group-hover:opacity-25 transition-opacity" />
-                  <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center mb-6 border border-white/15 group-hover:border-[#7C3AED]/50 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5F5F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#A855F7] transition-colors">
-                      {s.icon}
-                    </svg>
-                  </div>
+                  <span
+                    aria-hidden="true"
+                    className="block font-['Space_Grotesk'] font-bold leading-none mb-6 text-5xl md:text-6xl text-transparent bg-clip-text bg-gradient-to-br from-[#A855F7] to-[#7C3AED] opacity-90 select-none transition-transform duration-500 group-hover:-translate-y-0.5"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   {/* flex-col on every breakpoint keeps all four cards
                       visually identical: bold purple keyword on its own
                       line, muted tagline below. The previous flex-wrap

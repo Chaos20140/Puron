@@ -93,7 +93,7 @@ export function InstagramReels() {
               <img
                 src={r.cover}
                 alt=""
-                loading="lazy"
+                loading="eager"
                 decoding="async"
                 onError={(e) => {
                   const img = e.currentTarget;
