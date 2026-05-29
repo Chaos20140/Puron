@@ -1,0 +1,16 @@
+# Supabase project config. Only the function settings the marketing site
+# depends on are pinned here; everything else uses CLI defaults.
+#
+# WHY THIS FILE EXISTS: the edge function MUST stay publicly reachable
+# (no JWT) so the static marketing site can call /google-reviews and
+# /contact with a plain fetch() — it has no Supabase session/JWT to send.
+# Previously this relied on remembering the `--no-verify-jwt` CLI flag on
+# every deploy; deploying without it (or via the Dashboard, which defaults
+# JWT on) silently re-enabled verification and 401'd the whole site.
+# Pinning verify_jwt = false here makes `supabase functions deploy` keep the
+# function public by default, so the outage can't recur from a forgotten flag.
+project_id = "fhgevybapodhubkuylnw"
+
+[functions.make-server-1fdc8e05]
+enabled = true
+verify_jwt = false

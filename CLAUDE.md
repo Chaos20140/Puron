@@ -174,6 +174,8 @@ supabase functions deploy make-server-1fdc8e05 --project-ref fhgevybapodhubkuyln
 
 `--no-verify-jwt` keeps the endpoints public (matches current production behaviour). Without it, Supabase enforces JWT verification on the function and the marketing site can't reach it.
 
+> **`verify_jwt` is now pinned in [supabase/config.toml](supabase/config.toml)** (`[functions.make-server-1fdc8e05] verify_jwt = false`). With that file present, a plain `supabase functions deploy …` keeps the function public — the `--no-verify-jwt` flag is belt-and-suspenders, not load-bearing. **This was added after an incident:** a redeploy without the flag re-enabled JWT verification, and the gateway started returning `401 UNAUTHORIZED_NO_AUTH_HEADER` to every request → the live site showed no Google reviews and the contact form couldn't send (both endpoints share this one function). Symptom signature: `curl -i .../functions/v1/make-server-1fdc8e05/health` returns `401` with `x-served-by: supabase-edge-runtime` (the platform gateway, *before* the Hono app runs) → it's a `verify_jwt` problem, not an app-code bug. **Caveat:** the **Dashboard** "Deploy" button still defaults JWT *on* and ignores config.toml — prefer the CLI, or toggle it back off in the function's settings if you deploy via the Dashboard.
+
 Alternatively paste the file contents into the Supabase Dashboard → Edge Functions → server → Edit and click "Deploy".
 
 ## 8. Code → Figma snapshots (reference)
