@@ -110,9 +110,10 @@ export function ClientTicker() {
                   ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
                   ...(p.whiten ? { filter: "brightness(0) invert(1)" } : {}),
                 }}
-                // Eager + async — load all logos up front so the marquee
-                // doesn't trigger lazy decode + layout shift mid-scroll.
+                // Eager + high priority — logos are above-the-fold on most
+                // phones, so we want them decoded before the user scrolls.
                 loading="eager"
+                fetchPriority="high"
                 decoding="async"
               />
             </div>

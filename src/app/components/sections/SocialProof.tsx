@@ -132,9 +132,18 @@ export function SocialProof() {
           })()}
         </motion.div>
 
-        {/* Loading + empty states */}
+        {/* Loading skeleton — three shimmer cards matching the real card
+            dimensions so the section holds its height while the API fetch
+            settles. This eliminates the blank-area flash on mobile. */}
         {reviewsLoading && (
-          <div className="text-center text-[#B3B3C2] text-sm py-12">Rezensionen werden geladen…</div>
+          <div className="flex gap-6 overflow-hidden py-12 md:py-16 px-6 md:px-16" aria-hidden="true">
+            {[0, 1, 2].map((k) => (
+              <div
+                key={k}
+                className="shrink-0 w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-white/5 border border-white/5 animate-pulse"
+              />
+            ))}
+          </div>
         )}
         {!reviewsLoading && realReviews.length === 0 && (
           <div className="text-center text-[#B3B3C2] text-sm max-w-md mx-auto py-12">

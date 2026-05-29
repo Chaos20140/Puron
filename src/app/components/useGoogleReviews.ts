@@ -38,7 +38,12 @@ export function useGoogleReviews() {
 
     (async () => {
       try {
-        const res = await fetch(REVIEWS_URL);
+        // 4-second timeout prevents an indefinite hang on slow mobile networks,
+        // which would leave a blank space in the SocialProof section.
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), 4000);
+        const res = await fetch(REVIEWS_URL, { signal: controller.signal });
+        window.clearTimeout(timeoutId);
         debug("HTTP status:", res.status);
 
         const text = await res.text();
