@@ -162,7 +162,7 @@ supabase secrets set --env-file supabase/.env --project-ref fhgevybapodhubkuylnw
 Variables (set in `supabase/.env`):
 - `GOOGLE_PLACES_API_KEY` — required for `/google-reviews`
 - `RESEND_API_KEY` — required for `/contact`
-- `CONTACT_EMAIL_TO` (optional, default `Tolunay.u@outlook.de`)
+- `CONTACT_EMAIL_TO` (optional, default `Tolunay.u@outlook.de`) — **live secret is currently `info@puron-media.de`** (set 2026-05-29). Change it with `supabase secrets set "CONTACT_EMAIL_TO=…" --project-ref fhgevybapodhubkuylnw` (takes effect immediately, no redeploy)
 - `CONTACT_EMAIL_FROM` (optional, default `onboarding@resend.dev` — replace with `noreply@yourdomain` once you verify the domain in Resend so emails don't land in spam)
 - `ALLOWED_ORIGINS` (optional, default `*`) — comma-separated allow-list, e.g. `https://puron.agency,https://www.puron.agency`
 
