@@ -2,8 +2,9 @@ import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { motion } from "motion/react";
 import { usePageTitle } from "../../hooks/usePageTitle";
 
-// Vite's BASE_URL is "/" in dev, "/Puron/" on the GitHub Pages build.
-// Using it lets the image resolve correctly in both environments.
+// Vite's BASE_URL ("/" on the puron-media.de apex domain; would be a
+// subpath like "/Puron/" for a GitHub Pages project page). Using it lets
+// the image resolve correctly regardless of where the site is served.
 const ASSET_BASE = import.meta.env.BASE_URL;
 
 const team = [

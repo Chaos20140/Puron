@@ -32,11 +32,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # GHP_BASE matches the repo name so asset URLs resolve under the
-      # /Puron/ subpath. Switch to "/" once a custom domain is configured.
+      # Custom domain puron-media.de serves from root, so no GHP_BASE — Vite
+      # defaults base to "/" (see vite.config.ts). public/CNAME carries the
+      # domain into the artifact so the Pages custom-domain setting survives
+      # each Actions deploy. (For the old project-subpage build, this set
+      # GHP_BASE: /Puron/.)
       - run: pnpm build
-        env:
-          GHP_BASE: /Puron/
 
       # Pages must be enabled in the repo Settings (Settings → Pages →
       # Source: "GitHub Actions") before this step works. The GITHUB_TOKEN

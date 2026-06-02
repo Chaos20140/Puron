@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-// Vite's BASE_URL is "/" in dev, "/Puron/" on the GitHub Pages build.
+// Vite's BASE_URL ("/" on the puron-media.de apex domain; would be a
+// subpath like "/Puron/" if ever built for a GitHub Pages project page).
 const ASSET_BASE = import.meta.env.BASE_URL;
 
 // Each entry expects a real logo PNG/SVG at public/partners/<filename>.

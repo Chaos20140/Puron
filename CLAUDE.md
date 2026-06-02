@@ -226,11 +226,14 @@ After deploying, also update Supabase function secret `ALLOWED_ORIGINS` to lock 
 
 ### GitHub Pages deploy
 
-[.github/workflows/deploy.yml](.github/workflows/deploy.yml) builds + deploys on every push to `main` via `actions/deploy-pages`. The workflow sets `GHP_BASE=/Puron/` so Vite emits asset URLs under the repo subpath. React Router reads the same value via `import.meta.env.BASE_URL` and applies it as `basename`.
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) builds + deploys on every push to `main` via `actions/deploy-pages`. The site is live on the **custom apex domain `https://puron-media.de`** (migrated 2026-06-02 from the old `chaos20140.github.io/Puron` subpath).
 
-To switch to a custom domain at the apex (`https://puron-media.de`):
-1. Set GHP custom domain in repo Settings → Pages.
-2. Remove (or set to `/`) the `GHP_BASE` env var in [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
-3. Add `public/CNAME` containing the domain on a single line.
+Because it serves from root, the workflow **no longer sets `GHP_BASE`** — Vite defaults `base` to `/` ([vite.config.ts](vite.config.ts)), and React Router reads the same value via `import.meta.env.BASE_URL` for its `basename`. [public/CNAME](public/CNAME) contains `puron-media.de`; it gets copied into the build artifact so the Pages custom-domain setting survives every Actions deploy (without it, an Actions deploy can reset the domain). The custom domain itself is configured in repo **Settings → Pages**, and DNS must point the apex at GitHub Pages (A records `185.199.108–111.153` + AAAA `2606:50c0:8000–8003::153`); "Enforce HTTPS" should be on.
+
+> To revert to the project-subpage build (e.g. for a PR preview), set `GHP_BASE: /Puron/` back on the `pnpm build` step and remove `public/CNAME`.
+
+SEO assets tied to the domain are committed: `<link rel="canonical">` + `og:url` + `og:image`/`twitter:image` (→ `/logo.png`) in [index.html](index.html), [public/sitemap.xml](public/sitemap.xml) (all 7 routes), and a `Sitemap:` line in [public/robots.txt](public/robots.txt). The site/brand name in [index.html](index.html) + [manifest.webmanifest](public/manifest.webmanifest) was corrected from "Puron **Agency**" to "Puron **Media**" to match the wordmark/email/domain. The contact-email template ([supabase/functions/make-server-1fdc8e05/index.ts](supabase/functions/make-server-1fdc8e05/index.ts)) logo `<img>` + footer link now point to `https://puron-media.de` — **this needs a function redeploy to take effect** (see §7).
+
+Still to do on the Supabase side after launch (neither is in this repo): redeploy the edge function for the new email URLs, and set `ALLOWED_ORIGINS` to `https://puron-media.de` to lock the `/contact` endpoint (currently default `*`) — see §7.
 
 Note: GitHub Pages **ignores `public/_headers`**, so HTTP-header-only protections (HSTS, `X-Frame-Options`/`frame-ancestors`, `X-Content-Type-Options`) won't apply there. The CSP + `Referrer-Policy` are still delivered via the build-time `<meta>` injection (see above), so the main XSS vectors are covered — but for full clickjacking + HSTS protection deploy to Netlify or Cloudflare Pages instead.

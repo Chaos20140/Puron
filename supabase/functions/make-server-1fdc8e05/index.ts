@@ -359,7 +359,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
                     <td align="left" style="vertical-align:middle;">
-                      <img src="https://chaos20140.github.io/Puron/logo.png" width="56" height="56" alt="Puron Media" style="display:block; border:0; outline:none; text-decoration:none; margin-bottom:8px;">
+                      <img src="https://puron-media.de/logo.png" width="56" height="56" alt="Puron Media" style="display:block; border:0; outline:none; text-decoration:none; margin-bottom:8px;">
                       <div class="heading" style="font-size:22px; line-height:28px; font-weight:900; letter-spacing:-0.5px; color:#fffffe;">
                         Puron <span style="color:#A855F7;">Media</span>
                       </div>
@@ -445,7 +445,7 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
                               </tr>
                               <tr>
                                 <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Website</td>
-                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://chaos20140.github.io/Puron/" target="_blank" class="accent" style="color:#C39BFF; text-decoration:none; font-weight:700;">chaos20140.github.io/Puron</a></td>
+                                <td class="body-text" style="padding:7px 0; font-size:13px; line-height:20px; color:#d7dbea;"><a href="https://puron-media.de/" target="_blank" class="accent" style="color:#C39BFF; text-decoration:none; font-weight:700;">puron-media.de</a></td>
                               </tr>
                               <tr>
                                 <td width="40%" class="muted" style="padding:7px 0; font-size:13px; line-height:20px; color:#858ea4; font-weight:700;">Zeitpunkt</td>
