@@ -10,6 +10,8 @@ Marketing one-pager + sub-pages for **Puron Media (Meschede)**, a German social-
 
 The site has two pieces of live data: a Google Places "reviews" widget on the home page, and a contact-form submission endpoint — both served by a Supabase Edge Function.
 
+> **Contact page state (2026-06-02):** the email contact **form has been temporarily removed** from [ContactPage.tsx](src/app/components/pages/ContactPage.tsx) while the Resend mail pipeline is broken (see §7 — the Resend account has no verified domain, so test-mode rejects every recipient → `POST /contact` 502). The page now shows direct channels (E-Mail `info@puron-media.de`, Instagram `@puronmedia`, phone) + a **keyless Google-Maps location embed** (Birmecker Weg 20, 59872 Meschede). The `POST /contact` edge endpoint is untouched and still live — re-add the form here once Resend is fixed. The map embed required a CSP `frame-src` (see §9) and a Datenschutz clause ([PrivacyPage.tsx](src/app/components/pages/PrivacyPage.tsx) §7).
+
 ## 2. Stack at a glance
 
 | Layer | Choice |
@@ -193,7 +195,7 @@ If you ever need to re-snapshot:
 
 ## 9. Production hosting / security headers
 
-[public/_headers](public/_headers) ships a Netlify / Cloudflare Pages compatible header file with HSTS, CSP, X-Frame-Options DENY, X-Content-Type-Options nosniff, Permissions-Policy, and a strict Referrer-Policy. The CSP allows: self, Google Fonts, Unsplash images, Google profile photos, and the Supabase Edge Function origin — and forbids inline `<script>` (allows inline `style` because motion + section keyframes need it). It also sets `object-src 'none'`, `frame-ancestors 'none'`, and `upgrade-insecure-requests`.
+[public/_headers](public/_headers) ships a Netlify / Cloudflare Pages compatible header file with HSTS, CSP, X-Frame-Options DENY, X-Content-Type-Options nosniff, Permissions-Policy, and a strict Referrer-Policy. The CSP allows: self, Google Fonts, Unsplash images, Google profile photos, the Supabase Edge Function origin (`connect-src`), and `frame-src https://www.google.com https://maps.google.com` (the keyless Google-Maps location iframe on the Kontakt page) — and forbids inline `<script>` (allows inline `style` because motion + section keyframes need it). It also sets `object-src 'none'`, `frame-ancestors 'none'`, and `upgrade-insecure-requests`. **If you ever remove the Google-Maps embed, drop the `frame-src` directive again (here AND in the vite meta CSP).**
 
 **CSP also ships as a build-time `<meta>` tag** (the `inject-security-meta` plugin in [vite.config.ts](vite.config.ts)) so the GitHub Pages deployment — which ignores `_headers` — still gets a CSP + `Referrer-Policy`. The plugin is `apply: 'build'`, so it never runs in `pnpm dev` (a strict `script-src`/`connect-src` would break Vite's HMR eval + websocket). Keep the meta CSP directives in sync with `_headers` when you change either. Caveat: `frame-ancestors` / `X-Frame-Options` and `HSTS` **cannot** be delivered via `<meta>`, so clickjacking + HSTS protection still require real HTTP headers (i.e. Netlify/Cloudflare Pages, not GitHub Pages).
 

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const SITE_SUFFIX = " — Puron Agency";
+const SITE_SUFFIX = " — Puron Media";
 
 /**
  * Sets `document.title` for the duration the calling component is mounted,
