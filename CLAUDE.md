@@ -65,9 +65,14 @@ src/
       ErrorBoundary.tsx     ← class boundary + PageErrorFallback. Wrapped at app root + around each canvas.
       Layout.tsx            ← fixed nav + footer + <ErrorBoundary><AnimatedBackground/></...> + <Outlet/>
       AnimatedBackground.tsx← full-screen canvas (rotating particle sphere, auroras [desktop only], dust)
-                              — pauses on document.hidden, single static frame on prefers-reduced-motion,
-                              AND pauses during active scroll on mobile (holds last frame, resumes ~200ms
-                              after scroll stops) so the full-viewport repaint stops stealing scroll frames
+                              — pauses on document.hidden, single static frame on prefers-reduced-motion.
+                              On mobile it runs CONTINUOUSLY but caps the *repaint* to ~30fps (delta-time
+                              loop, so drift speed is identical at 30 or 60fps) so the full-viewport canvas
+                              stops competing with scroll compositing. This REPLACED an earlier "freeze the
+                              canvas while scrolling" hack that stopped the rAF loop on every scroll event —
+                              momentum scrolling kept it frozen, so the backdrop visibly hung while scrolling
+                              (user-reported 2026-06-05). The delta-time loop also makes drift frame-rate
+                              independent on desktop (no longer 2× faster on 120Hz displays).
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — pauses on prefers-reduced-motion, tab-hidden, AND when scrolled offscreen (IntersectionObserver; also stops the wasted loop on mobile where it's display:none)
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
       PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)

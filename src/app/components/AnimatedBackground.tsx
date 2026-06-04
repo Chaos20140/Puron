@@ -66,12 +66,11 @@ export function AnimatedBackground() {
       });
     }
 
-    const animate = () => {
+    const drawFrame = () => {
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
       const cy = h / 2;
-      time += 0.002;
 
       // Deep Space / Nebula Background Gradient (cached, see resize())
       ctx.fillStyle = bgGrad ?? "#020104";
@@ -230,11 +229,33 @@ export function AnimatedBackground() {
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = "source-over";
 
-      animationId = requestAnimationFrame(animate);
+    };
+
+    // Continuous animation loop. The field drifts so slowly that on mobile we
+    // cap the *repaint* rate to ~30fps — visually identical, but it halves the
+    // full-viewport canvas's GPU upload + main-thread cost so it no longer
+    // competes with scroll compositing. This replaces the old "freeze the canvas
+    // while scrolling" hack, which made the backdrop visibly hang on every
+    // scroll (each scroll event stopped the loop; momentum scrolling kept it
+    // frozen). Time advances by real elapsed time, so the drift speed is
+    // identical whether we draw at 30 or 60fps. Desktop is uncapped.
+    const targetFrameMs = isMobile ? 1000 / 30 : 0;
+    let lastDraw = 0;
+    const frame = (now: number) => {
+      animationId = requestAnimationFrame(frame);
+      if (targetFrameMs && now - lastDraw < targetFrameMs) return;
+      const dt = lastDraw ? now - lastDraw : 1000 / 60;
+      lastDraw = now;
+      // Clamp dt so a tab-restore (huge gap) can't make the field jump.
+      time += 0.002 * Math.min(dt / (1000 / 60), 4);
+      drawFrame();
     };
 
     const start = () => {
-      if (animationId === null) animate();
+      if (animationId === null) {
+        lastDraw = 0; // first frame after a (re)start draws immediately
+        animationId = requestAnimationFrame(frame);
+      }
     };
     const stop = () => {
       if (animationId !== null) {
@@ -245,14 +266,14 @@ export function AnimatedBackground() {
 
     if (prefersReducedMotion) {
       // One static frame, no rAF loop — respects WCAG 2.3.3.
-      animate();
-      stop();
+      drawFrame();
     } else {
       start();
     }
 
     // Pause the loop when the tab is hidden — saves battery and avoids
-    // background-throttle stutter when the tab regains focus.
+    // background-throttle stutter when the tab regains focus. No scroll
+    // handling on purpose: the animation now runs continuously through scrolls.
     const onVisibility = () => {
       if (prefersReducedMotion) return;
       if (document.hidden) stop();
@@ -260,33 +281,10 @@ export function AnimatedBackground() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    // Mobile scroll-idle pause: this full-viewport canvas repainting on every
-    // frame (the O(n²) particle network + every backdrop-blur section having to
-    // re-sample it) is the single biggest per-frame cost during a scroll. Hold
-    // the last frame while the finger is actively scrolling — yielding the
-    // GPU/main thread to the scroll itself — then resume ~200ms after it stops.
-    // Imperceptible on a field that drifts at time += 0.002. Desktop and
-    // prefers-reduced-motion are left untouched.
-    const isMobileNow = window.innerWidth < 768;
-    let scrollIdle = 0;
-    const onScroll = () => {
-      if (prefersReducedMotion) return;
-      stop();
-      window.clearTimeout(scrollIdle);
-      scrollIdle = window.setTimeout(() => {
-        if (!document.hidden) start();
-      }, 200);
-    };
-    if (isMobileNow && !prefersReducedMotion) {
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }
-
     return () => {
       stop();
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(scrollIdle);
     };
   }, []);
 
