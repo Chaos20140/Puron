@@ -10,7 +10,7 @@ Marketing one-pager + sub-pages for **Puron Media (Meschede)**, a German social-
 
 The site has two pieces of live data: a Google Places "reviews" widget on the home page, and a contact-form submission endpoint — both served by a Supabase Edge Function.
 
-> **Contact page state (2026-06-02):** the email contact **form has been temporarily removed** from [ContactPage.tsx](src/app/components/pages/ContactPage.tsx) while the Resend mail pipeline is broken (see §7 — the Resend account has no verified domain, so test-mode rejects every recipient → `POST /contact` 502). The page now shows direct channels (E-Mail `info@puron-media.de`, Instagram `@puronmedia`, phone) + a **keyless Google-Maps location embed** (Birmecker Weg 20, 59872 Meschede). The `POST /contact` edge endpoint is untouched and still live — re-add the form here once Resend is fixed. The map embed required a CSP `frame-src` (see §9) and a Datenschutz clause ([PrivacyPage.tsx](src/app/components/pages/PrivacyPage.tsx) §7).
+> **Contact page state (2026-06-02):** the email contact **form has been temporarily removed** from [ContactPage.tsx](src/app/components/pages/ContactPage.tsx) while the Resend mail pipeline is broken (see §7 — the Resend account has no verified domain, so test-mode rejects every recipient → `POST /contact` 502). The page now shows direct channels (E-Mail `info@puron-media.de`, WhatsApp, Instagram `@puronmedia`, phone) + a **keyless Google-Maps location embed** (Birmecker Weg 20, 59872 Meschede). WhatsApp is also a **persistent floating FAB on every page** ([WhatsAppButton.tsx](src/app/components/WhatsAppButton.tsx), mounted in Layout); the wa.me link lives in [src/app/whatsapp.ts](src/app/whatsapp.ts) (single source of truth for the number, the published Impressum mobile). The `POST /contact` edge endpoint is untouched and still live — re-add the form here once Resend is fixed. The map embed required a CSP `frame-src` (see §9) and a Datenschutz clause ([PrivacyPage.tsx](src/app/components/pages/PrivacyPage.tsx) §7).
 
 ## 2. Stack at a glance
 
@@ -75,6 +75,7 @@ src/
                               independent on desktop (no longer 2× faster on 120Hz displays).
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — pauses on prefers-reduced-motion, tab-hidden, AND when scrolled offscreen (IntersectionObserver; also stops the wasted loop on mobile where it's display:none)
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
+      WhatsAppButton.tsx    ← floating WhatsApp FAB (brand green #25D366), fixed bottom-right on every page (mounted in Layout). Opens the wa.me link from src/app/whatsapp.ts. Link navigation needs NO CSP change (it's not a resource load).
       PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)
       GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration (the card's backdrop-blur is gated to md+ — re-sampling a blur over the live canvas every frame is too costly while scrolling on phones)
       figma/ImageWithFallback.tsx  ← <img> wrapper with placeholder on error; defaults to loading="lazy" + decoding="async"

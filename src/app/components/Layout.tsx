@@ -5,6 +5,7 @@ import { PuronLogo } from "./PuronLogo";
 import { AnimatedBackground } from "./AnimatedBackground";
 import { AnimatedButton } from "./AnimatedButton";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { WhatsAppButton } from "./WhatsAppButton";
 
 export function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -169,6 +170,9 @@ export function Layout() {
           </div>
         </div>
       </footer>
+
+      {/* Persistent WhatsApp contact button on every page. */}
+      <WhatsAppButton />
     </div>
   );
 }
