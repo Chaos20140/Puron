@@ -34,6 +34,11 @@ const carouselStyles = `
   .review-carousel-wrap:hover .review-marquee-track { animation-play-state: paused; }
 }
 .review-carousel-wrap[data-paused="true"] .review-marquee-track { animation-play-state: paused; }
+/* Pause while actively scrolling on mobile (toggled imperatively, no re-render):
+   a second continuously-compositing animation stacked on the now-continuous
+   full-screen background canvas is what makes THIS section janky to scroll past.
+   Resumes a beat after the scroll stops. */
+.review-carousel-wrap[data-scrolling="true"] .review-marquee-track { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
   .review-marquee-track { animation: none; transform: none; }
 }
@@ -109,8 +114,38 @@ export function SocialProof() {
     return () => io.disconnect();
   }, [showCarousel]);
 
+  // Pause the marquee while the user is actively scrolling on mobile. The
+  // marquee is a second continuously-compositing animation; stacked on the
+  // (now continuous) full-screen background canvas during a scroll it blows the
+  // mobile frame budget, so the page hangs while scrolling past this section.
+  // Toggle a data-attr imperatively (NO React re-render on scroll) → CSS pauses
+  // the animation; it resumes 180ms after scrolling stops. Mobile + motion only.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || window.innerWidth >= 768) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let scrolling = false;
+    let t = 0;
+    const onScroll = () => {
+      if (!scrolling) {
+        scrolling = true;
+        el.setAttribute("data-scrolling", "true");
+      }
+      window.clearTimeout(t);
+      t = window.setTimeout(() => {
+        scrolling = false;
+        el.removeAttribute("data-scrolling");
+      }, 180);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(t);
+    };
+  }, [showCarousel]);
+
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-[#0A0A0D]/80 to-[#111116]/95 md:from-[#0A0A0D]/50 md:to-[#111116]/80 md:backdrop-blur-sm border-t border-white/5" style={{ isolation: "isolate" }}>
+    <section className="py-16 md:py-24 bg-gradient-to-b from-[#0A0A0D] to-[#111116] md:from-[#0A0A0D]/50 md:to-[#111116]/80 md:backdrop-blur-sm border-t border-white/5" style={{ isolation: "isolate" }}>
       <style>{carouselStyles}</style>
       <div className="max-w-7xl mx-auto px-6">
         <motion.div

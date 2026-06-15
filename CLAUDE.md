@@ -85,6 +85,12 @@ src/
                               (avoids a permanently-promoted, always-ticking compositor layer). Their
                               backdrop-blur is gated to md+. SocialProof also wraps the skeleton/empty/carousel
                               in one fixed min-height box so the data swap can't reflow the page mid-scroll.
+                              SocialProof's marquee ALSO pauses during active scroll on mobile (a `data-scrolling`
+                              attr toggled imperatively on the wrap — no React re-render — pauses
+                              animation-play-state, resumes ~180ms after scroll stops), and its section bg is
+                              opaque on mobile (`from-[#0A0A0D] to-[#111116]`, translucent only at md+): both
+                              stop this section's marquee + the now-continuous full-screen background canvas
+                              (see AnimatedBackground) from compounding GPU load and hanging the scroll past it.
       CustomCursor.tsx      ← replaces the OS pointer with the Puron hex logo on fine-pointer devices. Mounted at App.tsx root. Hidden on touch + skips scale-up on prefers-reduced-motion. CSS in [src/styles/cursor.css](src/styles/cursor.css) hides the native cursor via `.custom-cursor-active` on <html>.
       pages/                ← one component per route (HomePage, ServicesPage, ProjectsPage, TeamPage, ContactPage, ImprintPage, PrivacyPage, NotFoundPage)
 public/
