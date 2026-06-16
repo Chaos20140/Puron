@@ -75,7 +75,7 @@ src/
                               independent on desktop (no longer 2× faster on 120Hz displays).
       Hero3DVisual.tsx      ← per-page canvas (solar-system) used only on HomePage, lg+ only — pauses on prefers-reduced-motion, tab-hidden, AND when scrolled offscreen (IntersectionObserver; also stops the wasted loop on mobile where it's display:none)
       AnimatedButton.tsx    ← THE button component. Every CTA goes through it (variants: primary/secondary/outline/nav/ghost)
-      WhatsAppButton.tsx    ← floating WhatsApp FAB (brand green #25D366), fixed bottom-right on every page (mounted in Layout). Opens the wa.me link from src/app/whatsapp.ts. Link navigation needs NO CSP change (it's not a resource load).
+      WhatsAppButton.tsx    ← floating WhatsApp FAB (brand green #25D366) with a motion-safe attention pulse + hover label, fixed bottom-right on every page (mounted in Layout). Opens the wa.me link from src/app/whatsapp.ts. Link navigation needs NO CSP change (it's not a resource load).
       PuronLogo.tsx         ← inline SVG hex logo (the symbol only; the "PURON MEDIA" lettering is the raster public/wordmark.png, see Layout.tsx)
       GoogleReviewCard.tsx, useGoogleReviews.ts  ← live reviews integration (the card's backdrop-blur is gated to md+ — re-sampling a blur over the live canvas every frame is too costly while scrolling on phones)
       figma/ImageWithFallback.tsx  ← <img> wrapper with placeholder on error; defaults to loading="lazy" + decoding="async"
