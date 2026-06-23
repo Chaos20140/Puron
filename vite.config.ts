@@ -24,9 +24,8 @@ const CSP_DIRECTIVES = [
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: https://images.unsplash.com https://*.googleusercontent.com",
   "connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co",
-  // Google Maps location embed on the /contact page (keyless iframe).
-  "frame-src https://www.google.com https://maps.google.com",
   "object-src 'none'",
+  "frame-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "upgrade-insecure-requests",

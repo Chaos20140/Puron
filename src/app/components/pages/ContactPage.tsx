@@ -1,243 +1,370 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../AnimatedButton";
+import { SUPABASE_FUNCTION_URL } from "../../api";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { whatsappUrl } from "../../whatsapp";
 
-// The email contact form is temporarily removed while the Resend mail
-// pipeline is being fixed (the /contact edge endpoint still exists for when
-// it returns). Until then the page offers direct channels + a location map.
-const EMAIL = "info@puron-media.de";
+const goals = [
+  "Mehr Kunden",
+  "Mehr Bewerber",
+  "Mehr Sichtbarkeit",
+  "Stärkeres Markenimage",
+  "Noch nicht sicher",
+];
+
 const INSTAGRAM_URL =
   "https://www.instagram.com/puronmedia?igsh=MXhqM2VnOGRxOWkzag==";
-const PHONE_DISPLAY = "+49 163 8843453";
-const PHONE_HREF = "tel:+491638843453";
 
-const ADDRESS_LINE1 = "Birmecker Weg 20";
-const ADDRESS_LINE2 = "59872 Meschede";
-const MAPS_QUERY = "Birmecker Weg 20, 59872 Meschede";
-// Keyless embed (no Google Maps API key needed). The dark CSS filter blends
-// it into the theme; hovering reveals the true colours. frame-src for
-// google.com/maps.google.com is whitelisted in the CSP (vite.config.ts + _headers).
-const MAPS_EMBED = `https://maps.google.com/maps?q=${encodeURIComponent(MAPS_QUERY)}&z=15&output=embed`;
-const MAPS_DIRECTIONS = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(MAPS_QUERY)}`;
+type ValidatedField = "name" | "email" | "company" | "message";
 
-const iconProps = {
-  width: 22,
-  height: 22,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 1.6,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
+type FormFields = {
+  name: string;
+  company: string;
+  email: string;
+  message: string;
+  website: string; // honeypot — must stay empty
 };
 
+const emptyForm: FormFields = {
+  name: "",
+  company: "",
+  email: "",
+  message: "",
+  website: "",
+};
+
+const MAX = { name: 100, company: 100, email: 200, message: 2000 } as const;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+type FormErrors = Partial<Record<ValidatedField, string>>;
+
+function validate(form: FormFields): FormErrors {
+  const errors: FormErrors = {};
+  const name = form.name.trim();
+  const email = form.email.trim();
+  const message = form.message.trim();
+
+  if (!name) errors.name = "Bitte gib deinen Namen an.";
+  else if (form.name.length > MAX.name) errors.name = `Maximal ${MAX.name} Zeichen.`;
+
+  if (!email) errors.email = "Bitte gib deine E-Mail-Adresse an.";
+  else if (form.email.length > MAX.email) errors.email = `Maximal ${MAX.email} Zeichen.`;
+  else if (!EMAIL_RE.test(email)) errors.email = "Das sieht nicht wie eine gültige E-Mail aus.";
+
+  if (form.company.length > MAX.company) errors.company = `Maximal ${MAX.company} Zeichen.`;
+
+  if (!message) errors.message = "Bitte beschreibe kurz dein Anliegen.";
+  else if (form.message.length > MAX.message) errors.message = `Maximal ${MAX.message} Zeichen.`;
+
+  return errors;
+}
+
+const inputBase =
+  "w-full bg-[#0A0A0D] border rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:ring-1 transition-all disabled:opacity-60";
+const inputOk = "border-white/10 focus:border-[#7C3AED] focus:ring-[#7C3AED]";
+const inputErr = "border-red-500/60 focus:border-red-500 focus:ring-red-500";
+
 const MailIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" {...iconProps}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="4" width="20" height="16" rx="2" />
     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
   </svg>
 );
-
+const WhatsAppIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.413c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.744-.927zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414z" />
+  </svg>
+);
 const InstagramIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" {...iconProps}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
   </svg>
 );
-
 const PhoneIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" {...iconProps}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
   </svg>
 );
 
-const WhatsAppIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.413c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.744-.927zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414z" />
-  </svg>
-);
-
-const ArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M7 17 17 7" />
-    <path d="M7 7h10v10" />
-  </svg>
-);
-
-const PinIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-type Method = {
-  label: string;
-  value: string;
-  hint: string;
-  href: string;
-  external: boolean;
-  icon: React.ReactNode;
-};
-
-const methods: Method[] = [
-  {
-    label: "E-Mail",
-    value: EMAIL,
-    hint: "Schreib uns deine Anfrage — wir antworten schnell.",
-    href: `mailto:${EMAIL}`,
-    external: false,
-    icon: <MailIcon />,
-  },
-  {
-    label: "WhatsApp",
-    value: "Direkt chatten",
-    hint: "Schreib uns – wir antworten meist in Minuten.",
-    href: whatsappUrl(),
-    external: true,
-    icon: <WhatsAppIcon />,
-  },
-  {
-    label: "Instagram",
-    value: "@puronmedia",
-    hint: "Folge uns & schick uns einfach eine DM.",
-    href: INSTAGRAM_URL,
-    external: true,
-    icon: <InstagramIcon />,
-  },
-  {
-    label: "Telefon",
-    value: PHONE_DISPLAY,
-    hint: "Lieber direkt? Ruf uns kurz an.",
-    href: PHONE_HREF,
-    external: false,
-    icon: <PhoneIcon />,
-  },
+type Channel = { label: string; value: string; href: string; external: boolean; icon: React.ReactNode };
+const channels: Channel[] = [
+  { label: "E-Mail", value: "info@puron-media.de", href: "mailto:info@puron-media.de", external: false, icon: <MailIcon /> },
+  { label: "WhatsApp", value: "Chat starten", href: whatsappUrl(), external: true, icon: <WhatsAppIcon /> },
+  { label: "Instagram", value: "@puronmedia", href: INSTAGRAM_URL, external: true, icon: <InstagramIcon /> },
+  { label: "Telefon", value: "+49 163 8843453", href: "tel:+491638843453", external: false, icon: <PhoneIcon /> },
 ];
 
 export function ContactPage() {
   usePageTitle("Kontakt");
+  const [form, setForm] = useState<FormFields>(emptyForm);
+  const [selectedGoal, setSelectedGoal] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<Partial<Record<ValidatedField, boolean>>>({});
+
+  const errors = validate(form);
+  const showErr = (f: ValidatedField) => Boolean(touched[f] && errors[f]);
+
+  const update =
+    (field: keyof FormFields) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((s) => ({ ...s, [field]: e.target.value }));
+
+  const blur = (f: ValidatedField) => () => setTouched((t) => ({ ...t, [f]: true }));
+
+  const inputClass = (f: ValidatedField) => `${inputBase} ${showErr(f) ? inputErr : inputOk}`;
+
+  const fieldA11y = (f: ValidatedField) =>
+    showErr(f)
+      ? { "aria-invalid": true as const, "aria-describedby": `${f}-error` }
+      : {};
+
+  const FieldError = ({ field }: { field: ValidatedField }) =>
+    showErr(field) ? (
+      <p id={`${field}-error`} role="alert" className="text-xs text-red-400 mt-1.5">
+        {errors[field]}
+      </p>
+    ) : null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submitting) return;
+
+    // Mark every validated field as touched so any error becomes visible.
+    setTouched({ name: true, email: true, company: true, message: true });
+    if (Object.keys(errors).length > 0) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await fetch(`${SUPABASE_FUNCTION_URL}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, goal: selectedGoal }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | { ok?: boolean; error?: string }
+        | null;
+      if (!res.ok || data?.ok !== true) {
+        setError(
+          data?.error
+            ?? "Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.",
+        );
+        return;
+      }
+      setForm(emptyForm);
+      setSelectedGoal("");
+      setTouched({});
+      setSubmitted(true);
+    } catch {
+      setError(
+        "Verbindungsfehler. Bitte prüfe deine Internetverbindung und versuche es erneut.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="pt-24 md:pt-32 pb-16 md:pb-24 min-h-screen flex items-center">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <div className="w-20 h-20 rounded-full bg-[#7C3AED]/20 flex items-center justify-center mx-auto mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+          </div>
+          <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Vielen Dank!</h1>
+          <p className="text-lg text-[#B3B3C2] mb-8">Ihre Anfrage ist eingegangen. Wir werden uns innerhalb von 24 Stunden bei Ihnen melden, um eine mögliche Zusammenarbeit zu besprechen.</p>
+          <AnimatedButton variant="outline" onClick={() => setSubmitted(false)}>
+            Weitere Anfrage senden
+          </AnimatedButton>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <section className="pt-24 md:pt-32 pb-16 md:pb-24 relative" style={{ isolation: "isolate" }}>
-      <div className="max-w-5xl mx-auto px-6 relative z-10">
+    <div className="pt-24 md:pt-32 pb-16 md:pb-24">
+      <div className="max-w-2xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12 md:mb-16"
+          className="text-center mb-12"
         >
-          <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">
-            Bereit durchzustarten?
-          </h1>
-          <p className="text-lg text-[#B3B3C2] max-w-xl mx-auto">
-            Erreich uns direkt — per E-Mail, WhatsApp oder Instagram. Oder schau,
-            wo du uns in Meschede findest. Wir freuen uns auf deine Nachricht.
-          </p>
+          <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Bereit durchzustarten?</h1>
+          <p className="text-lg text-[#B3B3C2]">Schreib uns ein paar Zeilen &amp; wir melden uns bei dir — oder erreich uns direkt per WhatsApp, E-Mail oder Telefon.</p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-          {/* Direct contact channels */}
-          <div className="space-y-4">
-            {methods.map((m, i) => (
-              <motion.a
-                key={m.label}
-                href={m.href}
-                {...(m.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="group flex items-center gap-4 p-5 md:p-6 rounded-2xl bg-[#121217] border border-white/5 hover:border-[#7C3AED]/40 hover:bg-[#15151b] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-12px_rgba(124,58,237,0.5)]"
-              >
-                <span className="shrink-0 w-12 h-12 rounded-xl bg-[#7C3AED]/15 ring-1 ring-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] transition-colors duration-300 group-hover:bg-[#7C3AED]/25">
-                  {m.icon}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[11px] uppercase tracking-[0.14em] text-[#71717A]">
-                    {m.label}
-                  </span>
-                  <span className="block text-[#F5F5F7] font-medium truncate">{m.value}</span>
-                  <span className="block text-xs text-[#B3B3C2] mt-0.5">{m.hint}</span>
-                </span>
-                <span className="shrink-0 text-[#71717A] transition-all duration-300 group-hover:text-[#A855F7] group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                  <ArrowIcon />
-                </span>
-              </motion.a>
-            ))}
-
-            <p className="flex items-center gap-2 pt-2 text-sm text-[#71717A]">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#A855F7] shadow-[0_0_8px_2px_rgba(168,85,247,0.6)]" />
-              Antwort in der Regel innerhalb von 24 Stunden.
-            </p>
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="space-y-6 bg-[#121217] p-8 md:p-12 rounded-3xl border border-white/5 shadow-2xl"
+        >
+          {/* Honeypot — hidden from users, attractive to dumb bots. Do NOT
+              add aria-hidden because some bots skip those; rely on layout. */}
+          <div
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}
+          >
+            <label htmlFor="website">Website (bitte leer lassen)</label>
+            <input
+              id="website"
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={update("website")}
+            />
           </div>
 
-          {/* Location map */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="rounded-3xl bg-[#121217] border border-white/5 overflow-hidden flex flex-col shadow-2xl"
-          >
-            <div className="relative flex-1 min-h-[260px] md:min-h-[360px]">
-              <iframe
-                title="Standort von Puron Media — Birmecker Weg 20, 59872 Meschede"
-                src={MAPS_EMBED}
-                loading="lazy"
-                className="absolute inset-0 w-full h-full border-0"
-                // Inline (not a Tailwind arbitrary class): the CSS minifier strips
-                // the spaces between filter functions in arbitrary values, which
-                // makes the whole filter invalid. Inline style is left untouched.
-                style={{ filter: "invert(0.92) hue-rotate(180deg) brightness(0.9) contrast(0.85) saturate(0.85)" }}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-[#B3B3C2] mb-2">Name</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={form.name}
+                onChange={update("name")}
+                onBlur={blur("name")}
+                placeholder="Max Mustermann"
+                required
+                maxLength={MAX.name}
+                autoComplete="name"
+                disabled={submitting}
+                className={inputClass("name")}
+                {...fieldA11y("name")}
               />
-              <div aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />
+              <FieldError field="name" />
             </div>
-            <div className="flex items-center justify-between gap-4 p-5 md:p-6 border-t border-white/5">
-              <div className="flex items-start gap-3 min-w-0">
-                <span className="shrink-0 mt-0.5 text-[#A855F7]">
-                  <PinIcon />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-[#F5F5F7] font-medium leading-tight truncate">{ADDRESS_LINE1}</p>
-                  <p className="text-sm text-[#B3B3C2]">{ADDRESS_LINE2}</p>
-                </div>
-              </div>
-              <AnimatedButton
-                href={MAPS_DIRECTIONS}
-                variant="outline"
-                className="shrink-0 whitespace-nowrap !px-4 !py-2.5 !text-[13px]"
+            <div>
+              <label htmlFor="company" className="block text-sm font-medium text-[#B3B3C2] mb-2">Unternehmen</label>
+              <input
+                type="text"
+                id="company"
+                name="company"
+                value={form.company}
+                onChange={update("company")}
+                onBlur={blur("company")}
+                placeholder="Muster GmbH"
+                maxLength={MAX.company}
+                autoComplete="organization"
+                disabled={submitting}
+                className={inputClass("company")}
+                {...fieldA11y("company")}
+              />
+              <FieldError field="company" />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-[#B3B3C2] mb-2">E-Mail</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={form.email}
+              onChange={update("email")}
+              onBlur={blur("email")}
+              placeholder="max@beispiel.de"
+              required
+              maxLength={MAX.email}
+              autoComplete="email"
+              disabled={submitting}
+              className={inputClass("email")}
+              {...fieldA11y("email")}
+            />
+            <FieldError field="email" />
+          </div>
+
+          <div>
+            <div className="flex items-baseline justify-between mb-2">
+              <label htmlFor="message" className="block text-sm font-medium text-[#B3B3C2]">Worum geht's genau?</label>
+              <span className={`text-xs tabular-nums ${form.message.length > MAX.message ? "text-red-400" : "text-[#71717A]"}`}>
+                {form.message.length}/{MAX.message}
+              </span>
+            </div>
+            <textarea
+              id="message"
+              name="message"
+              rows={4}
+              value={form.message}
+              onChange={update("message")}
+              onBlur={blur("message")}
+              placeholder="Erzählen Sie uns von Ihren aktuellen Herausforderungen..."
+              required
+              maxLength={MAX.message}
+              disabled={submitting}
+              className={`${inputClass("message")} resize-none`}
+              {...fieldA11y("message")}
+            />
+            <FieldError field="message" />
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <label className="text-sm font-medium text-[#B3B3C2]">Primäres Ziel (Optional)</label>
+            <div className="flex flex-wrap gap-3">
+              {goals.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => setSelectedGoal(g === selectedGoal ? "" : g)}
+                  className={`px-4 py-2 rounded-full border text-sm transition-all duration-300 hover:scale-[1.05] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${selectedGoal === g ? "bg-[#7C3AED]/10 border-[#7C3AED] text-white" : "border-white/10 bg-[#0A0A0D] text-[#B3B3C2] hover:border-white/30"}`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200"
+            >
+              {error}
+            </div>
+          )}
+
+          <div className="pt-4">
+            <AnimatedButton
+              type="submit"
+              variant="primary"
+              fullWidth
+              className="!rounded-xl !py-4 !text-base"
+            >
+              {submitting ? "Wird gesendet…" : "Anfrage senden"}
+            </AnimatedButton>
+          </div>
+        </form>
+
+        {/* Direct channels — always available, even while a submission settles. */}
+        <div className="mt-12">
+          <p className="text-center text-xs uppercase tracking-[0.18em] text-[#71717A] mb-5">Oder direkt erreichen</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {channels.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="group flex flex-col items-center gap-2 p-4 rounded-2xl bg-[#121217] border border-white/5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:border-[#7C3AED]/40 hover:bg-[#15151b]"
               >
-                Route planen
-              </AnimatedButton>
-            </div>
-          </motion.div>
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7C3AED]/15 text-[#A855F7] ring-1 ring-[#7C3AED]/20 transition-colors duration-300 group-hover:bg-[#7C3AED]/25">
+                  {c.icon}
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-[#71717A]">{c.label}</span>
+                <span className="max-w-full truncate text-xs text-[#B3B3C2]">{c.value}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
-
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[700px] h-[360px] bg-[#7C3AED]/10 blur-[110px] rounded-full pointer-events-none" />
-    </section>
+    </div>
   );
 }
