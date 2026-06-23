@@ -266,17 +266,28 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
       await kv.set(rlKey, { count: 1, resetAt: now + CONTACT_RATE_LIMIT_WINDOW_MS });
     }
 
+    const recipient = Deno.env.get("CONTACT_EMAIL_TO") || "Tolunay.u@outlook.de";
+
+    // Mail-provider selection. If the Microsoft Graph app-only secrets are
+    // present we send straight through the Microsoft 365 / Exchange mailbox
+    // (no SMTP AUTH, no password stored — client-credentials OAuth + Graph
+    // sendMail over HTTPS). Otherwise we fall back to Resend. This lets the
+    // Graph code ship before the Azure app exists without changing behaviour.
+    const msTenant = Deno.env.get("MS_TENANT_ID");
+    const msClientId = Deno.env.get("MS_CLIENT_ID");
+    const msClientSecret = Deno.env.get("MS_CLIENT_SECRET");
+    const useGraph = Boolean(msTenant && msClientId && msClientSecret);
+
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      console.log("contact: RESEND_API_KEY env var missing");
+    const sender = Deno.env.get("CONTACT_EMAIL_FROM") || "onboarding@resend.dev";
+
+    if (!useGraph && !resendApiKey) {
+      console.log("contact: no mail provider configured (neither MS Graph nor RESEND_API_KEY)");
       return c.json(
         { error: "E-Mail-Versand ist gerade nicht konfiguriert. Bitte später erneut versuchen." },
         500,
       );
     }
-
-    const recipient = Deno.env.get("CONTACT_EMAIL_TO") || "Tolunay.u@outlook.de";
-    const sender = Deno.env.get("CONTACT_EMAIL_FROM") || "onboarding@resend.dev";
 
     const cleanName = singleLine(name, 100);
     const cleanEmail = singleLine(email, 200);
@@ -497,6 +508,74 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
   </body>
 </html>`;
 
+    if (useGraph) {
+      // Microsoft Graph (app-only): mint a client-credentials token, then
+      // sendMail AS the mailbox. saveToSentItems:false keeps the inquiry out of
+      // the Sent folder; reply_to is the submitter so a reply reaches them.
+      const msSender = Deno.env.get("MS_SENDER") || recipient;
+      let accessToken = "";
+      try {
+        const tokenRes = await fetch(
+          `https://login.microsoftonline.com/${msTenant}/oauth2/v2.0/token`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              client_id: msClientId as string,
+              client_secret: msClientSecret as string,
+              scope: "https://graph.microsoft.com/.default",
+              grant_type: "client_credentials",
+            }),
+          },
+        );
+        if (!tokenRes.ok) {
+          console.log(`contact: MS token failed (${tokenRes.status}): ${await tokenRes.text()}`);
+          return c.json(
+            { error: "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen." },
+            502,
+          );
+        }
+        accessToken = (await tokenRes.json()).access_token;
+      } catch (e) {
+        console.log(`contact: MS token error: ${e}`);
+        return c.json(
+          { error: "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen." },
+          502,
+        );
+      }
+
+      const graphRes = await fetch(
+        `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(msSender)}/sendMail`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: {
+              subject: `Neue Anfrage von ${cleanName}`,
+              body: { contentType: "HTML", content: html },
+              toRecipients: [{ emailAddress: { address: recipient } }],
+              replyTo: [{ emailAddress: { address: cleanEmail } }],
+            },
+            saveToSentItems: false,
+          }),
+        },
+      );
+
+      if (!graphRes.ok) {
+        console.log(`contact: MS Graph sendMail failed (${graphRes.status}): ${await graphRes.text()}`);
+        return c.json(
+          { error: "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen." },
+          502,
+        );
+      }
+
+      return c.json({ ok: true });
+    }
+
+    // Resend fallback (used until the Microsoft Graph secrets are configured).
     const resendRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
