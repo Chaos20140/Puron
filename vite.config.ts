@@ -23,7 +23,7 @@ const CSP_DIRECTIVES = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: https://images.unsplash.com https://*.googleusercontent.com",
-  "connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co",
+  "connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co https://api.web3forms.com",
   "object-src 'none'",
   "frame-src 'none'",
   "base-uri 'self'",

@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../AnimatedButton";
-import { SUPABASE_FUNCTION_URL } from "../../api";
 import { usePageTitle } from "../../hooks/usePageTitle";
 import { whatsappUrl } from "../../whatsapp";
+
+// Web3Forms access key. It's a PUBLIC client-side key on purpose: Web3Forms'
+// free plan only accepts browser submissions, so the form posts straight to
+// their API. The key only ever delivers to the recipient configured in the
+// Web3Forms dashboard (info@puron-media.de) — so worst case is spam to that
+// inbox, which Web3Forms' own spam filter + the honeypot below mitigate.
+const WEB3FORMS_ACCESS_KEY = "6a3ac9fb-3c95-4113-976e-cc97d287f139";
 
 const goals = [
   "Mehr Kunden",
@@ -138,21 +144,38 @@ export function ContactPage() {
     setTouched({ name: true, email: true, company: true, message: true });
     if (Object.keys(errors).length > 0) return;
 
+    // Honeypot: if the hidden field got filled, a bot did it — pretend success
+    // without sending anything.
+    if (form.website.trim() !== "") {
+      setSubmitted(true);
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`${SUPABASE_FUNCTION_URL}/contact`, {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, goal: selectedGoal }),
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          subject: `Neue Anfrage von ${form.name.trim() || "Website-Besucher"}`,
+          from_name: "Puron Kontaktformular",
+          replyto: form.email.trim(),
+          botcheck: "",
+          Name: form.name.trim(),
+          "E-Mail": form.email.trim(),
+          Unternehmen: form.company.trim() || "—",
+          "Primäres Ziel": selectedGoal || "—",
+          Nachricht: form.message.trim(),
+        }),
       });
       const data = (await res.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
+        | { success?: boolean }
         | null;
-      if (!res.ok || data?.ok !== true) {
+      if (!res.ok || data?.success !== true) {
         setError(
-          data?.error
-            ?? "Anfrage konnte nicht gesendet werden. Bitte später erneut versuchen.",
+          "Anfrage konnte gerade nicht gesendet werden. Bitte versuch es später erneut – oder erreich uns direkt per WhatsApp, E-Mail oder Telefon (siehe unten).",
         );
         return;
       }
