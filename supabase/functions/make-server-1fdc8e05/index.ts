@@ -281,8 +281,15 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     const sender = Deno.env.get("CONTACT_EMAIL_FROM") || "onboarding@resend.dev";
 
-    if (!useGraph && !resendApiKey) {
-      console.log("contact: no mail provider configured (neither MS Graph nor RESEND_API_KEY)");
+    // Web3Forms relay (preferred when set): a form-to-email service verified via
+    // the MAILBOX, not the domain — so it can deliver to info@puron-media.de
+    // even without DNS or Microsoft 365 admin access. The access key only ever
+    // sends to the address it was created for, and we keep it server-side so it
+    // never reaches the frontend.
+    const web3Key = Deno.env.get("WEB3FORMS_ACCESS_KEY");
+
+    if (!web3Key && !useGraph && !resendApiKey) {
+      console.log("contact: no mail provider configured (Web3Forms / MS Graph / Resend all absent)");
       return c.json(
         { error: "E-Mail-Versand ist gerade nicht konfiguriert. Bitte später erneut versuchen." },
         500,
@@ -295,6 +302,36 @@ app.post("/make-server-1fdc8e05/contact", async (c) => {
     const cleanGoal = typeof goal === "string" ? goal : "";
     const cleanMessage = message.trim().slice(0, 2000);
     const cleanPhone = ""; // Form doesn't collect phone yet — render em-dash below.
+
+    // Web3Forms delivers to the mailbox tied to the access key (e.g. info@…),
+    // so it works with mailbox-only access (no DNS, no M365 admin). It builds
+    // the email from these fields, so we skip our HTML template entirely here.
+    if (web3Key) {
+      const w3Res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          access_key: web3Key,
+          subject: `Neue Anfrage von ${cleanName}`,
+          from_name: "Puron Kontaktformular",
+          replyto: cleanEmail,
+          Name: cleanName,
+          "E-Mail": cleanEmail,
+          Unternehmen: cleanCompany || "—",
+          Ziel: cleanGoal || "—",
+          Nachricht: cleanMessage,
+        }),
+      });
+      const w3Json = (await w3Res.json().catch(() => null)) as { success?: boolean } | null;
+      if (!w3Res.ok || w3Json?.success !== true) {
+        console.log(`contact: Web3Forms failed (${w3Res.status}): ${JSON.stringify(w3Json)}`);
+        return c.json(
+          { error: "E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen." },
+          502,
+        );
+      }
+      return c.json({ ok: true });
+    }
 
     // Local Berlin time, formatted in German.
     const submittedAt = new Date().toLocaleString("de-DE", {
