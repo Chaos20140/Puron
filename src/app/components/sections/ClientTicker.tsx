@@ -22,6 +22,8 @@ const partners: { name: string; logo: string; scale?: number; whiten?: boolean }
   { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png`, whiten: true },
   { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
+  { name: "Autozentrum Bestwig", logo: `${ASSET_BASE}partners/autozentrum-bestwig.png` },
+  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.png`, whiten: true },
 ];
 
 // GPU-composited transform marquee (same approach as the reviews carousel):
