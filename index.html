@@ -21,6 +21,7 @@
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link rel="manifest" href="/manifest.webmanifest" />
       <link rel="canonical" href="https://puron-media.de/" />
+      <link rel="apple-touch-icon" href="/logo.png" />
 
       <!-- Open Graph -->
       <meta property="og:type" content="website" />
@@ -30,12 +31,47 @@
       <meta property="og:title" content="Puron Media — Social Media Content, das Unternehmen sichtbar macht" />
       <meta property="og:description" content="Reels, Posts, Ads und Content-Strategien, die messbares Wachstum erzeugen." />
       <meta property="og:image" content="https://puron-media.de/logo.png" />
+      <meta property="og:image:width" content="256" />
+      <meta property="og:image:height" content="256" />
+      <meta property="og:image:alt" content="Puron Media – Logo" />
 
       <!-- Twitter Card -->
       <meta name="twitter:card" content="summary" />
       <meta name="twitter:title" content="Puron Media" />
       <meta name="twitter:description" content="Social Media Content, das Unternehmen sichtbar macht." />
       <meta name="twitter:image" content="https://puron-media.de/logo.png" />
+
+      <!-- Structured data (JSON-LD): local-business / professional-service info
+           for richer search results + local SEO. A type="application/ld+json"
+           block is data, not executable script, so the strict CSP script-src
+           does not apply to it. -->
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "ProfessionalService",
+          "@id": "https://puron-media.de/#organization",
+          "name": "Puron Media",
+          "alternateName": "Puron Media Meschede",
+          "url": "https://puron-media.de/",
+          "logo": "https://puron-media.de/logo.png",
+          "image": "https://puron-media.de/logo.png",
+          "description": "Social-Media-Agentur aus Meschede: Reels, Posts, Ads und Content-Strategien, die Unternehmen Kunden, Bewerber und langfristige Sichtbarkeit gewinnen lassen.",
+          "email": "info@puron-media.de",
+          "telephone": "+49 163 8843453",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Birmecker Weg 20",
+            "postalCode": "59872",
+            "addressLocality": "Meschede",
+            "addressRegion": "Nordrhein-Westfalen",
+            "addressCountry": "DE"
+          },
+          "areaServed": { "@type": "Country", "name": "Deutschland" },
+          "sameAs": ["https://www.instagram.com/puronmedia"],
+          "founder": { "@type": "Person", "name": "Mahsuni Akdemir" },
+          "priceRange": "€€"
+        }
+      </script>
 
       <style>html, body { height: 100%; margin: 0; background: #0A0A0D; } #root { height: 100%; }</style>
     </head>

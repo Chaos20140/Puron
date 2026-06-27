@@ -5,25 +5,19 @@ import { useEffect, useRef, useState } from "react";
 const ASSET_BASE = import.meta.env.BASE_URL;
 
 // Each entry expects a real logo PNG/SVG at public/partners/<filename>.
-// Logos render directly on the dark page in their natural colors —
-// no card frame, no grayscale, no opacity tint — so the brand colors
-// stay vivid. Logos with white/light source backgrounds will show as
-// such; export them with transparent backgrounds (e.g. via remove.bg)
-// if they need to blend with the page.
-// Per-logo overrides:
-// - `scale`: visual size multiplier for logos that would otherwise look
-//   small inside the fixed container (e.g. AutoWelt's 1:1 mark).
-// - `whiten`: paint every visible pixel pure white via CSS filter
-//   (brightness(0) crushes to black, invert(1) flips to white;
-//   transparency is preserved). Use for dark-on-transparent logos
-//   that would vanish on the dark page background.
-const partners: { name: string; logo: string; scale?: number; whiten?: boolean }[] = [
-  { name: "KFZ-Gutachter Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png`, whiten: true },
-  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png`, whiten: true },
+// For a uniform, cohesive look the ticker renders EVERY logo as a flat white
+// silhouette (CSS filter: brightness(0) crushes to black, invert(1) flips to
+// white; transparency is preserved) — so the differing brand colours don't
+// clash on the dark page. Export logos with transparent backgrounds (remove.bg).
+// `scale` is an optional per-logo size multiplier for marks that would
+// otherwise look small inside the fixed container (e.g. AutoWelt's 1:1 mark).
+const partners: { name: string; logo: string; scale?: number }[] = [
+  { name: "KFZ-Gutachter Cem Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png` },
+  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
   { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
   { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
   { name: "Autozentrum Bestwig", logo: `${ASSET_BASE}partners/autozentrum-bestwig.png` },
-  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.png`, whiten: true },
+  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.png` },
 ];
 
 // GPU-composited transform marquee (same approach as the reviews carousel):
@@ -130,8 +124,9 @@ export function ClientTicker() {
                 alt={p.name}
                 className="max-w-full max-h-full object-contain"
                 style={{
+                  // Uniform white silhouette for every logo (cohesive strip).
+                  filter: "brightness(0) invert(1)",
                   ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
-                  ...(p.whiten ? { filter: "brightness(0) invert(1)" } : {}),
                 }}
                 // Eager + high priority — logos are above-the-fold on most
                 // phones, so we want them decoded before the user scrolls.
