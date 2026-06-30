@@ -164,7 +164,7 @@ export function Layout() {
             </div>
 
             <div className="text-left md:text-right">
-              <p>Erstellt / Gehostet von <span className="text-[#A855F7] font-medium">Tolunay Usul</span></p>
+              <p>Erstellt / Gehostet von <a href="https://axion-studio.de/index.html" target="_blank" rel="noopener noreferrer" className="text-[#A855F7] font-medium hover:underline">Axion Studio</a></p>
               <p className="mt-2">&copy; {new Date().getFullYear()} Puron Media. Alle Rechte vorbehalten.</p>
             </div>
           </div>
