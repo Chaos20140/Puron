@@ -74,7 +74,10 @@ function spaStaticRoutes() {
       const home = readFileSync(src, 'utf8')
       writeFileSync(path.join(dist, '404.html'), home)
       for (const r of ROUTES) {
-        const url = `${SITE_ORIGIN}/${r}`
+        // Trailing slash: GitHub Pages serves dist/<route>/index.html at
+        // "/<route>/" (200) and 301-redirects "/<route>" -> "/<route>/", so the
+        // canonical must be the slash form to match the actually-served URL.
+        const url = `${SITE_ORIGIN}/${r}/`
         const html = home
           .replaceAll(`href="${SITE_ORIGIN}/"`, `href="${url}"`)
           .replaceAll(`content="${SITE_ORIGIN}/"`, `content="${url}"`)
