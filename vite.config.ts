@@ -62,7 +62,11 @@ function injectSecurityMeta() {
 //    consolidated onto the homepage. React-router still renders the right page
 //    from the path client-side.
 const SITE_ORIGIN = 'https://puron-media.de'
-const ROUTES = ['services', 'projects', 'team', 'contact', 'imprint', 'privacy']
+// NOTE: 'projects' is intentionally NOT here — its route is commented out in
+// routes.tsx ("hidden until we have a real portfolio"), so /projects/ would
+// render NotFoundPage and Google flags it as a Soft 404. Keep it out of both
+// this list and public/sitemap.xml until ProjectsPage is real content.
+const ROUTES = ['services', 'team', 'contact', 'imprint', 'privacy']
 function spaStaticRoutes() {
   return {
     name: 'spa-static-routes',
