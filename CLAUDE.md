@@ -237,7 +237,7 @@ If you deploy to **Vercel**, translate the same rules into a `vercel.json` (the 
 For SPA fallback (so direct visits to `/services` etc. don't 404):
 - **Netlify / Cloudflare Pages**: [public/_redirects](public/_redirects) is committed (`/*    /index.html   200`).
 - **Vercel**: ignores `_redirects`. Add a `vercel.json` `rewrites` block pointing everything to `/index.html`.
-- **GitHub Pages**: ignores both. The `spa-404-fallback` Vite plugin in [vite.config.ts](vite.config.ts) copies `dist/index.html` → `dist/404.html` so unknown paths still render the SPA shell (status 404, but functional).
+- **GitHub Pages**: ignores both. The `spa-static-routes` Vite plugin in [vite.config.ts](vite.config.ts) (a) copies `dist/index.html` → `dist/404.html` (genuinely-unknown paths → SPA shell, status 404 → NotFoundPage), AND (b) writes a real `dist/<route>/index.html` for **every known route** (`services`/`projects`/`team`/`contact`/`imprint`/`privacy`) so GitHub Pages returns **HTTP 200** on a direct hit — otherwise sub-routes 404 and **Google won't index them** (this was the "URL nicht verfügbar / Nicht gefunden (404)" symptom in Search Console, fixed 2026-07-09). Each per-route copy self-canonicalises (its `canonical` + `og:url` are rewritten to its own URL via the `ROUTES`/`SITE_ORIGIN` constants) so the pages aren't consolidated onto the homepage. When you add a route, add it to `ROUTES` in vite.config.ts AND [public/sitemap.xml](public/sitemap.xml).
 
 After deploying, also update Supabase function secret `ALLOWED_ORIGINS` to lock the contact endpoint to your production domain — see §7.
 

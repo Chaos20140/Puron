@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import path from 'path'
-import { copyFileSync, existsSync } from 'fs'
+import { copyFileSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
@@ -52,27 +52,42 @@ function injectSecurityMeta() {
   }
 }
 
-// SPA fallback for static hosts that don't support rewrites
-// (notably GitHub Pages): copy dist/index.html to dist/404.html so
-// any unknown path serves the SPA shell. Status will be 404 — not
-// great for SEO but the page renders correctly and react-router
-// takes over from the URL.
-function spa404Fallback() {
+// Static-host routing for GitHub Pages, which has no SPA rewrite and returns
+// HTTP 404 for any path without a real file — and Google will NOT index a 404.
+//  - copy dist/index.html -> dist/404.html so genuinely-unknown paths still
+//    render the SPA shell (status 404, correct -> NotFoundPage).
+//  - write a real index.html for every KNOWN route so GitHub Pages returns
+//    HTTP 200 on a direct hit / to a crawler. Each copy self-canonicalises
+//    (canonical + og:url rewritten to its own URL) so the sub-pages aren't
+//    consolidated onto the homepage. React-router still renders the right page
+//    from the path client-side.
+const SITE_ORIGIN = 'https://puron-media.de'
+const ROUTES = ['services', 'projects', 'team', 'contact', 'imprint', 'privacy']
+function spaStaticRoutes() {
   return {
-    name: 'spa-404-fallback',
+    name: 'spa-static-routes',
     apply: 'build' as const,
     closeBundle() {
       const dist = path.resolve(__dirname, 'dist')
       const src = path.join(dist, 'index.html')
-      const dst = path.join(dist, '404.html')
-      if (existsSync(src)) copyFileSync(src, dst)
+      if (!existsSync(src)) return
+      const home = readFileSync(src, 'utf8')
+      writeFileSync(path.join(dist, '404.html'), home)
+      for (const r of ROUTES) {
+        const url = `${SITE_ORIGIN}/${r}`
+        const html = home
+          .replaceAll(`href="${SITE_ORIGIN}/"`, `href="${url}"`)
+          .replaceAll(`content="${SITE_ORIGIN}/"`, `content="${url}"`)
+        mkdirSync(path.join(dist, r), { recursive: true })
+        writeFileSync(path.join(dist, r, 'index.html'), html)
+      }
     },
   }
 }
 
 export default defineConfig({
   base,
-  plugins: [react(), tailwindcss(), injectSecurityMeta(), spa404Fallback()],
+  plugins: [react(), tailwindcss(), injectSecurityMeta(), spaStaticRoutes()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
