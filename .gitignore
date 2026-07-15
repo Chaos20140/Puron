@@ -8,3 +8,11 @@ supabase/.temp
 supabase/.env
 .env
 .env.local
+
+# KI-Assistenz-Notizen: nur lokal, nie ins Repo und nie deployen
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.cursorrules
+.cursor/
+.github/copilot-instructions.md
