@@ -10,7 +10,7 @@ const works = [
   {
     title: "Aura Cosmetics",
     category: "Markenkampagne",
-    desc: "Komplette Social Media Neugestaltung und tägliche Content Produktion.",
+    desc: "Komplette Social-Media-Neugestaltung und tägliche Content-Produktion.",
     img: "https://images.unsplash.com/photo-1726066012749-f81bf4422d4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb2NpYWwlMjBtZWRpYSUyMGNvbnRlbnQlMjBjcmVhdGlvbnxlbnwxfHx8fDE3NzUxOTQzODZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     layout: "wide" as const,
     span: "md:col-span-8",
@@ -18,7 +18,7 @@ const works = [
   },
   {
     title: "TechNova Evolution",
-    category: "Reels Produktion",
+    category: "Reels-Produktion",
     desc: "Hochkonvertierende Reels für B2B.",
     img: "https://images.unsplash.com/photo-1661343586831-d7fd573de66c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMHByb2R1Y3Rpb24lMjByZWVsc3xlbnwxfHx8fDE3NzUyMzkxMzV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     layout: "tall" as const,
@@ -57,7 +57,7 @@ export function SelectedWorks() {
           className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 lg:mb-16"
         >
           <div>
-            <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-4 block">Unser Portfolio</span>
+            <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-4 block">Unser Portfolio</span>
             <h2 className="font-['Space_Grotesk'] text-4xl lg:text-6xl font-semibold tracking-tight text-[#F5F5F7]">
               Ausgewählte <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">Arbeiten</span>
             </h2>
@@ -80,7 +80,15 @@ export function SelectedWorks() {
                 transition={{ duration: 0.8, delay: w.delay }}
                 className={`${w.span} group cursor-pointer`}
               >
-                <Link to="/projects" className={`block relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-[#121217] ${aspect}`}>
+                {/* NOT /projects: that route is commented out in routes.tsx, so
+                    the path falls through to the catch-all and renders
+                    NotFoundPage — and GitHub Pages already had a Soft-404 in the
+                    Search Console because of it. This section is currently
+                    disabled in HomePage too, but the dead link would go live the
+                    moment someone re-enables it. Point it back at /projects
+                    together with routes.tsx, vite.config.ts ROUTES and
+                    public/sitemap.xml once ProjectsPage has real content. */}
+                <Link to="/contact" className={`block relative rounded-[2rem] overflow-hidden shadow-2xl border border-white/5 bg-[#121217] ${aspect}`}>
                   <ImageWithFallback
                     src={w.img}
                     alt={w.title}

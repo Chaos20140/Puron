@@ -8,7 +8,7 @@ const services = [
   { keyword: "Reels", desc: "die nicht überscrollt werden" },
   { keyword: "Beiträge", desc: "die nach deiner Marke aussehen" },
   { keyword: "Ads", desc: "die nicht nur laufen, sondern liefern" },
-  { keyword: "Content Strategie", desc: "die wirklich Sinn macht" },
+  { keyword: "Content-Strategie", desc: "die wirklich Sinn ergibt" },
 ];
 
 export function ServicesPreview() {
@@ -22,7 +22,7 @@ export function ServicesPreview() {
           transition={{ duration: 0.6 }}
           className="mb-12 md:mb-16 max-w-2xl"
         >
-          <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Was wir zaubern</span>
+          <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-3 block">Was wir zaubern</span>
           <h2 className="font-['Space_Grotesk'] text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-6 md:mb-8 leading-[1.15]">
             Viele quatschen über Trends – doch wir überzeugen mit{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">visueller Qualität</span>.

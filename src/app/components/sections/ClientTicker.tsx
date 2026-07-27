@@ -4,20 +4,26 @@ import { useEffect, useRef, useState } from "react";
 // subpath like "/Puron/" if ever built for a GitHub Pages project page).
 const ASSET_BASE = import.meta.env.BASE_URL;
 
-// Each entry expects a real logo PNG/SVG at public/partners/<filename>.
+// Each entry expects a real logo at public/partners/<filename>.
 // For a uniform, cohesive look the ticker renders EVERY logo as a flat white
 // silhouette (CSS filter: brightness(0) crushes to black, invert(1) flips to
 // white; transparency is preserved) — so the differing brand colours don't
 // clash on the dark page. Export logos with transparent backgrounds (remove.bg).
 // `scale` is an optional per-logo size multiplier for marks that would
 // otherwise look small inside the fixed container (e.g. AutoWelt's 1:1 mark).
+//
+// The .webp files are BUILT from the PNG sources by scripts/optimize-images.mjs
+// (`pnpm images`) — drop a new logo in as PNG and re-run it. The six PNGs were
+// 744 KB together and every one of them was requested eagerly at high priority
+// on the mobile home page, which starved the LCP element of bandwidth; the
+// WebP silhouettes are 62 KB total.
 const partners: { name: string; logo: string; scale?: number }[] = [
-  { name: "KFZ-Gutachter Cem Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.png` },
-  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.png` },
-  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.png`, scale: 1.4 },
-  { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.png` },
-  { name: "Autozentrum Bestwig", logo: `${ASSET_BASE}partners/autozentrum-bestwig.png` },
-  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.png` },
+  { name: "KFZ-Gutachter Cem Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.webp` },
+  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.webp` },
+  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.webp`, scale: 1.4 },
+  { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.webp` },
+  { name: "Autozentrum Bestwig", logo: `${ASSET_BASE}partners/autozentrum-bestwig.webp` },
+  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.webp` },
 ];
 
 // GPU-composited transform marquee (same approach as the reviews carousel):
@@ -73,8 +79,34 @@ export function ClientTicker() {
     return () => io.disconnect();
   }, []);
 
+  // How many times the partner list is repeated PER HALF of the track. The
+  // track always renders 2 halves and animates to translateX(-50%), i.e. it
+  // scrolls exactly one half per cycle. That only looks seamless while one half
+  // is at least as wide as the visible window — otherwise the window runs past
+  // the end of the track near the end of the cycle and the logos "disappear"
+  // into an empty strip. With six logos one half is ~1536px, so every viewport
+  // wider than that (any normal desktop) hit it. Repeat until it covers.
+  const [halfRepeat, setHalfRepeat] = useState(1);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const track = trackRef.current;
+    if (!wrap || !track || reduced) return;
+    const measure = () => {
+      const copyWidth = track.scrollWidth / (2 * halfRepeat);
+      if (copyWidth <= 0) return;
+      const needed = Math.max(1, Math.ceil(wrap.clientWidth / copyWidth));
+      if (needed !== halfRepeat) setHalfRepeat(needed);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [reduced, halfRepeat]);
+
   // Derive the duration from the rendered width so the speed stays constant
-  // across breakpoints. translateX(-50%) travels exactly one copy.
+  // across breakpoints AND across halfRepeat values. translateX(-50%) travels
+  // exactly one half, so the duration has to scale with the half width.
   useEffect(() => {
     const track = trackRef.current;
     if (!track || reduced) return;
@@ -86,9 +118,9 @@ export function ClientTicker() {
     const ro = new ResizeObserver(setDuration);
     ro.observe(track);
     return () => ro.disconnect();
-  }, [reduced]);
+  }, [reduced, halfRepeat]);
 
-  const renderedPartners = [...partners, ...partners];
+  const renderedPartners = Array.from({ length: 2 * halfRepeat }, () => partners).flat();
 
   return (
     <section className="py-12 border-t border-white/5 bg-[#0A0A0D]/50 relative z-20 overflow-hidden md:backdrop-blur-[2px]">
@@ -128,10 +160,15 @@ export function ClientTicker() {
                   filter: "brightness(0) invert(1)",
                   ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
                 }}
-                // Eager + high priority — logos are above-the-fold on most
-                // phones, so we want them decoded before the user scrolls.
+                // No width/height attrs on purpose: the logos have differing
+                // aspect ratios and the wrapper box is fixed-size, so there is
+                // no layout shift to guard against — an intrinsic-size hint
+                // would only fight `object-contain`.
+                // Eager, but deliberately NOT fetchPriority="high": the strip
+                // sits just inside the fold on a tall phone, and six high-
+                // priority image requests used to compete with the hero (the
+                // LCP element) for a throttled mobile connection.
                 loading="eager"
-                fetchPriority="high"
                 decoding="async"
               />
             </div>

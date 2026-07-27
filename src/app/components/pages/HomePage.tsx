@@ -1,4 +1,5 @@
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { HOME_META } from "../../seo";
 import { HeroSection } from "../sections/HeroSection";
 import { ClientTicker } from "../sections/ClientTicker";
 import { ServicesPreview } from "../sections/ServicesPreview";
@@ -10,7 +11,7 @@ import { SocialProof } from "../sections/SocialProof";
 import { ContactCta } from "../sections/ContactCta";
 
 export function HomePage() {
-  usePageTitle("Puron Media — Social Media Content, der funktioniert");
+  usePageMeta(HOME_META.title, HOME_META.description, "/");
   return (
     <>
       <HeroSection />

@@ -24,7 +24,7 @@ export function WhyPuronSection() {
             Wir sind besessen von Perfektion und Ergebnissen. Unsere unvergleichliche Expertise schlägt die Brücke zwischen kreativer Ästhetik und erstklassigem Unternehmenswachstum. Wir sind einfach die Besten in dem was wir tun – weil wir uns unerbittlich auf Qualität, Strategie und die Produktion von Arbeit konzentrieren, die unbestreitbaren Einfluss hat.
           </p>
           <AnimatedButton to="/contact" variant="outline" className="!border-b !border-[#7C3AED] !rounded-none !px-0 !py-1 !bg-transparent hover:!text-[#A855F7] gap-2 inline-flex items-center">
-            Starten Sie Ihr Projekt
+            Starte dein Projekt
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
           </AnimatedButton>
         </motion.div>
@@ -42,7 +42,7 @@ export function WhyPuronSection() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
               </div>
               <div>
-                <h4 className="text-lg font-medium mb-2 text-[#F5F5F7]">{item.title}</h4>
+                <h3 className="text-lg font-medium mb-2 text-[#F5F5F7]">{item.title}</h3>
                 <p className="text-[#B3B3C2] text-sm leading-relaxed">{item.desc}</p>
               </div>
             </motion.div>

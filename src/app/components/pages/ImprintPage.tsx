@@ -1,17 +1,18 @@
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { ROUTE_META } from "../../seo";
 
-// Fill in the placeholders marked [bitte ergänzen] with real values
-// before going to a wider audience. As an Einzelunternehmen no
-// Handelsregister entry is required, but the §5 TMG details (address,
-// contact) and §18 MStV "Verantwortlich für den Inhalt" line are
-// legally mandatory for a commercial website in Germany.
+// As an Einzelunternehmen no Handelsregister entry is required, but the
+// § 5 DDG details (address, contact) and the § 18 Abs. 2 MStV "Verantwortlich
+// für den Inhalt" line are legally mandatory for a commercial website in
+// Germany. NOTE: the TMG was superseded by the DDG (Digitale-Dienste-Gesetz)
+// on 14 May 2024 — cite § 5 DDG, not § 5 TMG.
 export function ImprintPage() {
-  usePageTitle("Impressum");
+  usePageMeta(ROUTE_META.imprint.title, ROUTE_META.imprint.description, "/imprint/");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-3xl mx-auto px-6">
         <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Impressum</h1>
-        <p className="text-sm text-[#71717A] mb-12">Anbieterkennzeichnung gemäß § 5 TMG</p>
+        <p className="text-sm text-[#8A8A94] mb-12">Anbieterkennzeichnung gemäß § 5 DDG</p>
 
         <div className="space-y-8 text-[#B3B3C2] leading-relaxed">
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
@@ -42,14 +43,19 @@ export function ImprintPage() {
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
-            <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Hosting &amp; Bildquellen</h2>
-            <p className="text-sm">Diese Website wird gehostet auf <strong className="text-[#F5F5F7]">GitHub Pages</strong> (GitHub, Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA). Edge-Funktionen (Kontaktformular, Google-Reviews) werden bereitgestellt über <strong className="text-[#F5F5F7]">Supabase</strong> (Supabase Inc., 970 Toa Payoh North, #07-04, Singapore 318992). Verwendete Stockfotos stammen von <a href="https://unsplash.com" target="_blank" rel="noopener noreferrer" className="text-[#A855F7] hover:underline">Unsplash</a>.</p>
+            <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Hosting</h2>
+            {/* The Unsplash credit was removed: the only Unsplash images in the
+                codebase are in ProjectsPage, whose route is commented out, so
+                no reachable page loads one. */}
+            <p className="text-sm">Diese Website wird gehostet auf <strong className="text-[#F5F5F7]">GitHub Pages</strong> (GitHub, Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA). Edge-Funktionen (Google-Rezensionen) werden bereitgestellt über <strong className="text-[#F5F5F7]">Supabase</strong> (Supabase Inc., 970 Toa Payoh North, #07-04, Singapore 318992). Der Versand des Kontaktformulars läuft über <strong className="text-[#F5F5F7]">Web3Forms</strong>.</p>
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">
             <h2 className="font-['Space_Grotesk'] text-xl font-medium text-[#F5F5F7] mb-4">Streitschlichtung</h2>
-            <p className="text-sm">Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: <a href="https://ec.europa.eu/consumers/odr" className="text-[#A855F7] hover:underline" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a></p>
-            <p className="text-sm mt-2">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+            {/* The EU "Online-Streitbeilegung" (OS) platform was SHUT DOWN on
+                20 July 2025 — linking to it is now a dead, incorrect reference.
+                Only the § 36 VSBG declaration remains required. */}
+            <p className="text-sm">Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen (§ 36 VSBG).</p>
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">

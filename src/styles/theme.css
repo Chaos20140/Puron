@@ -120,8 +120,12 @@
 }
 
 @layer base {
+  /* `outline-ring/50` was here too. It repainted EVERY element's focus outline
+     in --ring (a dark grey) at 50% opacity — on a near-black page that made the
+     browser's default keyboard-focus ring effectively invisible site-wide.
+     Focus styling now lives in src/styles/focus.css. */
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
 
   body {
@@ -133,9 +137,10 @@
   * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
   */
 
-  html {
-    font-size: var(--font-size);
-  }
+  /* NOTE: `html { font-size: var(--font-size) }` (16px) used to be here. It
+     hard-pinned the root font size and overrode the size a visitor had set in
+     their browser — since the whole layout is measured in rem, the page did not
+     scale for them at all (WCAG 1.4.4 "Resize text"). Do not reintroduce it. */
 
   h1 {
     font-size: var(--text-2xl);

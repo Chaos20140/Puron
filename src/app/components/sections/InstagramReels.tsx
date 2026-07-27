@@ -12,7 +12,9 @@ const PROFILE_URL = "https://www.instagram.com/puronmedia?igsh=MXhqM2VnOGRxOWkza
 // Tip: shortcodes (the bit after /reel/) are stable, so the URL won't rot
 // even if the post is edited.
 //
-// Covers live in public/reels/ as reel-1.jpg … (one per entry, in order).
+// Covers live in public/reels/. Drop the screenshot in as reel-N.jpg (one per
+// entry, in order) and run `pnpm images` — scripts/optimize-images.mjs writes
+// the reel-N.webp that is actually referenced here.
 // If a cover file is missing the <img> onError swaps in a lila SVG
 // placeholder so the layout never shows a broken-image icon.
 const ASSET_BASE = import.meta.env.BASE_URL;
@@ -28,17 +30,17 @@ const reels: Reel[] = [
   {
     href: "https://www.instagram.com/reel/DWv9gjODUsQ/?igsh=MTRzNDV6cjYwMnZmbw==",
     caption: "Was wir tun bei Puron",
-    cover: `${ASSET_BASE}reels/reel-1.jpg`,
+    cover: `${ASSET_BASE}reels/reel-1.webp`,
   },
   {
     href: "https://www.instagram.com/p/DX6rcYXDbwv/?igsh=am55MTltbHZ2emZn",
     caption: "Der erste Eindruck zählt",
-    cover: `${ASSET_BASE}reels/reel-2.jpg`,
+    cover: `${ASSET_BASE}reels/reel-2.webp`,
   },
   {
     href: "https://www.instagram.com/reel/DV6e3FBjXKV/?igsh=bWdjNXIwYXA2cXBi",
     caption: "3 Gründe – keine 0815-Starter",
-    cover: `${ASSET_BASE}reels/reel-3.jpg`,
+    cover: `${ASSET_BASE}reels/reel-3.webp`,
   },
 ];
 
@@ -56,7 +58,7 @@ export function InstagramReels() {
           transition={{ duration: 0.6 }}
           className="mb-10 md:mb-14 max-w-2xl"
         >
-          <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">
+          <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-3 block">
             Aus unserem Feed
           </span>
           <h2 className="font-['Space_Grotesk'] text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight mb-6 leading-[1.15]">
@@ -92,8 +94,11 @@ export function InstagramReels() {
                   runs once and replaces the broken-image icon. */}
               <img
                 src={r.cover}
-                alt=""
-                loading="eager"
+                alt={`Vorschaubild des Instagram-Reels „${r.caption}“ von Puron Media`}
+                // Lazy: this grid starts ~3000px down the mobile page. It used
+                // to load eagerly and spent the connection budget before the
+                // hero had finished painting.
+                loading="lazy"
                 decoding="async"
                 onError={(e) => {
                   const img = e.currentTarget;

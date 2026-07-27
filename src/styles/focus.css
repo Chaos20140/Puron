@@ -1,0 +1,24 @@
+/* Keyboard focus.
+ *
+ * The project had NO :focus-visible rule anywhere: every link, every
+ * AnimatedButton, the navigation, the goal chips and the review cards relied on
+ * the browser default ring — which theme.css then repainted globally in a dark
+ * grey (`outline-ring/50`), making it invisible on the near-black page. Keyboard
+ * users had no idea where they were (WCAG 2.4.7 "Focus Visible").
+ *
+ * :focus-visible (not :focus) so a mouse click doesn't leave a ring behind.
+ * :where() keeps specificity at 0 so component classes can still override it.
+ */
+:where(a, button, [role="button"], input, textarea, select, summary):focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* The custom cursor hides the OS pointer, so on those devices the focus ring is
+   the only positional feedback there is — give it a little more presence. */
+@media (pointer: fine) {
+  :where(a, button, [role="button"]):focus-visible {
+    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.25);
+  }
+}

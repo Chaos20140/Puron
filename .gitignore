@@ -9,6 +9,11 @@ supabase/.env
 .env
 .env.local
 
+# Rohmaterial (Logo-Exporte, WhatsApp-Bilder, KI-Generate). Lag vorher lose im
+# Repo-Root: 12 MB, von nichts referenziert, aber jederzeit ein `git add .`
+# davon entfernt, committet zu werden. Ausgelieferte Bilder liegen in public/.
+_assets-src/
+
 # KI-Assistenz-Notizen: nur lokal, nie ins Repo und nie deployen
 CLAUDE.md
 AGENTS.md

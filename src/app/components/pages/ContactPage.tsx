@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { motion } from "motion/react";
 import { AnimatedButton } from "../AnimatedButton";
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { ROUTE_META } from "../../seo";
 import { whatsappUrl } from "../../whatsapp";
 
 // Web3Forms access key. It's a PUBLIC client-side key on purpose: Web3Forms'
@@ -67,7 +69,9 @@ function validate(form: FormFields): FormErrors {
 }
 
 const inputBase =
-  "w-full bg-[#0A0A0D] border rounded-xl px-4 py-3.5 text-white placeholder-white/20 focus:outline-none focus:ring-1 transition-all disabled:opacity-60";
+  // focus-visible:outline-none, not focus:outline-none — the latter also killed
+  // the keyboard focus ring that focus.css provides.
+  "w-full bg-[#0A0A0D] border rounded-xl px-4 py-3.5 text-white placeholder-white/50 focus-visible:outline-none focus:ring-1 transition-all disabled:opacity-60";
 const inputOk = "border-white/10 focus:border-[#7C3AED] focus:ring-[#7C3AED]";
 const inputErr = "border-red-500/60 focus:border-red-500 focus:ring-red-500";
 
@@ -104,7 +108,7 @@ const channels: Channel[] = [
 ];
 
 export function ContactPage() {
-  usePageTitle("Kontakt");
+  usePageMeta(ROUTE_META.contact.title, ROUTE_META.contact.description, "/contact/");
   const [form, setForm] = useState<FormFields>(emptyForm);
   const [selectedGoal, setSelectedGoal] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -153,9 +157,14 @@ export function ContactPage() {
 
     setSubmitting(true);
     setError(null);
+    // Without a timeout a stalled mobile connection left the button in
+    // "Wird gesendet…" indefinitely with no way out.
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
+        signal: controller.signal,
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
           access_key: WEB3FORMS_ACCESS_KEY,
@@ -183,11 +192,15 @@ export function ContactPage() {
       setSelectedGoal("");
       setTouched({});
       setSubmitted(true);
-    } catch {
+    } catch (err) {
+      const timedOut = err instanceof DOMException && err.name === "AbortError";
       setError(
-        "Verbindungsfehler. Bitte prüfe deine Internetverbindung und versuche es erneut.",
+        timedOut
+          ? "Die Anfrage hat zu lange gedauert. Bitte versuch es erneut – oder erreich uns direkt per WhatsApp, E-Mail oder Telefon (siehe unten)."
+          : "Verbindungsfehler. Bitte prüfe deine Internetverbindung und versuche es erneut.",
       );
     } finally {
+      window.clearTimeout(timeoutId);
       setSubmitting(false);
     }
   };
@@ -195,12 +208,21 @@ export function ContactPage() {
   if (submitted) {
     return (
       <div className="pt-24 md:pt-32 pb-16 md:pb-24 min-h-screen flex items-center">
-        <div className="max-w-3xl mx-auto px-6 text-center">
+        {/* The form is replaced wholesale, so focus lands nowhere and a screen
+            reader would announce nothing. role="status" makes the confirmation
+            speak itself; tabIndex={-1} + autofocus moves the caret here. */}
+        <div
+          className="max-w-3xl mx-auto px-6 text-center"
+          role="status"
+          aria-live="polite"
+          tabIndex={-1}
+          ref={(el) => el?.focus()}
+        >
           <div className="w-20 h-20 rounded-full bg-[#7C3AED]/20 flex items-center justify-center mx-auto mb-8">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
           </div>
           <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl font-semibold tracking-tight mb-4">Vielen Dank!</h1>
-          <p className="text-lg text-[#B3B3C2] mb-8">Ihre Anfrage ist eingegangen. Wir werden uns innerhalb von 24 Stunden bei Ihnen melden, um eine mögliche Zusammenarbeit zu besprechen.</p>
+          <p className="text-lg text-[#B3B3C2] mb-8">Deine Anfrage ist eingegangen. Wir melden uns innerhalb von 24 Stunden bei dir, um eine mögliche Zusammenarbeit zu besprechen.</p>
           <AnimatedButton variant="outline" onClick={() => setSubmitted(false)}>
             Weitere Anfrage senden
           </AnimatedButton>
@@ -308,7 +330,7 @@ export function ContactPage() {
           <div>
             <div className="flex items-baseline justify-between mb-2">
               <label htmlFor="message" className="block text-sm font-medium text-[#B3B3C2]">Worum geht's genau?</label>
-              <span className={`text-xs tabular-nums ${form.message.length > MAX.message ? "text-red-400" : "text-[#71717A]"}`}>
+              <span className={`text-xs tabular-nums ${form.message.length > MAX.message ? "text-red-400" : "text-[#8A8A94]"}`}>
                 {form.message.length}/{MAX.message}
               </span>
             </div>
@@ -319,7 +341,7 @@ export function ContactPage() {
               value={form.message}
               onChange={update("message")}
               onBlur={blur("message")}
-              placeholder="Erzählen Sie uns von Ihren aktuellen Herausforderungen..."
+              placeholder="Erzähl uns von deinen aktuellen Herausforderungen …"
               required
               maxLength={MAX.message}
               disabled={submitting}
@@ -329,14 +351,21 @@ export function ContactPage() {
             <FieldError field="message" />
           </div>
 
-          <div className="space-y-3 pt-2">
-            <label className="text-sm font-medium text-[#B3B3C2]">Primäres Ziel (Optional)</label>
+          {/* Was a bare <label> with no `for` — it pointed at no control, so a
+              screen reader announced five unrelated toggle buttons. A labelled
+              group + aria-pressed on each chip communicates both the grouping
+              and the on/off state. */}
+          <div className="space-y-3 pt-2" role="group" aria-labelledby="goal-label">
+            <span id="goal-label" className="block text-sm font-medium text-[#B3B3C2]">
+              Primäres Ziel (optional)
+            </span>
             <div className="flex flex-wrap gap-3">
               {goals.map((g) => (
                 <button
                   key={g}
                   type="button"
                   disabled={submitting}
+                  aria-pressed={selectedGoal === g}
                   onClick={() => setSelectedGoal(g === selectedGoal ? "" : g)}
                   className={`px-4 py-2 rounded-full border text-sm transition-all duration-300 hover:scale-[1.05] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${selectedGoal === g ? "bg-[#7C3AED]/10 border-[#7C3AED] text-white" : "border-white/10 bg-[#0A0A0D] text-[#B3B3C2] hover:border-white/30"}`}
                 >
@@ -355,11 +384,26 @@ export function ContactPage() {
             </div>
           )}
 
-          <div className="pt-4">
+          {/* Art. 13 DSGVO: the visitor must be told what happens with the data
+              AT the point of collection, not only three clicks away. A plain
+              notice + link is the standard German pattern and — unlike a
+              consent checkbox — matches the actual legal basis here
+              (Art. 6 Abs. 1 lit. b/f, not consent). */}
+          <p className="text-xs text-[#8A8A94] leading-relaxed">
+            Mit dem Absenden erlaubst du uns, deine Angaben zur Bearbeitung der
+            Anfrage zu verwenden. Wie wir mit deinen Daten umgehen, steht in der{" "}
+            <Link to="/privacy" className="text-[#A855F7] underline underline-offset-2 hover:text-white">
+              Datenschutzerklärung
+            </Link>
+            .
+          </p>
+
+          <div className="pt-2">
             <AnimatedButton
               type="submit"
               variant="primary"
               fullWidth
+              disabled={submitting}
               className="!rounded-xl !py-4 !text-base"
             >
               {submitting ? "Wird gesendet…" : "Anfrage senden"}
@@ -369,7 +413,7 @@ export function ContactPage() {
 
         {/* Direct channels — always available, even while a submission settles. */}
         <div className="mt-12">
-          <p className="text-center text-xs uppercase tracking-[0.18em] text-[#71717A] mb-5">Oder direkt erreichen</p>
+          <p className="text-center text-xs uppercase tracking-[0.18em] text-[#8A8A94] mb-5">Oder direkt erreichen</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {channels.map((c) => (
               <a
@@ -381,8 +425,12 @@ export function ContactPage() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7C3AED]/15 text-[#A855F7] ring-1 ring-[#7C3AED]/20 transition-colors duration-300 group-hover:bg-[#7C3AED]/25">
                   {c.icon}
                 </span>
-                <span className="text-[10px] uppercase tracking-wider text-[#71717A]">{c.label}</span>
-                <span className="max-w-full truncate text-xs text-[#B3B3C2]">{c.value}</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#8A8A94]">{c.label}</span>
+                {/* `truncate` cut "info@puron-media.de" off with an ellipsis in
+                    the ~118px a tile gets on a 360px phone — the primary e-mail
+                    address was unreadable on exactly those devices. Wrap it
+                    instead of hiding it. */}
+                <span className="max-w-full text-xs text-[#B3B3C2] leading-snug [overflow-wrap:anywhere]">{c.value}</span>
               </a>
             ))}
           </div>

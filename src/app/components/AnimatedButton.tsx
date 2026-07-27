@@ -12,6 +12,8 @@ interface AnimatedButtonProps {
   onClick?: () => void;
   className?: string;
   fullWidth?: boolean;
+  /** Only meaningful for the <button> form (no `to`/`href`). */
+  disabled?: boolean;
 }
 
 const base =
@@ -38,6 +40,7 @@ export function AnimatedButton({
   onClick,
   className = "",
   fullWidth = false,
+  disabled = false,
 }: AnimatedButtonProps) {
   const cls = `${base} ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`;
 
@@ -58,7 +61,17 @@ export function AnimatedButton({
   }
 
   return (
-    <button type={type || "button"} className={cls} onClick={onClick}>
+    <button
+      type={type || "button"}
+      // A submit button that stays enabled while the request is in flight looks
+      // idle to the user and stays in the tab order as an active control; the
+      // handler's re-entry guard prevented a double POST but nothing told the
+      // user (or a screen reader) that something was happening.
+      disabled={disabled}
+      aria-busy={disabled || undefined}
+      className={`${cls} disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100`}
+      onClick={onClick}
+    >
       {children}
     </button>
   );

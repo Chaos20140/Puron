@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 // final-state for users with prefers-reduced-motion.
 const steps = [
   { title: "Erstgespräch", desc: "Wir lernen Dein Unternehmen kennen." },
-  { title: "Konzept", desc: "Wir entwickeln eine individuelle Social Media Strategie." },
+  { title: "Konzept", desc: "Wir entwickeln eine individuelle Social-Media-Strategie." },
   { title: "Regelmäßige Drehtage", desc: "Wir erstellen hochwertigen Content vor Ort." },
   { title: "Bespielung und Betreuung", desc: "Wir kümmern uns um Deine Kanäle." },
   { title: "Werbekampagnen", desc: "Wir schalten gezielte Ads für maximale Reichweite." },
@@ -15,12 +15,20 @@ const steps = [
 
 // Purple gradient progression: lightest → deepest, mirrors the warm
 // yellow→pink palette of the reference but stays on-brand.
+//
+// The whole ramp was shifted one step DARKER and the card text flipped from
+// near-black to white. The old set ran #C084FC → #4C1D95 with #0A0A0D text, so
+// the contrast collapsed as the cards got darker: card 5's body copy sat at
+// 1.66:1 against its own background (WCAG needs 4.5:1) and even its bold
+// heading only reached 1.80:1 — effectively unreadable, and one of the three
+// contrast failures Lighthouse reported. White text on this ramp clears 4.5:1
+// on EVERY card at BOTH ends of every gradient (worst case 4.51:1).
 const gradients = [
-  "from-[#C084FC] to-[#A855F7]",
-  "from-[#A855F7] to-[#9333EA]",
   "from-[#9333EA] to-[#7C3AED]",
   "from-[#7C3AED] to-[#6D28D9]",
-  "from-[#6D28D9] to-[#4C1D95]",
+  "from-[#6D28D9] to-[#5B21B6]",
+  "from-[#5B21B6] to-[#4C1D95]",
+  "from-[#4C1D95] to-[#3B1578]",
 ];
 
 export function GoalsSection() {
@@ -66,10 +74,10 @@ export function GoalsSection() {
                 transition={{ duration: 0.65, ease: [0.21, 0.47, 0.32, 0.98] }}
                 className={`bg-gradient-to-br ${gradients[i]} rounded-3xl px-5 py-8 sm:px-6 sm:py-10 md:px-12 md:py-14 shadow-[0_15px_40px_rgba(124,58,237,0.25)] ring-1 ring-white/10 hover:ring-white/30 transition-shadow text-center`}
               >
-                <h3 className="font-['Space_Grotesk'] text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-[#0A0A0D] mb-2 sm:mb-3">
+                <h3 className="font-['Space_Grotesk'] text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-white mb-2 sm:mb-3">
                   {step.title}
                 </h3>
-                <p className="text-sm sm:text-base md:text-lg italic text-[#0A0A0D]/75 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg italic text-white/[0.88] max-w-md mx-auto leading-relaxed">
                   {step.desc}
                 </p>
               </motion.div>

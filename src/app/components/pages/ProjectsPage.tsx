@@ -54,7 +54,7 @@ export function ProjectsPage() {
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-16 md:mb-20 max-w-3xl">
-          <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Unsere Arbeit</span>
+          <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-3 block">Unsere Arbeit</span>
           <h1 className="font-['Space_Grotesk'] text-4xl md:text-6xl font-semibold tracking-tight leading-[1.05] mb-6">
             Ausgewählte <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">Projekte</span>
           </h1>

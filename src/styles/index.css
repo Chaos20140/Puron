@@ -2,3 +2,5 @@
 @import './tailwind.css';
 @import './theme.css';
 @import './cursor.css';
+/* After theme.css on purpose: it owns the global focus ring. */
+@import './focus.css';

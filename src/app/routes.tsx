@@ -1,17 +1,15 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 import { HomePage } from "./components/pages/HomePage";
-import { ServicesPage } from "./components/pages/ServicesPage";
 // import { ProjectsPage } from "./components/pages/ProjectsPage"; // hidden until we have a real portfolio
-import { TeamPage } from "./components/pages/TeamPage";
-import { ContactPage } from "./components/pages/ContactPage";
-import { ImprintPage } from "./components/pages/ImprintPage";
-import { PrivacyPage } from "./components/pages/PrivacyPage";
-import { NotFoundPage } from "./components/pages/NotFoundPage";
 
-// `basename` mirrors Vite's `base` so the router works whether the site
-// is served from the domain root (custom domain → BASE_URL = "/") or a
-// repo subpath like /Puron/ on GitHub Pages.
+// HomePage is imported eagerly — it is the landing route for ~every visit and
+// lazy-loading it would only add a round trip in front of the LCP element.
+// Every OTHER page is code-split via react-router's `lazy`, so the initial
+// bundle no longer carries the imprint, privacy, team, services and contact
+// pages that a first-time visitor doesn't render. `lazy` returns the route
+// module, and the router waits on it during navigation — no <Suspense>
+// boundary or loading flash needed.
 export const router = createBrowserRouter(
   [
     {
@@ -19,13 +17,31 @@ export const router = createBrowserRouter(
       Component: Layout,
       children: [
         { index: true, Component: HomePage },
-        { path: "services", Component: ServicesPage },
-        // { path: "projects", Component: ProjectsPage },
-        { path: "team", Component: TeamPage },
-        { path: "contact", Component: ContactPage },
-        { path: "imprint", Component: ImprintPage },
-        { path: "privacy", Component: PrivacyPage },
-        { path: "*", Component: NotFoundPage },
+        {
+          path: "services",
+          lazy: async () => ({ Component: (await import("./components/pages/ServicesPage")).ServicesPage }),
+        },
+        // { path: "projects", lazy: … },
+        {
+          path: "team",
+          lazy: async () => ({ Component: (await import("./components/pages/TeamPage")).TeamPage }),
+        },
+        {
+          path: "contact",
+          lazy: async () => ({ Component: (await import("./components/pages/ContactPage")).ContactPage }),
+        },
+        {
+          path: "imprint",
+          lazy: async () => ({ Component: (await import("./components/pages/ImprintPage")).ImprintPage }),
+        },
+        {
+          path: "privacy",
+          lazy: async () => ({ Component: (await import("./components/pages/PrivacyPage")).PrivacyPage }),
+        },
+        {
+          path: "*",
+          lazy: async () => ({ Component: (await import("./components/pages/NotFoundPage")).NotFoundPage }),
+        },
       ],
     },
   ],

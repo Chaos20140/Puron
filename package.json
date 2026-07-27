@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:install": "playwright install chromium"
+    "test:install": "playwright install chromium",
+    "images": "node scripts/optimize-images.mjs",
+    "fonts": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
     "motion": "12.23.24",

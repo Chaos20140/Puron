@@ -9,16 +9,18 @@
       <!-- Google Search Console verification (URL-prefix property). Public token. -->
       <meta name="google-site-verification" content="J4NtdWHZsd1fcWv-RLUX4FkM-V80dMHdcDDVmP2Q2N0" />
 
-      <!-- Load fonts directly in the head (with preconnect) instead of via a
-           CSS @import. The @import created a request waterfall — the browser
-           had to fetch the bundled CSS first, discover the @import, then fetch
-           Google Fonts. A <link> here is discovered immediately and fetched in
-           parallel with the JS. display=swap shows fallback text instantly. -->
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+      <!-- Fonts are SELF-HOSTED (public/fonts, @font-face in
+           src/styles/fonts.css, regenerate with `pnpm fonts`). The previous
+           <link> to fonts.googleapis.com was a render-blocking stylesheet on a
+           third origin — DNS + TCP + TLS before the browser even learned which
+           .woff2 to fetch — and it sent every visitor's IP to Google (DSGVO).
+           Preloading the two latin subsets here starts them in parallel with
+           the bundled CSS instead of after it. -->
+      <link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
 
-      <title>Puron Media — Social Media Content, das Unternehmen sichtbar macht</title>
+      <!-- Kept in sync with HOME_META in src/app/seo.ts — the build stamps the
+           values from there into dist/index.html, this is the dev-time copy. -->
+      <title>Social Media Agentur Meschede &amp; Sauerland — Puron Media</title>
       <meta name="description" content="Puron Media aus Meschede produziert Reels, Posts, Ads und Content-Strategien, die Unternehmen Kunden, Bewerber und langfristige Aufmerksamkeit gewinnen lassen." />
 
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -69,10 +71,25 @@
             "addressRegion": "Nordrhein-Westfalen",
             "addressCountry": "DE"
           },
-          "areaServed": { "@type": "Country", "name": "Deutschland" },
+          "areaServed": [
+            { "@type": "Country", "name": "Deutschland" },
+            { "@type": "AdministrativeArea", "name": "Hochsauerlandkreis" },
+            { "@type": "City", "name": "Meschede" }
+          ],
+          "knowsLanguage": ["de"],
           "sameAs": ["https://www.instagram.com/puronmedia"],
           "founder": { "@type": "Person", "name": "Mahsuni Akdemir" },
-          "priceRange": "€€"
+          "priceRange": "€€",
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Leistungen",
+            "itemListElement": [
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Reels", "description": "Konzeption, Dreh und Schnitt vertikaler Videos für Instagram Reels, TikTok und YouTube Shorts." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Social-Media-Beiträge", "description": "Einzelbild-Posts und Multi-Slide-Karussells inklusive Caption- und Hashtag-Strategie." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Ads", "description": "Werbemittel für Meta, Google und LinkedIn inklusive A/B-Testing und Performance-Reporting." } },
+              { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Content-Strategie", "description": "Zielgruppenanalyse, Content-Säulen und monatliche Content-Pläne." } }
+            ]
+          }
         }
       </script>
 

@@ -1,7 +1,8 @@
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { ROUTE_META } from "../../seo";
 
 export function PrivacyPage() {
-  usePageTitle("Datenschutz");
+  usePageMeta(ROUTE_META.privacy.title, ROUTE_META.privacy.description, "/privacy/");
   const sections = [
     {
       title: "1. Verantwortliche Stelle",
@@ -11,7 +12,7 @@ export function PrivacyPage() {
     {
       title: "2. Zugriffsdaten (Hosting)",
       content:
-        "Diese Website wird auf GitHub Pages (GitHub, Inc., USA) gehostet. Beim Aufruf erfasst GitHub automatisch Zugriffsdaten in Server-Logs: anonymisierte IP-Adresse, Datum und Uhrzeit des Zugriffs, übertragene Datenmenge, Quelle/Verweis, Browsertyp und Betriebssystem. Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer technisch fehlerfreien und sicheren Auslieferung der Website (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen findest du in der Datenschutzerklärung von GitHub: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement",
+        "Diese Website wird auf GitHub Pages (GitHub, Inc., USA) gehostet. Beim Aufruf erfasst GitHub automatisch Zugriffsdaten in Server-Logs: die IP-Adresse des anfragenden Geräts, Datum und Uhrzeit des Zugriffs, übertragene Datenmenge, Quelle/Verweis, Browsertyp und Betriebssystem. Auf Inhalt, Umfang und Speicherdauer dieser Protokolle haben wir keinen Einfluss; sie werden von GitHub als Hoster in eigener Verantwortung erhoben. Da GitHub, Inc. seinen Sitz in den USA hat, findet dabei eine Übermittlung in ein Drittland statt (siehe Abschnitt 7). Diese Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an einer technisch fehlerfreien und sicheren Auslieferung der Website (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen findest du in der Datenschutzerklärung von GitHub: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement",
     },
     {
       title: "3. Kontaktformular",
@@ -21,22 +22,22 @@ export function PrivacyPage() {
     {
       title: "4. Google-Rezensionen",
       content:
-        "Auf der Startseite zeigen wir öffentliche Google-Rezensionen unseres Unternehmens an. Die Rezensionen werden serverseitig über unsere Edge-Funktion bei Supabase aus der Google Places API (New) abgerufen und für maximal eine Stunde in einem Schlüssel-Wert-Speicher zwischengespeichert. Direkt vom Browser des Besuchers gehen keine Anfragen an Google. Profilbilder der Rezensent:innen werden von Google-Servern (lh3.googleusercontent.com) geladen — dabei wird die IP-Adresse des Besuchers an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Außendarstellung).",
+        "Auf der Startseite zeigen wir öffentliche Google-Rezensionen unseres Unternehmens an. Die Rezensionen werden serverseitig über unsere Edge-Funktion bei Supabase aus der Google Places API (New) abgerufen und für maximal eine Stunde zwischengespeichert. Vom Browser des Besuchers gehen dabei keine Anfragen an Google: Die Profilbilder der Rezensent:innen werden bewusst nicht eingebunden, stattdessen zeigen wir einen Platzhalter mit dem Anfangsbuchstaben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Außendarstellung).",
     },
     {
-      title: "5. Schriftarten (Google Fonts)",
+      title: "5. Schriftarten",
       content:
-        "Diese Website lädt die Schriftarten Inter und Space Grotesk vom Google-Fonts-Dienst (Google Ireland Limited / Google LLC). Beim Laden der Schriftdateien wird deine IP-Adresse an Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer ansprechenden und schnell ladenden Darstellung). Weitere Informationen: https://policies.google.com/privacy",
+        "Die verwendete Schriftart (Space Grotesk) wird von unserem eigenen Server ausgeliefert und nicht von Google Fonts nachgeladen. Beim Aufruf der Website wird deshalb keine Verbindung zu Servern von Google aufgebaut und keine IP-Adresse an Google übertragen.",
     },
     {
-      title: "6. Stockfotos (Unsplash)",
+      title: "6. Cookies und lokale Speicherung",
       content:
-        "Einzelne Bilder werden über das Content-Delivery-Network von Unsplash (Unsplash Inc., Kanada) eingebunden. Beim Laden eines Bildes wird die IP-Adresse deines Geräts an Unsplash übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO.",
+        "Diese Website setzt keine Cookies — weder eigene noch von Drittanbietern. Es werden auch keine Daten in localStorage oder sessionStorage deines Browsers abgelegt. Ein Cookie-Banner ist deshalb nicht erforderlich.",
     },
     {
-      title: "7. Cookies",
+      title: "7. Übermittlung in Drittländer & Auftragsverarbeitung",
       content:
-        "Diese Website setzt keine Cookies — weder eigene noch von Drittanbietern. Es kommt ausschließlich technisch notwendige lokale Browser-Funktionalität (z.B. localStorage / sessionStorage) zum Einsatz, sofern überhaupt vom Browser angefragt.",
+        "Ein Teil der eingesetzten Dienstleister verarbeitet Daten außerhalb der EU bzw. des EWR:\n\n- GitHub, Inc. (USA) — Hosting dieser Website\n- Supabase Inc. (USA/Singapur) — Edge-Funktion für den Abruf der Google-Rezensionen\n- Web3Forms — technische Zustellung des Kontaktformulars\n\nSoweit die Anbieter unter dem EU-US Data Privacy Framework zertifiziert sind, erfolgt die Übermittlung auf dieser Grundlage (Art. 45 DSGVO); im Übrigen auf Basis der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO). Mit Dienstleistern, die personenbezogene Daten in unserem Auftrag verarbeiten, bestehen Verträge zur Auftragsverarbeitung nach Art. 28 DSGVO. Trotz dieser Garantien lässt sich ein Zugriff durch US-Behörden nicht vollständig ausschließen.",
     },
     {
       title: "8. Deine Rechte",
@@ -51,7 +52,7 @@ export function PrivacyPage() {
     {
       title: "10. Änderungen dieser Datenschutzerklärung",
       content:
-        "Diese Datenschutzerklärung kann von Zeit zu Zeit aktualisiert werden, um Änderungen in unseren Diensten oder der Rechtslage abzubilden. Die jeweils aktuelle Version findest du immer auf dieser Seite.\n\nStand: Juni 2026.",
+        "Diese Datenschutzerklärung kann von Zeit zu Zeit aktualisiert werden, um Änderungen in unseren Diensten oder der Rechtslage abzubilden. Die jeweils aktuelle Version findest du immer auf dieser Seite.\n\nStand: Juli 2026.",
     },
   ];
 

@@ -1,5 +1,6 @@
 import { AnimatedButton } from "../AnimatedButton";
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { ROUTE_META } from "../../seo";
 
 // No pictographic icons — gradient index numbers (01–04) instead, consistent
 // with the homepage ServicesPreview treatment.
@@ -20,19 +21,19 @@ const services = [
     features: ["Kreatives Ad-Design", "A/B-Testing von Assets", "Retargeting-Visuals", "Performance-Reporting"],
   },
   {
-    title: "Content Strategie",
+    title: "Content-Strategie",
     desc: "Wir entwickeln umfassende Content-Strategien, die mit deinen Geschäftszielen übereinstimmen und Zielgruppenanalyse, Wettbewerbsforschung sowie Content-Säulen umfassen.",
     features: ["Zielgruppenforschung", "Content-Säulen-Framework", "Monatliche Content-Pläne", "Performance-Analyse"],
   },
 ];
 
 export function ServicesPage() {
-  usePageTitle("Dienstleistungen");
+  usePageMeta(ROUTE_META.services.title, ROUTE_META.services.description, "/services/");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-16 md:mb-20 max-w-3xl">
-          <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Unsere Dienstleistungen</span>
+          <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-3 block">Unsere Dienstleistungen</span>
           <h1 className="font-['Space_Grotesk'] text-3xl sm:text-4xl md:text-6xl font-semibold tracking-tight leading-[1.1] md:leading-[1.05] mb-6">
             Was wir{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">zaubern</span>
@@ -41,7 +42,7 @@ export function ServicesPage() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">angehen</span>
           </h1>
           <p className="text-base md:text-lg text-[#B3B3C2] leading-relaxed">
-            Wir bieten eine komplette Palette von Social Media Dienstleistungen,
+            Wir bieten eine komplette Palette von Social-Media-Dienstleistungen,
             <br />
             von der Produktion bis zur Strategie.
           </p>
@@ -63,7 +64,7 @@ export function ServicesPage() {
                   <p className="text-base md:text-lg text-[#B3B3C2] leading-relaxed">{s.desc}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm uppercase tracking-widest text-[#7C3AED] font-medium mb-6">Was beinhaltet ist</h4>
+                  <h3 className="text-sm uppercase tracking-widest text-[#A855F7] font-medium mb-6">Was enthalten ist</h3>
                   <ul className="space-y-4">
                     {s.features.map((f, j) => (
                       <li key={j} className="flex items-center gap-3">
@@ -82,7 +83,7 @@ export function ServicesPage() {
 
         <div className="mt-20 text-center">
           <h2 className="font-['Space_Grotesk'] text-3xl font-semibold tracking-tight mb-4">Bereit durchzustarten?</h2>
-          <p className="text-lg text-[#B3B3C2] mb-8">Lass uns besprechen, welche Dienstleistungen für deine Marke am besten geeignet ist.</p>
+          <p className="text-lg text-[#B3B3C2] mb-8">Lass uns besprechen, welche Dienstleistungen für deine Marke am besten geeignet sind.</p>
           <AnimatedButton to="/contact" variant="primary">
             Kontakt aufnehmen
           </AnimatedButton>

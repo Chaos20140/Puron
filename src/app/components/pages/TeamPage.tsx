@@ -1,6 +1,7 @@
 import { ImageWithFallback } from "../figma/ImageWithFallback";
 import { motion } from "motion/react";
-import { usePageTitle } from "../../hooks/usePageTitle";
+import { usePageMeta } from "../../hooks/usePageTitle";
+import { ROUTE_META } from "../../seo";
 
 // Vite's BASE_URL ("/" on the puron-media.de apex domain; would be a
 // subpath like "/Puron/" for a GitHub Pages project page). Using it lets
@@ -12,7 +13,8 @@ const team = [
     name: "Mahsuni Akdemir",
     role: "Gründer & Creative",
     desc: "Nach meinem medienbasierten Studium und fünf Jahren paralleler Berufserfahrung habe ich 2026 den Schritt in die Selbstständigkeit gewagt. Mit Puron habe ich einen Raum geschaffen, in dem Kreativität frei entfaltet und in visuellen Konzepten zum Ausdruck gebracht werden kann. Gemeinsam mit unseren Kunden entwickeln wir nicht nur Visionen, sondern verwandeln sie in Inhalte mit nachhaltigem Mehrwert – messbar & wirkungsvoll.",
-    img: `${ASSET_BASE}team/mahsuni.png`,
+    // .webp is built from team/mahsuni.png by `pnpm images` (586 KB → 33 KB).
+    img: `${ASSET_BASE}team/mahsuni.webp`,
     socials: [
       { label: "Instagram", href: "https://www.instagram.com/puronmedia?igsh=MXhqM2VnOGRxOWkzag==" },
     ],
@@ -20,7 +22,7 @@ const team = [
   // Hidden until additional team members are real:
   // {
   //   name: "Marcus Thorne",
-  //   role: "Content Strategie",
+  //   role: "Content-Strategie",
   //   desc: "...",
   //   img: "...",
   //   socials: ["LinkedIn", "Twitter"],
@@ -35,7 +37,7 @@ const team = [
 ];
 
 export function TeamPage() {
-  usePageTitle("Unser Team");
+  usePageMeta(ROUTE_META.team.title, ROUTE_META.team.description, "/team/");
   return (
     <div className="pt-24 md:pt-32 pb-16 md:pb-24" style={{ isolation: "isolate" }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -45,7 +47,7 @@ export function TeamPage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="mb-16 md:mb-20 max-w-3xl"
         >
-          <span className="text-xs uppercase tracking-widest text-[#7C3AED] font-medium mb-3 block">Unser Team</span>
+          <span className="text-xs uppercase tracking-widest text-[#A855F7] font-medium mb-3 block">Unser Team</span>
           <h1 className="font-['Space_Grotesk'] text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05] mb-6">
             Die Köpfe hinter den <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A855F7] to-[#7C3AED]">Ideen</span>.
           </h1>

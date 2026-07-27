@@ -15,6 +15,14 @@ export function AnimatedBackground() {
     // The deep-space radial gradient only depends on the canvas size, so we
     // build it once per resize instead of allocating it every single frame.
     let bgGrad: CanvasGradient | null = null;
+    // Assigning canvas.width/height CLEARS the backing store. With no rAF loop
+    // running (prefers-reduced-motion draws exactly one frame) nothing repainted
+    // afterwards, and because the context is { alpha: false } the result was an
+    // opaque black rectangle over the whole viewport. On a phone `resize` fires
+    // the first time the address bar collapses — so reduced-motion visitors lost
+    // the backdrop permanently on their first scroll. `redrawStatic` is a
+    // forward reference to drawFrame, wired up once everything below exists.
+    let redrawStatic: (() => void) | null = null;
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -24,9 +32,20 @@ export function AnimatedBackground() {
       bgGrad.addColorStop(0, "#1A0B2E"); // Deep saturated purple in center
       bgGrad.addColorStop(0.4, "#0A0514"); // Darker
       bgGrad.addColorStop(1, "#020104"); // Almost pitch black at edges
+      redrawStatic?.();
+    };
+    // rAF-coalesced: the address-bar animation fires resize dozens of times and
+    // each one reallocates the backing store.
+    let resizeRaf = 0;
+    const onResize = () => {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = 0;
+        resize();
+      });
     };
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", onResize);
 
     const isMobile = window.innerWidth < 768;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -265,7 +284,9 @@ export function AnimatedBackground() {
     };
 
     if (prefersReducedMotion) {
-      // One static frame, no rAF loop — respects WCAG 2.3.3.
+      // One static frame, no rAF loop — respects WCAG 2.3.3. Every later resize
+      // has to repaint that frame itself (see `redrawStatic` above).
+      redrawStatic = drawFrame;
       drawFrame();
     } else {
       start();
@@ -283,7 +304,8 @@ export function AnimatedBackground() {
 
     return () => {
       stop();
-      window.removeEventListener("resize", resize);
+      if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);

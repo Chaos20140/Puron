@@ -65,10 +65,18 @@ export function Hero3DVisual() {
       ]);
     }
 
-    const animate = () => {
+    // Delta-time stepping, same as AnimatedBackground. `time += 0.005` per
+    // FRAME made the solar system run exactly twice as fast on a 120 Hz display
+    // as on 60 Hz, and crawl whenever frames were dropped. Clamped at 4x so a
+    // long stall (tab restore, GC pause) doesn't teleport the scene.
+    let lastDraw = 0;
+    const animate = (now?: number) => {
       const w = canvas.width;
       const h = canvas.height;
-      time += 0.005;
+      const t = now ?? performance.now();
+      const dt = lastDraw ? t - lastDraw : 1000 / 60;
+      lastDraw = t;
+      time += 0.005 * Math.min(dt / (1000 / 60), 4);
 
       ctx.clearRect(0, 0, w, h);
 
@@ -260,7 +268,10 @@ export function Hero3DVisual() {
     };
 
     const start = () => {
-      if (animationId === null) animate();
+      if (animationId === null) {
+        lastDraw = 0; // first frame after a (re)start uses the nominal step
+        animate();
+      }
     };
     const stop = () => {
       if (animationId !== null) {

@@ -35,15 +35,18 @@ export function useGoogleReviews() {
 
   useEffect(() => {
     let cancelled = false;
+    // Controller and timer live in the EFFECT scope, not inside the async IIFE,
+    // so the cleanup can actually reach them. Previously cleanup only flipped
+    // `cancelled`: the in-flight request ran to completion after the user had
+    // navigated away, and the 4s timer still fired an abort() into the void.
+    const controller = new AbortController();
+    // 4-second timeout prevents an indefinite hang on slow mobile networks,
+    // which would leave a blank space in the SocialProof section.
+    const timeoutId = window.setTimeout(() => controller.abort(), 4000);
 
     (async () => {
       try {
-        // 4-second timeout prevents an indefinite hang on slow mobile networks,
-        // which would leave a blank space in the SocialProof section.
-        const controller = new AbortController();
-        const timeoutId = window.setTimeout(() => controller.abort(), 4000);
         const res = await fetch(REVIEWS_URL, { signal: controller.signal });
-        window.clearTimeout(timeoutId);
         debug("HTTP status:", res.status);
 
         const text = await res.text();
@@ -55,15 +58,18 @@ export function useGoogleReviews() {
         }
 
         if (!res.ok || !json || json.error) {
-          const message = json?.error ?? `HTTP ${res.status}`;
-          debug("API error:", message);
-          if (!cancelled) setError(typeof message === "string" ? message : JSON.stringify(message));
+          // The raw upstream message stays in the dev-only console. Putting it
+          // in React state risks it being rendered verbatim the day someone
+          // writes `{reviewsError}` into the JSX — the consumer only ever needs
+          // to know THAT it failed, never why.
+          debug("API error:", json?.error ?? `HTTP ${res.status}`);
+          if (!cancelled) setError("unavailable");
           return;
         }
 
         if (!Array.isArray(json.reviews)) {
           debug("Unexpected payload shape — reviews missing:", json);
-          if (!cancelled) setError("Unerwartetes Antwortformat");
+          if (!cancelled) setError("unavailable");
           return;
         }
 
@@ -72,15 +78,23 @@ export function useGoogleReviews() {
           setData(json as GoogleReviewsData);
         }
       } catch (err) {
+        // Same rule as above: details to the dev console, an opaque marker to
+        // the UI. `String(err)` on a network failure can carry the full request
+        // URL and the browser's internal error text.
         debug("Network error:", err);
-        if (!cancelled) setError(String(err));
+        if (!cancelled) setError("unavailable");
       } finally {
+        // clearTimeout used to sit only on the success path, so a network error
+        // left the timer running until it expired.
+        window.clearTimeout(timeoutId);
         if (!cancelled) setLoading(false);
       }
     })();
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
     };
   }, []);
 

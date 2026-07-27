@@ -11,7 +11,12 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm dev",
+    // `npx vite` instead of `pnpm dev`: pnpm is installed via corepack here and
+    // is not always on PATH, in which case Playwright's webServer failed to
+    // start ("Der Befehl \"pnpm\" ... konnte nicht gefunden werden") and every
+    // test errored before it ran. npx resolves the local vite binary regardless
+    // of which package manager is on PATH.
+    command: "npx vite",
     url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

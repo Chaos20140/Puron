@@ -64,9 +64,31 @@ export function SocialProof() {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
+  // Same wrap-around guard as ClientTicker: translateX(-50%) scrolls exactly
+  // one half of the track, which only looks seamless while a half is at least
+  // as wide as the visible window. Three short reviews on a wide monitor would
+  // otherwise leave an empty strip at the end of every cycle.
+  const [halfRepeat, setHalfRepeat] = useState(1);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const track = trackRef.current;
+    if (!wrap || !track || realReviews.length === 0 || reduced) return;
+    const measure = () => {
+      const copyWidth = track.scrollWidth / (2 * halfRepeat);
+      if (copyWidth <= 0) return;
+      const needed = Math.max(1, Math.ceil(wrap.clientWidth / copyWidth));
+      if (needed !== halfRepeat) setHalfRepeat(needed);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [realReviews.length, reduced, halfRepeat]);
+
   // Derive the animation duration from the rendered track width so the flow
   // keeps a constant px/s pace across breakpoints and review counts. The
-  // track is two copies wide; translateX(-50%) travels exactly one copy.
+  // track is two halves wide; translateX(-50%) travels exactly one half.
   useEffect(() => {
     const track = trackRef.current;
     if (!track || realReviews.length === 0 || reduced) return;
@@ -82,7 +104,7 @@ export function SocialProof() {
     const ro = new ResizeObserver(setDuration);
     ro.observe(track);
     return () => ro.disconnect();
-  }, [realReviews.length, reduced]);
+  }, [realReviews.length, reduced, halfRepeat]);
 
   // Touch pauses the marquee so a card can be read/tapped; it resumes a beat
   // after the finger lifts. Desktop hover-pause is pure CSS (hover: hover).
@@ -97,6 +119,8 @@ export function SocialProof() {
   useEffect(() => () => window.clearTimeout(resumeTimer.current), []);
 
   const showCarousel = !reviewsLoading && realReviews.length > 0;
+  // Only the skeleton and the carousel need the reserved height (see below).
+  const hasReviewBox = reviewsLoading || showCarousel;
 
   // Pause the marquee + release its will-change layer when the section scrolls
   // off-screen — a permanently-promoted, always-animating compositor layer
@@ -187,10 +211,13 @@ export function SocialProof() {
           })()}
         </motion.div>
 
-        {/* All three states (skeleton, empty/error, carousel) render into one
-            fixed-height box so a mid-scroll data arrival can't reflow the page
-            below it. min-h = card height + the py-12/md:py-16 vertical padding. */}
-        <div className="relative min-h-[416px] sm:min-h-[436px] md:min-h-[488px]">
+        {/* The reserved height applies to the LOADING and CAROUSEL states only —
+            it exists so a mid-scroll data arrival can't reflow the page below
+            it (min-h = card height + the py-12/md:py-16 padding). The empty and
+            error states must NOT reserve it: keeping ~490px of blank space
+            under a one-line message looked like a broken section, which is
+            exactly what a visitor sees whenever the reviews API is unreachable. */}
+        <div className={`relative ${hasReviewBox ? "min-h-[416px] sm:min-h-[436px] md:min-h-[488px]" : ""}`}>
         {/* Loading skeleton — three shimmer cards matching the real card
             dimensions so the section holds its height while the API fetch
             settles. This eliminates the blank-area flash on mobile. */}
@@ -205,10 +232,22 @@ export function SocialProof() {
           </div>
         )}
         {!reviewsLoading && realReviews.length === 0 && (
-          <div className="text-center text-[#B3B3C2] text-sm max-w-md mx-auto py-12">
-            {reviewsError
-              ? "Die Google-Rezensionen können momentan nicht geladen werden. Bitte versuche es später erneut."
-              : "Aktuell sind keine Google-Rezensionen verfügbar."}
+          <div className="text-center max-w-md mx-auto py-8">
+            <p className="text-[#B3B3C2] text-sm">
+              {reviewsError
+                ? "Die Google-Rezensionen können momentan nicht geladen werden."
+                : "Aktuell sind keine Google-Rezensionen verfügbar."}
+            </p>
+            {/* Give the visitor somewhere to go instead of a dead end — the
+                reviews exist, we just can't show them right now. */}
+            <a
+              href="https://www.google.com/search?q=Puron+Media+Meschede"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-sm text-[#A855F7] underline decoration-[#A855F7]/40 underline-offset-4 hover:decoration-[#A855F7]"
+            >
+              Bewertungen direkt bei Google ansehen
+            </a>
           </div>
         )}
 
@@ -235,11 +274,14 @@ export function SocialProof() {
               ref={trackRef}
               className="review-marquee-track flex gap-6 md:gap-8 w-max pr-6 md:pr-8"
             >
-              {[...realReviews, ...realReviews].map((r, i) => (
-                <div key={i} aria-hidden={i >= realReviews.length || undefined} className="shrink-0">
-                  <GoogleReviewCard review={r} href={googleMapsUri} />
-                </div>
-              ))}
+              {Array.from({ length: 2 * halfRepeat }, () => realReviews).flat().map((r, i) => {
+                const duplicate = i >= realReviews.length;
+                return (
+                  <div key={i} aria-hidden={duplicate || undefined} className="shrink-0">
+                    <GoogleReviewCard review={r} href={googleMapsUri} duplicate={duplicate} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

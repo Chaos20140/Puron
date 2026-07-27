@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "motion/react";
 import type { GoogleReview } from "./useGoogleReviews";
 
@@ -31,37 +30,38 @@ const Stars = ({ rating }: { rating: number }) => {
   );
 };
 
-type Props = { review: GoogleReview; href?: string | null };
+type Props = { review: GoogleReview; href?: string | null; duplicate?: boolean };
 
 // When `href` is set the whole card becomes a link to the business's Google
 // reviews page — the card already had `cursor-pointer`, this makes that
 // invitation actually pay off.
-export function GoogleReviewCard({ review, href }: Props) {
+// `duplicate` marks the second, aria-hidden copy the marquee renders to loop
+// seamlessly. Its link must leave the tab order: a focusable descendant inside
+// an aria-hidden subtree is a WCAG failure (Lighthouse: "[aria-hidden='true']
+// elements contain focusable descendants") and keyboard users would otherwise
+// tab into cards a screen reader can't announce.
+// Reviewer profile photos are deliberately NOT rendered. `review.authorPhoto`
+// is an lh3.googleusercontent.com URL, so painting it made every home-page
+// visitor's browser send its IP, user agent and referrer straight to Google in
+// the US — without consent and without any interaction. The privacy policy even
+// claimed the opposite ("Direkt vom Browser des Besuchers gehen keine Anfragen
+// an Google"). The initials avatar below was already the on-error fallback, so
+// nothing else changes. To bring photos back, proxy them through the edge
+// function instead of hotlinking Google.
+export function GoogleReviewCard({ review, href, duplicate = false }: Props) {
   const initials = (review.author || "?").trim().charAt(0).toUpperCase();
-  const [photoFailed, setPhotoFailed] = useState(false);
-  const showPhoto = review.authorPhoto && !photoFailed;
 
   const inner = (
     <div className="absolute inset-3 rounded-xl bg-[#0A0A0D]/95 text-[#F5F5F7] ring-1 ring-white/10 md:backdrop-blur overflow-hidden">
       <div className="p-6 h-full flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="flex items-center gap-3">
-            {showPhoto ? (
-              <img
-                src={review.authorPhoto!}
-                alt={review.author}
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-full object-cover bg-[#1f1f2e]"
-                loading="eager"
-                decoding="async"
-                onError={() => setPhotoFailed(true)}
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] text-sm font-medium">
-                {initials}
-              </div>
-            )}
+            <div
+              aria-hidden="true"
+              className="h-10 w-10 shrink-0 rounded-full bg-[#7C3AED]/20 flex items-center justify-center text-[#A855F7] text-sm font-medium"
+            >
+              {initials}
+            </div>
             <div>
               <div className="text-sm font-medium text-white">{review.author}</div>
               <div className="text-xs text-[#B3B3C2]">{review.relativeTime}</div>
@@ -71,7 +71,7 @@ export function GoogleReviewCard({ review, href }: Props) {
         </div>
         <Stars rating={review.rating} />
         <p className="text-[15px] leading-relaxed text-[#E0E0E5] mb-auto font-medium line-clamp-[8]">
-          "{review.text}"
+          {`„${review.text}“`}
         </p>
       </div>
     </div>
@@ -87,6 +87,7 @@ export function GoogleReviewCard({ review, href }: Props) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Google-Rezension von ${review.author} – auf Google ansehen`}
+        tabIndex={duplicate ? -1 : undefined}
         whileHover={{ scale: 1.08, y: -10, zIndex: 30 }}
         transition={{ duration: 0.45, ease: [0.21, 0.47, 0.32, 0.98] }}
         className={wrapperClass}
