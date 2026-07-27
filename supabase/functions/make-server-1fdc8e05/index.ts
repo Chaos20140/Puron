@@ -48,7 +48,14 @@ app.get("/make-server-1fdc8e05/health", (c) => {
 // for "Puron Media Meschede" with KV caching.
 const REVIEWS_CACHE_KEY = "google_reviews:puron_media_meschede";
 const PLACE_ID_CACHE_KEY = "google_reviews:puron_media_meschede:place_id";
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const REVIEWS_FAIL_KEY = "google_reviews:puron_media_meschede:last_failure";
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — how long a payload counts as FRESH
+
+// How long to keep serving the last good payload after an upstream failure
+// without re-asking Google. Places API (New) is billed per call, so hammering
+// it from every page view while it is rejecting us is both slow for the visitor
+// and expensive.
+const FAILURE_BACKOFF_MS = 5 * 60 * 1000; // 5 minutes
 
 async function resolvePlaceId(apiKey: string): Promise<string> {
   const cached = await kv.get(PLACE_ID_CACHE_KEY);
@@ -77,20 +84,50 @@ async function resolvePlaceId(apiKey: string): Promise<string> {
   return placeId;
 }
 
+// Reviews are marketing content, not live data: a day-old review reads exactly
+// the same as a fresh one. The endpoint therefore serves STALE-WHILE-ERROR — it
+// only ever returns an error when it has nothing at all to show.
+//
+// Before this, the cached payload was used strictly for one hour and any
+// upstream hiccup produced a 502, which blanked the whole reviews section on the
+// live site (2026-07-27: Places details started returning non-OK and the
+// carousel showed "können momentan nicht geladen werden" until it recovered).
 app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
+  // Read defensively: this sits OUTSIDE the try below (every failure path needs
+  // it), so a KV outage here would otherwise escape as an unhandled rejection.
+  let cached: { fetchedAt: number; payload: Record<string, unknown> } | null = null;
+  try {
+    cached = (await kv.get(REVIEWS_CACHE_KEY)) as typeof cached;
+  } catch (error) {
+    console.log(`KV read failed for ${REVIEWS_CACHE_KEY}: ${error instanceof Error ? error.message : error}`);
+  }
+
+  // Last resort for every failure path below: the newest payload we ever got.
+  const serveStale = (reason: string) => {
+    if (!cached?.payload) {
+      console.log(`No cached reviews to fall back on (${reason})`);
+      return c.json({ error: "Reviews konnten nicht geladen werden." }, 502);
+    }
+    console.log(`Serving stale reviews (${reason}), cached at ${new Date(cached.fetchedAt).toISOString()}`);
+    return c.json({ ...cached.payload, cached: true, stale: true });
+  };
+
   try {
     const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!apiKey) {
+      // Don't name the missing variable to the caller — that is internal config.
       console.log("GOOGLE_PLACES_API_KEY env var is missing while fetching Google reviews");
-      return c.json({ error: "Missing GOOGLE_PLACES_API_KEY" }, 500);
+      return serveStale("missing API key");
     }
 
-    const cached = await kv.get(REVIEWS_CACHE_KEY) as
-      | { fetchedAt: number; payload: unknown }
-      | null;
-
     if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-      return c.json({ ...((cached.payload ?? {}) as object), cached: true });
+      return c.json({ ...cached.payload, cached: true });
+    }
+
+    // Recently failed? Don't pay for another rejected call yet.
+    const lastFailure = (await kv.get(REVIEWS_FAIL_KEY)) as { at: number } | null;
+    if (lastFailure && Date.now() - lastFailure.at < FAILURE_BACKOFF_MS && cached?.payload) {
+      return c.json({ ...cached.payload, cached: true, stale: true });
     }
 
     const placeId = await resolvePlaceId(apiKey);
@@ -108,10 +145,12 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
 
     if (!detailsRes.ok) {
       const text = await detailsRes.text();
+      // The upstream status + body is the ONLY place the real cause (quota,
+      // billing, key restriction) is visible — keep logging it in full, and keep
+      // it out of the response: it can contain API-key/quota diagnostics.
       console.log(`Places details failed (${detailsRes.status}) for placeId=${placeId}: ${text}`);
-      // IMPORTANT: never cache error responses, and never leak the upstream
-      // body to the client — it can contain API-key/quota diagnostics.
-      return c.json({ error: "Reviews konnten nicht geladen werden." }, 502);
+      await kv.set(REVIEWS_FAIL_KEY, { at: Date.now() });
+      return serveStale(`Places details HTTP ${detailsRes.status}`);
     }
 
     const data = await detailsRes.json();
@@ -140,15 +179,21 @@ app.get("/make-server-1fdc8e05/google-reviews", async (c) => {
     // Only cache when we actually got reviews back from Google. This
     // guarantees error states (403, API_KEY_INVALID, REQUEST_DENIED, …)
     // never poison the cache.
-    if (reviews.length > 0) {
-      await kv.set(REVIEWS_CACHE_KEY, { fetchedAt: Date.now(), payload });
+    if (reviews.length === 0) {
+      console.log(`Places details returned 0 reviews for placeId=${placeId}`);
+      await kv.set(REVIEWS_FAIL_KEY, { at: Date.now() });
+      return serveStale("empty review list");
     }
+
+    await kv.set(REVIEWS_CACHE_KEY, { fetchedAt: Date.now(), payload });
+    await kv.del(REVIEWS_FAIL_KEY);
 
     return c.json({ ...payload, cached: false });
   } catch (error) {
     console.log(`Unexpected error in /google-reviews: ${error instanceof Error ? error.stack ?? error.message : error}`);
     // IMPORTANT: never cache error responses, and never leak internals.
-    return c.json({ error: "Reviews konnten nicht geladen werden." }, 500);
+    await kv.set(REVIEWS_FAIL_KEY, { at: Date.now() });
+    return serveStale("unexpected error");
   }
 });
 
