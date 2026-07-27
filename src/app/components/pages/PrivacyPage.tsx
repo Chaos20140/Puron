@@ -22,7 +22,7 @@ export function PrivacyPage() {
     {
       title: "4. Google-Rezensionen",
       content:
-        "Auf der Startseite zeigen wir öffentliche Google-Rezensionen unseres Unternehmens an. Die Rezensionen werden serverseitig über unsere Edge-Funktion bei Supabase aus der Google Places API (New) abgerufen und für maximal eine Stunde zwischengespeichert. Vom Browser des Besuchers gehen dabei keine Anfragen an Google: Die Profilbilder der Rezensent:innen werden bewusst nicht eingebunden, stattdessen zeigen wir einen Platzhalter mit dem Anfangsbuchstaben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Außendarstellung).",
+        "Auf der Startseite zeigen wir öffentliche Google-Rezensionen unseres Unternehmens an. Diese Texte sind fester Bestandteil der Website und werden nicht live abgerufen: Beim Aufruf der Seite findet keinerlei Verbindung zu Google oder einem anderen Dienst statt — weder aus deinem Browser noch von unserem Server. Auch die Profilbilder der Rezensent:innen binden wir nicht ein, stattdessen zeigen wir einen Platzhalter mit dem Anfangsbuchstaben. Erst wenn du eine Rezension anklickst, öffnet sich das Google-Profil in einem neuen Tab; ab dann gilt die Datenschutzerklärung von Google. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Außendarstellung).",
     },
     {
       title: "5. Schriftarten",
@@ -37,7 +37,7 @@ export function PrivacyPage() {
     {
       title: "7. Übermittlung in Drittländer & Auftragsverarbeitung",
       content:
-        "Ein Teil der eingesetzten Dienstleister verarbeitet Daten außerhalb der EU bzw. des EWR:\n\n- GitHub, Inc. (USA) — Hosting dieser Website\n- Supabase Inc. (USA/Singapur) — Edge-Funktion für den Abruf der Google-Rezensionen\n- Web3Forms — technische Zustellung des Kontaktformulars\n\nSoweit die Anbieter unter dem EU-US Data Privacy Framework zertifiziert sind, erfolgt die Übermittlung auf dieser Grundlage (Art. 45 DSGVO); im Übrigen auf Basis der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO). Mit Dienstleistern, die personenbezogene Daten in unserem Auftrag verarbeiten, bestehen Verträge zur Auftragsverarbeitung nach Art. 28 DSGVO. Trotz dieser Garantien lässt sich ein Zugriff durch US-Behörden nicht vollständig ausschließen.",
+        "Ein Teil der eingesetzten Dienstleister verarbeitet Daten außerhalb der EU bzw. des EWR:\n\n- GitHub, Inc. (USA) — Hosting dieser Website\n- Web3Forms — technische Zustellung des Kontaktformulars, ausschließlich beim Absenden\n\nSoweit die Anbieter unter dem EU-US Data Privacy Framework zertifiziert sind, erfolgt die Übermittlung auf dieser Grundlage (Art. 45 DSGVO); im Übrigen auf Basis der EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO). Mit Dienstleistern, die personenbezogene Daten in unserem Auftrag verarbeiten, bestehen Verträge zur Auftragsverarbeitung nach Art. 28 DSGVO. Trotz dieser Garantien lässt sich ein Zugriff durch US-Behörden nicht vollständig ausschließen.",
     },
     {
       title: "8. Deine Rechte",

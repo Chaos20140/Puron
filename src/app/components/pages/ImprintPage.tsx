@@ -47,7 +47,7 @@ export function ImprintPage() {
             {/* The Unsplash credit was removed: the only Unsplash images in the
                 codebase are in ProjectsPage, whose route is commented out, so
                 no reachable page loads one. */}
-            <p className="text-sm">Diese Website wird gehostet auf <strong className="text-[#F5F5F7]">GitHub Pages</strong> (GitHub, Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA). Edge-Funktionen (Google-Rezensionen) werden bereitgestellt über <strong className="text-[#F5F5F7]">Supabase</strong> (Supabase Inc., 970 Toa Payoh North, #07-04, Singapore 318992). Der Versand des Kontaktformulars läuft über <strong className="text-[#F5F5F7]">Web3Forms</strong>.</p>
+            <p className="text-sm">Diese Website wird gehostet auf <strong className="text-[#F5F5F7]">GitHub Pages</strong> (GitHub, Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA). Der Versand des Kontaktformulars läuft über <strong className="text-[#F5F5F7]">Web3Forms</strong>.</p>
           </div>
 
           <div className="p-8 rounded-3xl bg-[#121217] border border-white/5">

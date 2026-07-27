@@ -26,7 +26,7 @@ const CSP_DIRECTIVES = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: https://images.unsplash.com",
-  "connect-src 'self' https://fhgevybapodhubkuylnw.supabase.co https://api.web3forms.com",
+  "connect-src 'self' https://api.web3forms.com",
   "object-src 'none'",
   "frame-src 'none'",
   "base-uri 'self'",

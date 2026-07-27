@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import type { GoogleReview } from "./useGoogleReviews";
+import { relativeTime, type Review } from "../reviews";
 
 const GoogleLogo = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
@@ -30,7 +30,7 @@ const Stars = ({ rating }: { rating: number }) => {
   );
 };
 
-type Props = { review: GoogleReview; href?: string | null; duplicate?: boolean };
+type Props = { review: Review; href?: string | null; duplicate?: boolean };
 
 // When `href` is set the whole card becomes a link to the business's Google
 // reviews page — the card already had `cursor-pointer`, this makes that
@@ -40,14 +40,10 @@ type Props = { review: GoogleReview; href?: string | null; duplicate?: boolean }
 // an aria-hidden subtree is a WCAG failure (Lighthouse: "[aria-hidden='true']
 // elements contain focusable descendants") and keyboard users would otherwise
 // tab into cards a screen reader can't announce.
-// Reviewer profile photos are deliberately NOT rendered. `review.authorPhoto`
-// is an lh3.googleusercontent.com URL, so painting it made every home-page
-// visitor's browser send its IP, user agent and referrer straight to Google in
-// the US — without consent and without any interaction. The privacy policy even
-// claimed the opposite ("Direkt vom Browser des Besuchers gehen keine Anfragen
-// an Google"). The initials avatar below was already the on-error fallback, so
-// nothing else changes. To bring photos back, proxy them through the edge
-// function instead of hotlinking Google.
+// No reviewer profile photo: those were lh3.googleusercontent.com URLs, so
+// painting them sent every visitor's IP, user agent and referrer straight to
+// Google without consent. The initials avatar replaces them, and since the
+// reviews are static content now there is no photo URL left to render anyway.
 export function GoogleReviewCard({ review, href, duplicate = false }: Props) {
   const initials = (review.author || "?").trim().charAt(0).toUpperCase();
 
@@ -64,7 +60,7 @@ export function GoogleReviewCard({ review, href, duplicate = false }: Props) {
             </div>
             <div>
               <div className="text-sm font-medium text-white">{review.author}</div>
-              <div className="text-xs text-[#B3B3C2]">{review.relativeTime}</div>
+              <div className="text-xs text-[#B3B3C2]">{relativeTime(review.publishedAt)}</div>
             </div>
           </div>
           <GoogleLogo />

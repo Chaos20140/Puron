@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { useGoogleReviews } from "../useGoogleReviews";
+import { AGGREGATE, GOOGLE_REVIEWS_URL, REVIEWS } from "../../reviews";
 import { GoogleReviewCard } from "../GoogleReviewCard";
 
 // Reviews carousel — a NATIVE horizontal scroll rail with snap points, plus a
@@ -59,17 +59,16 @@ const RESUME_AFTER_MS = 2500; // grace period after the user lets go
 const COPIES = 3; // middle copy is home; one copy of runway either way
 
 export function SocialProof() {
-  const { data: reviewsData, error: reviewsError, loading: reviewsLoading } = useGoogleReviews();
-  const realReviews = reviewsData?.reviews ?? [];
-  const aggregateRating = reviewsData?.rating ?? null;
-  const aggregateCount = reviewsData?.userRatingCount ?? null;
-  // The URL comes from the Google Places API via our edge function, i.e. from
-  // outside. It is rendered into href on the aggregate line AND on every card,
-  // so anything but a plain https: URL is dropped rather than trusted — an
-  // href is a script-execution surface (`javascript:`), and "upstream is
-  // trustworthy" is not a property we can verify at runtime.
-  const rawMapsUri = reviewsData?.googleMapsUri ?? null;
-  const googleMapsUri = rawMapsUri && /^https:\/\//i.test(rawMapsUri) ? rawMapsUri : null;
+  // Static content now (src/app/reviews.ts) — no fetch, no loading state, no
+  // error state, and nothing that can reflow the page after first paint.
+  const realReviews = REVIEWS;
+  const aggregateRating = AGGREGATE.rating;
+  const aggregateCount = AGGREGATE.count;
+  // The href is still validated rather than trusted: it is rendered on the
+  // aggregate line AND on every card, and an href is a script-execution surface
+  // (`javascript:`). Cheap to keep, and it now also guards against a typo in the
+  // hand-edited constant.
+  const googleMapsUri = /^https:\/\//i.test(GOOGLE_REVIEWS_URL) ? GOOGLE_REVIEWS_URL : null;
 
   const railRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -79,9 +78,7 @@ export function SocialProof() {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  const showCarousel = !reviewsLoading && realReviews.length > 0;
-  // Only the skeleton and the carousel need the reserved height (see below).
-  const hasReviewBox = reviewsLoading || showCarousel;
+  const showCarousel = realReviews.length > 0;
 
   // How often the review list is repeated per copy. One copy has to be at least
   // as wide as the rail, otherwise the loop jump would be visible.
@@ -335,37 +332,16 @@ export function SocialProof() {
           })()}
         </motion.div>
 
-        {/* The reserved height applies to the LOADING and CAROUSEL states only —
-            it exists so a mid-scroll data arrival can't reflow the page below
-            it (min-h = card height + the py-12/md:py-16 padding). The empty and
-            error states must NOT reserve it: keeping ~490px of blank space
-            under a one-line message looked like a broken section, which is
-            exactly what a visitor sees whenever the reviews API is unreachable. */}
-        <div className={`relative ${hasReviewBox ? "min-h-[416px] sm:min-h-[436px] md:min-h-[488px]" : ""}`}>
-        {/* Loading skeleton — three shimmer cards matching the real card
-            dimensions so the section holds its height while the API fetch
-            settles. This eliminates the blank-area flash on mobile. */}
-        {reviewsLoading && (
-          <div className="flex gap-6 overflow-hidden py-12 md:py-16 px-6 md:px-16" aria-hidden="true">
-            {[0, 1, 2].map((k) => (
-              <div
-                key={k}
-                className="shrink-0 w-[260px] sm:w-[300px] md:w-[340px] h-[320px] sm:h-[340px] md:h-[360px] rounded-2xl bg-white/5 border border-white/5 animate-pulse"
-              />
-            ))}
-          </div>
-        )}
-        {!reviewsLoading && realReviews.length === 0 && (
+        {/* No loading skeleton and no min-height reservation any more: the
+            reviews are part of the bundle, so they are on screen in the first
+            paint and there is no late data arrival that could reflow the page.
+            The empty branch only guards a hand-emptied REVIEWS array. */}
+        <div className="relative">
+        {realReviews.length === 0 && (
           <div className="text-center max-w-md mx-auto py-8">
-            <p className="text-[#B3B3C2] text-sm">
-              {reviewsError
-                ? "Die Google-Rezensionen können momentan nicht geladen werden."
-                : "Aktuell sind keine Google-Rezensionen verfügbar."}
-            </p>
-            {/* Give the visitor somewhere to go instead of a dead end — the
-                reviews exist, we just can't show them right now. */}
+            <p className="text-[#B3B3C2] text-sm">Aktuell sind keine Rezensionen hinterlegt.</p>
             <a
-              href="https://www.google.com/search?q=Puron+Media+Meschede"
+              href={googleMapsUri ?? "https://www.google.com/search?q=Puron+Media+Meschede"}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-block text-sm text-[#A855F7] underline decoration-[#A855F7]/40 underline-offset-4 hover:decoration-[#A855F7]"
