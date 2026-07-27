@@ -15,37 +15,56 @@ export function AnimatedBackground() {
     // The deep-space radial gradient only depends on the canvas size, so we
     // build it once per resize instead of allocating it every single frame.
     let bgGrad: CanvasGradient | null = null;
-    // Assigning canvas.width/height CLEARS the backing store. With no rAF loop
-    // running (prefers-reduced-motion draws exactly one frame) nothing repainted
-    // afterwards, and because the context is { alpha: false } the result was an
-    // opaque black rectangle over the whole viewport. On a phone `resize` fires
-    // the first time the address bar collapses — so reduced-motion visitors lost
-    // the backdrop permanently on their first scroll. `redrawStatic` is a
-    // forward reference to drawFrame, wired up once everything below exists.
-    let redrawStatic: (() => void) | null = null;
+    // Assigning canvas.width/height CLEARS the backing store, and the context is
+    // { alpha: false }, so between the clear and the next paint the element is an
+    // opaque black rectangle over the whole viewport.
+    //
+    // Two things follow, and getting either wrong makes the backdrop flicker or
+    // vanish while scrolling on a phone:
+    //
+    // 1. MEASURE THE CSS BOX, NOT THE WINDOW. The canvas is `fixed … h-screen`,
+    //    i.e. 100vh — on mobile that resolves to the LARGE viewport height and
+    //    stays put while the address bar collapses. `window.innerHeight` does
+    //    the opposite: it changes on every address-bar toggle, so sizing from it
+    //    re-allocated (and blanked) the backing store on essentially every
+    //    scroll. Reading clientWidth/clientHeight makes scrolling a no-op.
+    // 2. REPAINT IN THE SAME CALL. `redraw` is a forward reference to drawFrame,
+    //    wired up below once it exists. Leaving the repaint to the animation
+    //    loop is not good enough: mobile caps repaints to 30fps, so the canvas
+    //    could stay black for a full 33ms frame — and if the clear is deferred
+    //    into a requestAnimationFrame it can land AFTER that frame's draw, which
+    //    turns an occasional flicker into a reliable one.
+    let redraw: (() => void) | null = null;
+    let lastW = 0;
+    let lastH = 0;
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
-      bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(canvas.width, canvas.height) * 1.2);
+      const w = canvas.clientWidth || window.innerWidth;
+      const h = canvas.clientHeight || window.innerHeight;
+      // Never clear for nothing — a resize event that doesn't change the box
+      // (the common case while scrolling) must not touch the backing store.
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
+      canvas.width = w;
+      canvas.height = h;
+      const cx = w / 2;
+      const cy = h / 2;
+      bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 1.2);
       bgGrad.addColorStop(0, "#1A0B2E"); // Deep saturated purple in center
       bgGrad.addColorStop(0.4, "#0A0514"); // Darker
       bgGrad.addColorStop(1, "#020104"); // Almost pitch black at edges
-      redrawStatic?.();
-    };
-    // rAF-coalesced: the address-bar animation fires resize dozens of times and
-    // each one reallocates the backing store.
-    let resizeRaf = 0;
-    const onResize = () => {
-      if (resizeRaf) return;
-      resizeRaf = requestAnimationFrame(() => {
-        resizeRaf = 0;
-        resize();
-      });
+      redraw?.();
     };
     resize();
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", resize);
+    // Orientation changes settle a beat after the event fires; re-measure then.
+    // Named, not inline, so the cleanup below can actually detach it.
+    let orientationTimer = 0;
+    const onOrientationChange = () => {
+      window.clearTimeout(orientationTimer);
+      orientationTimer = window.setTimeout(resize, 150);
+    };
+    window.addEventListener("orientationchange", onOrientationChange);
 
     const isMobile = window.innerWidth < 768;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -283,10 +302,15 @@ export function AnimatedBackground() {
       }
     };
 
+    // Wire up the forward reference from resize() — in BOTH paths. Reduced
+    // motion needs it because there is no loop at all; the animated path needs
+    // it because the loop's next repaint can be up to a frame away (33ms on
+    // mobile), and a blank full-viewport canvas for a frame is exactly the
+    // flicker this is here to prevent.
+    redraw = drawFrame;
+
     if (prefersReducedMotion) {
-      // One static frame, no rAF loop — respects WCAG 2.3.3. Every later resize
-      // has to repaint that frame itself (see `redrawStatic` above).
-      redrawStatic = drawFrame;
+      // One static frame, no rAF loop — respects WCAG 2.3.3.
       drawFrame();
     } else {
       start();
@@ -304,8 +328,9 @@ export function AnimatedBackground() {
 
     return () => {
       stop();
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
-      window.removeEventListener("resize", onResize);
+      window.clearTimeout(orientationTimer);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("orientationchange", onOrientationChange);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
