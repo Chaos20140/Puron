@@ -37,67 +37,6 @@ test.describe("Google-Rezensionen Karussell (Mobile)", () => {
     });
   });
 
-  test("rendert Karten ohne touch-action: pan-x und ohne Mandatory-Snap", async ({ page }) => {
-    await page.goto("/");
-    const wrap = page.locator(".review-carousel-wrap");
-    await expect(wrap).toBeVisible();
-    await expect(page.getByText("Testkunde 1").first()).toBeVisible();
-
-    const styles = await wrap.evaluate((el) => {
-      const cs = getComputedStyle(el);
-      return { touchAction: cs.touchAction, snap: cs.scrollSnapType };
-    });
-    // pan-x blockierte das vertikale Seiten-Scrollen über dem Karussell.
-    expect(styles.touchAction).not.toBe("pan-x");
-    // Kein Mandatory-Snap, der mit der Animation kämpfen könnte.
-    expect(styles.snap).not.toContain("mandatory");
-  });
-
-  test("GPU-Marquee läuft und bewegt die Karten nach links (rechts→links)", async ({ page }) => {
-    await page.goto("/");
-    const track = page.locator(".review-marquee-track");
-    await expect(track).toBeVisible();
-
-    // Es ist eine echte CSS-Animation (Compositor) — kein scrollLeft-Hack.
-    const animName = await track.evaluate((el) => getComputedStyle(el).animationName);
-    expect(animName).toBe("review-marquee");
-
-    const translateX = () =>
-      track.evaluate((el) => {
-        const t = getComputedStyle(el).transform;
-        if (!t || t === "none") return 0;
-        return new DOMMatrixReadOnly(t).m41;
-      });
-
-    // Der Marquee pausiert bewusst, solange die Sektion NICHT im Viewport ist
-    // (IntersectionObserver → data-active). toBeVisible() prüft nur eine
-    // nicht-leere Box, nicht die Sichtbarkeit im Viewport — ohne Scroll maß der
-    // Test deshalb zweimal denselben eingefrorenen Offset und schlug sporadisch
-    // fehl. Erst in den Viewport scrollen und auf data-active warten.
-    await track.scrollIntoViewIfNeeded();
-    await expect(page.locator('.review-carousel-wrap[data-active="true"]')).toHaveCount(1);
-
-    const before = await translateX();
-    await page.waitForTimeout(600);
-    const after = await translateX();
-    // translateX wird negativer → Inhalt wandert nach links.
-    expect(after).toBeLessThan(before);
-  });
-
-  test("Touch pausiert die Animation", async ({ page }) => {
-    await page.goto("/");
-    const wrap = page.locator(".review-carousel-wrap");
-    await expect(wrap).toBeVisible();
-
-    await wrap.dispatchEvent("touchstart");
-    await expect(wrap).toHaveAttribute("data-paused", "true");
-
-    const playState = await page
-      .locator(".review-marquee-track")
-      .evaluate((el) => getComputedStyle(el).animationPlayState);
-    expect(playState).toBe("paused");
-  });
-
   test("Bewertung + Anzahl werden angezeigt und verlinken zu Google", async ({ page }) => {
     await page.goto("/");
     // Präzise: die Aggregat-Zeile unter der Überschrift. `/auf Google ansehen/`
@@ -106,8 +45,8 @@ test.describe("Google-Rezensionen Karussell (Mobile)", () => {
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", "https://maps.google.com/?cid=123");
 
-    // Genau EINE Karte pro Rezension im A11y-Baum — der geklonte zweite Satz
-    // des Marquees ist aria-hidden und darf nicht doppelt auftauchen.
+    // Genau EINE Karte pro Rezension im A11y-Baum — die Kopien der Schiene
+    // sind aria-hidden und duerfen nicht mehrfach auftauchen.
     await expect(page.getByRole("link", { name: /^Google-Rezension von/ })).toHaveCount(6);
   });
 
@@ -120,23 +59,107 @@ test.describe("Google-Rezensionen Karussell (Mobile)", () => {
     await page.goto("/");
     await expect(page.getByText("Testkunde 1").first()).toBeVisible();
     // Die Karte muss den Initialen-Platzhalter zeigen, nicht das Google-Foto.
-    await expect(page.locator(".review-marquee-track img")).toHaveCount(0);
+    await expect(page.locator(".review-rail img")).toHaveCount(0);
     expect(googleRequests, `Direktanfragen an Google: ${googleRequests.join(", ")}`).toHaveLength(0);
   });
 
-  test("Marquee ist breiter als sein Fenster (kein Leerstreifen beim Umschlag)", async ({ page }) => {
+  test("eine Kopie ist mindestens so breit wie die Schiene (nahtloser Sprung)", async ({ page }) => {
     await page.goto("/");
-    const wrap = page.locator(".review-carousel-wrap");
-    await expect(wrap).toBeVisible();
+    const rail = page.locator(".review-rail");
+    await expect(rail).toBeVisible();
 
-    const { fenster, haelfte } = await page.evaluate(() => {
-      const w = document.querySelector(".review-carousel-wrap") as HTMLElement;
-      const t = document.querySelector(".review-marquee-track") as HTMLElement;
-      return { fenster: w.clientWidth, haelfte: t.scrollWidth / 2 };
+    const { schiene, kopie } = await page.evaluate(() => {
+      const r = document.querySelector(".review-rail") as HTMLElement;
+      const t = r.firstElementChild as HTMLElement;
+      return { schiene: r.clientWidth, kopie: t.scrollWidth / 3 };
     });
-    // translateX(-50%) scrollt genau eine Hälfte. Ist sie schmaler als das
-    // Fenster, läuft das Fenster am Zyklusende über das Track-Ende hinaus.
-    expect(haelfte).toBeGreaterThanOrEqual(fenster);
+    // Der Endlos-Sprung versetzt um genau eine Kopie. Ist die schmaler als die
+    // Schiene, waere der Sprung sichtbar.
+    expect(kopie).toBeGreaterThanOrEqual(schiene);
+  });
+
+  test("ist eine echte Scroll-Schiene mit Snap und blockiert kein Seiten-Scrollen", async ({ page }) => {
+    await page.goto("/");
+    const rail = page.locator(".review-rail");
+    await expect(rail).toBeVisible();
+
+    const styles = await rail.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        overflowX: cs.overflowX,
+        snap: cs.scrollSnapType,
+        touchAction: cs.touchAction,
+        overscrollX: cs.overscrollBehaviorX,
+        scrollbarBreite: (el as HTMLElement).offsetHeight - (el as HTMLElement).clientHeight,
+      };
+    });
+    expect(styles.overflowX).toBe("auto");
+    expect(styles.snap).toContain("mandatory");
+    // touch-action: pan-x wuerde das vertikale Seiten-Scrollen ueber dem
+    // Karussell blockieren — das war schon einmal ein Fehler.
+    expect(styles.touchAction).not.toBe("pan-x");
+    // Ohne contain wischt man auf iOS/Android in die Zurueck-Geste.
+    expect(styles.overscrollX).toBe("contain");
+    expect(styles.scrollbarBreite).toBe(0);
+  });
+
+  test("manuelles Durchblaettern bewegt die Schiene, danach laeuft Autoplay weiter", async ({ page }) => {
+    await page.goto("/");
+    const rail = page.locator(".review-rail");
+    await expect(rail).toBeVisible();
+    await rail.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900); // Schiene setzt sich auf ihre Home-Position
+
+    const pos = () => rail.evaluate((el) => Math.round(el.scrollLeft));
+    const vorher = await pos();
+
+    // Horizontales Wischen/Blaettern nachstellen (Touch-Drag hat Playwright
+    // nicht als Primitive; ein horizontales Rad geht durch denselben Pfad:
+    // Nutzer bewegt die Schiene selbst und pausiert damit das Autoplay).
+    const box = (await rail.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(300, 0);
+    await page.waitForTimeout(700);
+
+    const nachWischen = await pos();
+    expect(nachWischen, "manuelles Blaettern hat die Schiene nicht bewegt").not.toBe(vorher);
+
+    // Und danach darf sie NICHT stehen bleiben.
+    await page.mouse.move(box.x + box.width / 2, box.y - 200); // Zeiger weg (Hover-Pause loesen)
+    await page.waitForTimeout(2600 + 4200);
+    expect(await pos(), "Karussell blieb nach dem Blaettern stehen").not.toBe(nachWischen);
+  });
+
+  test("Seiten-Scrollen haelt das Karussell NICHT an", async ({ page }) => {
+    await page.goto("/");
+    const rail = page.locator(".review-rail");
+    await expect(rail).toBeVisible();
+    await rail.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900);
+
+    const vorher = await rail.evaluate((el) => Math.round(el.scrollLeft));
+    // Waehrend der ganzen Wartezeit die Seite vertikal bewegen — frueher fror
+    // das Karussell dabei ein (data-scrolling-Hack).
+    for (let i = 0; i < 10; i++) {
+      await page.mouse.wheel(0, i % 2 === 0 ? 25 : -25);
+      await page.waitForTimeout(500);
+    }
+    const nachher = await rail.evaluate((el) => Math.round(el.scrollLeft));
+    expect(nachher, "Karussell stand waehrend des Seiten-Scrollens still").not.toBe(vorher);
+  });
+
+  test("Pfeiltasten blaettern (Desktop/Tastatur)", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/");
+    const rail = page.locator(".review-rail");
+    await expect(rail).toBeVisible();
+    await rail.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900);
+
+    const vorher = await rail.evaluate((el) => Math.round(el.scrollLeft));
+    await page.getByRole("button", { name: "Nächste Rezension" }).click();
+    await page.waitForTimeout(700);
+    expect(await rail.evaluate((el) => Math.round(el.scrollLeft))).toBeGreaterThan(vorher);
   });
 });
 
