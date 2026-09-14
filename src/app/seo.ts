@@ -21,13 +21,13 @@ export type PageMeta = {
   description: string;
 };
 
-// The title carries the local search terms the business actually competes for
-// ("Social Media Agentur" + Meschede/Sauerland) instead of only the tagline —
-// the JSON-LD in index.html already positions this as a local ProfessionalService.
+// Client decision (2026-09-11): the title is the brand tagline again, and the
+// regional keyword lives in the description instead — "Sauerland", not
+// "Meschede", which the client asked to drop from the snippet.
 export const HOME_META: PageMeta = {
-  title: "Social Media Agentur Meschede & Sauerland — Puron Media",
+  title: "Puron Media — Social Media Content, der funktioniert",
   description:
-    "Puron Media aus Meschede produziert Reels, Posts, Ads und Content-Strategien, die Unternehmen Kunden, Bewerber und langfristige Aufmerksamkeit gewinnen lassen.",
+    "Puron Media aus dem Sauerland produziert Reels, Posts, Ads und Content-Strategien, die Unternehmen Kunden, Bewerber und langfristige Aufmerksamkeit gewinnen lassen.",
 };
 
 // Keys are the route segments; they must match ROUTES in vite.config.ts.
