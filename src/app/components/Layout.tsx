@@ -70,10 +70,11 @@ export function Layout() {
             className="flex shrink-0 items-center group"
           >
             {/* The client's full lockup (hexagon + "PURON MEDIA" + tagline) as
-                ONE image — the dark-UI variant from `pnpm images`, whose
-                hexagon ring is light because the delivered black one vanishes
-                on this bar. Cropped to its ink, so the CSS height is the real
-                logo height. Sized so logo + "Kontakt" + menu button still fit
+                ONE image, used exactly as delivered — BLACK hexagon ring
+                included. The client wants it black even on this dark bar
+                (a lightened ring was rejected 2026-09-29); don't re-colour it.
+                Cropped to its ink by `pnpm images`, so the CSS height is the
+                real logo height. Sized so logo + "Kontakt" + menu button still fit
                 a 360px phone. No entrance animation: it is persistent chrome
                 and paints with the first frame. */}
             <img

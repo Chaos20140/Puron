@@ -7,10 +7,11 @@
 // written as WebP next to the original; the PNG/JPG stays in public/ as the
 // source for the next run.
 //
-// Three pipelines:
+// Four pipelines:
 //  - photo:   plain resize + lossy WebP.
-//  - brand:   the nav/footer logo. Cropped to its ink and re-coloured for the
-//             dark UI (see brandLogo()).
+//  - brand:   the nav/footer logo, cropped to its ink (see brandLogo()).
+//  - favicon: favicon.ico, favicon-192.png, logo.png and apple-touch-icon.png
+//             from public/favicon-source.png (see favicons()).
 //  - partner: the ticker marks. Flattened to white silhouettes, cropped to their
 //             ink, and MEASURED — the measurements are written to
 //             src/app/components/sections/partnerLogoMetrics.generated.ts,
@@ -78,38 +79,146 @@ for (const job of photos) {
 }
 
 // ------------------------------------------------------------ brand logo ----
-// The client's lockup (hexagon + "PURON MEDIA" + tagline) is drawn for a WHITE
-// background: the hexagon ring is black. On the near-black nav and footer that
-// ring disappears and the mark reads as a floating cube, so the dark-UI variant
-// maps the neutral dark pixels to the site's foreground colour (#F5F5F7). The
-// purple is left untouched, and alpha is preserved so the anti-aliased edges
-// stay smooth. Cropped to its ink: the delivered PNG is 91% transparent margin,
-// which would otherwise decide how big the logo renders.
+// The client's lockup (hexagon + "PURON MEDIA" + tagline), used EXACTLY as
+// delivered — black hexagon ring included. A lightened-ring variant shipped on
+// 2026-09-28 and the client asked for the black ring back the next day, so
+// don't re-colour it. Only cropped to its ink: the delivered PNG is 91%
+// transparent margin, which would otherwise decide how big the logo renders.
 async function brandLogo(file) {
   const src = path.join(pub, file);
   if (!existsSync(src)) return null;
   const { data, width, height } = await raw(src);
-  const LIGHT = [0xf5, 0xf5, 0xf7];
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] === 0) continue;
-    // Classify by BRIGHTNESS, blended rather than thresholded: the ring's
-    // compression noise carries a faint purple tint, so a "neutral and dark"
-    // test skipped those pixels and left dark speckles inside the light ring.
-    // The purple peaks around 200+ in its brightest channel, the ring stays
-    // below ~80; everything between is blended so no seam appears.
-    const max = Math.max(data[i], data[i + 1], data[i + 2]);
-    const keep = Math.min(1, Math.max(0, (max - 110) / (175 - 110)));
-    for (let c = 0; c < 3; c++) data[i + c] = Math.round(LIGHT[c] * (1 - keep) + data[i + c] * keep);
-  }
   const box = inkBox(data, width, height);
   const out = src.replace(/\.png$/i, ".webp");
   // Lossy at q86 is indistinguishable from lossless at 3x zoom and half the
-  // size (25 KB vs 51 KB) — it loads with high priority on every page.
+  // size — it loads with high priority on every page.
   await fromRaw(data, width, height).extract(box).webp({ quality: 86, alphaQuality: 92, effort: 6 }).toFile(out);
   report(src, out, `brand, ${box.width}x${box.height}`);
   return box;
 }
 const brand = await brandLogo("brand-logo.png");
+
+// --------------------------------------------------------------- favicon ----
+// Source: public/favicon-source.png, the client's hexagon mark (black ring,
+// purple cube). Its cube outlines are TRANSPARENT, not white: on a white
+// background — Google's result page in light mode — that reads as intended,
+// but on a dark browser tab or a dark UI the outlines turn dark and the mark
+// collapses into a purple blob. So the favicon gets white UNDER the mark,
+// inside its outline only: identical on white, still legible on dark.
+//
+// "Inside the outline" = the convex hull of the mark, shrunk by a few pixels.
+// The shrink keeps white away from the ring's anti-aliased OUTER edge (white
+// there would draw a light halo on dark backgrounds) — the ring is ~45 px
+// thick at source size, so the interior is still fully covered.
+
+/** Convex hull (Andrew's monotone chain) of the opaque pixels' row extremes. */
+function markHull(data, width, height) {
+  const pts = [];
+  for (let y = 0; y < height; y++) {
+    let l = -1, r = -1;
+    for (let x = 0; x < width; x++) if (data[(y * width + x) * 4 + 3] > 128) { if (l < 0) l = x; r = x; }
+    if (l >= 0) pts.push([l, y], [r, y]);
+  }
+  pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (list) => {
+    const h = [];
+    for (const p of list) {
+      while (h.length >= 2 && cross(h[h.length - 2], h[h.length - 1], p) <= 0) h.pop();
+      h.push(p);
+    }
+    h.pop();
+    return h;
+  };
+  return [...half(pts), ...half([...pts].reverse())];
+}
+
+/** True if (x, y) is inside the convex polygon and at least `inset` px from every edge. */
+function insideInset(poly, x, y, inset) {
+  for (let i = 0; i < poly.length; i++) {
+    const [ax, ay] = poly[i];
+    const [bx, by] = poly[(i + 1) % poly.length];
+    const len = Math.hypot(bx - ax, by - ay) || 1;
+    // Hull is counter-clockwise in image coordinates (y down) → interior has
+    // a positive cross product; divide by length for the signed distance.
+    if (((bx - ax) * (y - ay) - (by - ay) * (x - ax)) / len < inset) return false;
+  }
+  return true;
+}
+
+/** Minimal ICO writer: PNG-compressed entries (supported since Windows Vista). */
+function ico(pngs) {
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(pngs.length, 4);
+  const dir = Buffer.alloc(16 * pngs.length);
+  let offset = 6 + dir.length;
+  pngs.forEach(({ size, buf }, i) => {
+    const o = i * 16;
+    dir.writeUInt8(size >= 256 ? 0 : size, o);
+    dir.writeUInt8(size >= 256 ? 0 : size, o + 1);
+    dir.writeUInt8(0, o + 2);
+    dir.writeUInt8(0, o + 3);
+    dir.writeUInt16LE(1, o + 4);
+    dir.writeUInt16LE(32, o + 6);
+    dir.writeUInt32LE(buf.length, o + 8);
+    dir.writeUInt32LE(offset, o + 12);
+    offset += buf.length;
+  });
+  return Buffer.concat([header, dir, ...pngs.map((p) => p.buf)]);
+}
+
+async function favicons(file) {
+  const src = path.join(pub, file);
+  if (!existsSync(src)) return;
+  const { data, width, height } = await raw(src);
+
+  const hull = markHull(data, width, height);
+  // A blank or near-transparent export would give a degenerate hull, and an
+  // empty polygon counts every pixel as inside — the icons would silently
+  // become white squares. Fail loudly instead.
+  if (hull.length < 3) throw new Error(`${file}: no opaque mark found`);
+  const inset = Math.max(2, Math.round(Math.min(width, height) * 0.012));
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (!insideInset(hull, x + 0.5, y + 0.5, inset)) continue;
+      const i = (y * width + x) * 4;
+      const a = data[i + 3] / 255;
+      // Composite the mark OVER white, keeping anti-aliased edges smooth.
+      for (let c = 0; c < 3; c++) data[i + c] = Math.round(data[i + c] * a + 255 * (1 - a));
+      data[i + 3] = 255;
+    }
+  }
+
+  // Square canvas, mark centred with a small margin so nothing touches the edge.
+  const box = inkBox(data, width, height);
+  const side = Math.ceil(Math.max(box.width, box.height) * 1.08);
+  const mark = await fromRaw(data, width, height).extract(box).png().toBuffer();
+  const square = await sharp({ create: { width: side, height: side, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: mark, left: Math.round((side - box.width) / 2), top: Math.round((side - box.height) / 2) }])
+    .png()
+    .toBuffer();
+
+  const at = (size) => sharp(square).resize(size, size, { kernel: "lanczos3" }).png({ compressionLevel: 9 }).toBuffer();
+
+  // /favicon.ico — browsers AND Google's crawler fall back to this path.
+  const icoFile = path.join(pub, "favicon.ico");
+  writeFileSync(icoFile, ico([{ size: 16, buf: await at(16) }, { size: 32, buf: await at(32) }, { size: 48, buf: await at(48) }]));
+  // Google's search result favicon must be a multiple of 48 px square.
+  writeFileSync(path.join(pub, "favicon-192.png"), await at(192));
+  // JSON-LD logo + PWA manifest (Google: logo ≥ 112 px, must work on white).
+  writeFileSync(path.join(pub, "logo.png"), await at(512));
+  // iOS home screen ignores transparency (renders black), so this one sits on
+  // white with room around it.
+  const touch = await sharp({ create: { width: 180, height: 180, channels: 4, background: "#ffffff" } })
+    .composite([{ input: await sharp(square).resize(144, 144).png().toBuffer(), left: 18, top: 18 }])
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  writeFileSync(path.join(pub, "apple-touch-icon.png"), touch);
+  report(src, icoFile, "favicon.ico (16/32/48) + favicon-192.png + logo.png (512) + apple-touch-icon.png (180)");
+}
+await favicons("favicon-source.png");
 
 // ---------------------------------------------------------- partner logos ----
 // Per-logo treatments, keyed by source file name.

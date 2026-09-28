@@ -49,6 +49,34 @@ function logoHeightUnits(file: string): { units: number; width: number; height: 
 }
 const sized = partners.map((p) => ({ ...p, ...logoHeightUnits(p.file) }));
 
+// "Every logo on screen at most ONCE" (client request 2026-09-29): as soon as
+// one full pass of the list is narrower than the visible strip, the same logo
+// shows up twice at the same time. The pass (period P) is guaranteed to be
+// wider than the strip (W) plus the widest logo plus one gap, so a logo has
+// fully left before its next copy enters:
+//     P = u·S + n·g  ≥  W + u·Wmax + g
+// with u = logo unit, S = summed width in units, n = logo count, g = gap.
+// With g = GAP·u this solves to u ≥ W / (S + (n−1)·GAP − Wmax) — so the
+// logos simply grow with the strip, which is also what makes them bigger.
+// The strip is capped at the content width (max-w-7xl = 80rem) so the logos
+// stop growing on ultra-wide screens; where the unit hits its upper clamp,
+// the gap widens instead (see the track's `columnGap`).
+const GAP_UNITS = 0.8;
+const widthUnits = sized.map((p) => (p.units * p.width) / p.height);
+const SUM_WIDTH = widthUnits.reduce((a, b) => a + b, 0);
+const MAX_WIDTH = Math.max(...widthUnits);
+const N = sized.length;
+const UNIT_DIVISOR = Math.max(1, SUM_WIDTH + (N - 1) * GAP_UNITS - MAX_WIDTH);
+// 100vw ≥ the strip's real width (it excludes the scrollbar), which errs on
+// the safe side: a slightly larger unit only makes the period longer.
+const STRIP_WIDTH = "min(100vw, 80rem)";
+const tickerVars = {
+  "--logo-unit": `clamp(3rem, calc(${STRIP_WIDTH} / ${UNIT_DIVISOR.toFixed(3)}), 5.5rem)`,
+  // Normally GAP·u; if the unit is clamped at its maximum, grow the gap so
+  // P ≥ W + Wmax + g still holds: g ≥ (W − u·(S − Wmax)) / (n − 1).
+  "--logo-gap": `max(calc(var(--logo-unit) * ${GAP_UNITS}), calc((${STRIP_WIDTH} - var(--logo-unit) * ${(SUM_WIDTH - MAX_WIDTH).toFixed(3)}) / ${Math.max(1, N - 1)}))`,
+} as React.CSSProperties;
+
 // GPU-composited transform marquee (same approach as the reviews carousel):
 // a translateX keyframe runs on the compositor thread, so it stays smooth and
 // never fights scrolling — unlike the old per-frame scrollLeft writes, which
@@ -155,22 +183,24 @@ export function ClientTicker() {
       <div
         ref={wrapRef}
         data-active={!reduced && inView ? "true" : undefined}
-        className={`partner-ticker-wrap relative w-full ${reduced ? "overflow-x-auto" : "overflow-hidden"}`}
+        // max-w-7xl: the strip spans the content column, not the whole
+        // monitor — that caps W for the "each logo once" sizing above.
+        className={`partner-ticker-wrap relative w-full max-w-7xl mx-auto ${reduced ? "overflow-x-auto" : "overflow-hidden"}`}
         style={{
           maskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitMaskImage: "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
           WebkitOverflowScrolling: "touch",
+          ...tickerVars,
         }}
       >
-        {/* Trailing pr-* equals the gap so the two copies stay symmetric and
+        {/* Each logo's height is --logo-unit × its own factor; the tallest
+            sets the strip height and the rest centre on it. The trailing
+            padding equals the gap so the two copies stay symmetric and
             translateX(-50%) wraps seamlessly. Second copy is aria-hidden. */}
-        {/* --logo-unit is the height of a "typical" logo per breakpoint; each
-            logo multiplies it by its own factor. The tallest logo sets the
-            strip height, the rest centre on it. Equal gaps between the actual
-            logos (not between fixed boxes) is what makes the row read evenly. */}
         <div
           ref={trackRef}
-          className="partner-marquee-track flex items-center w-max gap-10 sm:gap-14 md:gap-16 pr-10 sm:pr-14 md:pr-16 [--logo-unit:2.5rem] sm:[--logo-unit:2.875rem] md:[--logo-unit:3.5rem] lg:[--logo-unit:3.875rem]"
+          className="partner-marquee-track flex items-center w-max"
+          style={{ columnGap: "var(--logo-gap)", paddingRight: "var(--logo-gap)" }}
         >
           {renderedPartners.map((p, i) => (
             <img
@@ -182,8 +212,16 @@ export function ClientTicker() {
               // images load; the rendered height comes from the style below.
               width={p.width}
               height={p.height}
-              style={{ height: `calc(var(--logo-unit) * ${p.units.toFixed(3)})` }}
-              className="w-auto max-w-none shrink-0 select-none"
+              // Width is set explicitly (not w-auto) so every logo occupies
+              // exactly the width the "at most once" formula assumed — even a
+              // logo that has no metrics yet (it letterboxes via object-contain
+              // instead of silently shortening the pass).
+              style={{
+                height: `calc(var(--logo-unit) * ${p.units.toFixed(3)})`,
+                width: `calc(var(--logo-unit) * ${((p.units * p.width) / p.height).toFixed(3)})`,
+                objectFit: "contain",
+              }}
+              className="max-w-none shrink-0 select-none"
               draggable={false}
               // Eager, but deliberately NOT fetchPriority="high": the strip
               // sits just inside the fold on a tall phone and must not compete

@@ -143,3 +143,47 @@ test.describe("Partner-Ticker", () => {
     expect(haelfte).toBeGreaterThanOrEqual(fenster);
   });
 });
+
+// Client rule (2026-09-29): on ANY screen size every partner logo is visible at
+// most once at a time — one full pass must be wider than the visible strip plus
+// the widest logo, so a logo has left before its next copy enters.
+test.describe("Partner-Ticker: jedes Logo nur einmal sichtbar", () => {
+  for (const width of [360, 768, 1024, 1440, 1920, 2560]) {
+    test(`bei ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/");
+      const wrap = page.locator(".partner-ticker-wrap");
+      await expect(wrap).toBeVisible();
+      await wrap.scrollIntoViewIfNeeded();
+
+      const geo = await page.evaluate(() => {
+        const w = document.querySelector(".partner-ticker-wrap") as HTMLElement;
+        const imgs = [...document.querySelectorAll<HTMLImageElement>(".partner-marquee-track img")];
+        const names = imgs.map((i) => i.getAttribute("src"));
+        const n = names.indexOf(names[0], 1); // index of the first repeat
+        const period = imgs[n].offsetLeft - imgs[0].offsetLeft;
+        const widest = Math.max(...imgs.slice(0, n).map((i) => i.getBoundingClientRect().width));
+        return { strip: w.clientWidth, period, widest };
+      });
+      expect(geo.period, JSON.stringify(geo)).toBeGreaterThanOrEqual(geo.strip + geo.widest);
+
+      // And empirically, at several moments of the animation.
+      for (let k = 0; k < 4; k++) {
+        const dupes = await page.evaluate(() => {
+          const r = document.querySelector(".partner-ticker-wrap")!.getBoundingClientRect();
+          const seen = new Map<string, number>();
+          for (const i of document.querySelectorAll<HTMLImageElement>(".partner-marquee-track img")) {
+            const b = i.getBoundingClientRect();
+            if (b.right > r.left && b.left < r.right) {
+              const s = i.getAttribute("src")!;
+              seen.set(s, (seen.get(s) ?? 0) + 1);
+            }
+          }
+          return [...seen].filter(([, c]) => c > 1).map(([s]) => s);
+        });
+        expect(dupes, `doppelt sichtbar bei ${width}px`).toEqual([]);
+        await page.waitForTimeout(1500);
+      }
+    });
+  }
+});
