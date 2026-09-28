@@ -19,7 +19,7 @@ const partners: { name: string; file: string }[] = [
   { name: "Autozentrum Bestwig", file: "autozentrum-bestwig.webp" },
   { name: "Putzfee Sauerland", file: "putzfee-sauerland.webp" },
   { name: "Leitungsverlegung Özdemir", file: "leitungsverlegung-oezdemir.webp" },
-  { name: "Partnerlogo: Buchstabe B mit Phönix", file: "phoenix-b.webp" },
+  { name: "Best Ham United", file: "best-ham-united.webp" },
 ];
 
 // Optical size normalisation. Putting every logo in the same fixed box (the old

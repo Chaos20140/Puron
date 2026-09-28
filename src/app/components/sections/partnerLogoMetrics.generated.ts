@@ -7,10 +7,10 @@ export type PartnerLogoMetrics = { width: number; height: number; density: numbe
 export const PARTNER_LOGO_METRICS: Record<string, PartnerLogoMetrics> = {
   "autowelt-sauerland.webp": { width: 418, height: 100, density: 0.402 },
   "autozentrum-bestwig.webp": { width: 480, height: 156, density: 0.156 },
+  "best-ham-united.webp": { width: 114, height: 200, density: 0.334 },
   "eddys.webp": { width: 480, height: 170, density: 0.466 },
   "kfz-akdemir.webp": { width: 236, height: 200, density: 0.305 },
   "leitungsverlegung-oezdemir.webp": { width: 480, height: 160, density: 0.281 },
-  "phoenix-b.webp": { width: 114, height: 200, density: 0.334 },
   "putzfee-sauerland.webp": { width: 370, height: 200, density: 0.167 },
   "sauerland-terrassen.webp": { width: 315, height: 200, density: 0.252 },
 };
