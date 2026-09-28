@@ -1,30 +1,53 @@
 import { useEffect, useRef, useState } from "react";
+import { PARTNER_LOGO_METRICS } from "./partnerLogoMetrics.generated";
 
 // Vite's BASE_URL ("/" on the puron-media.de apex domain; would be a
 // subpath like "/Puron/" if ever built for a GitHub Pages project page).
 const ASSET_BASE = import.meta.env.BASE_URL;
 
-// Each entry expects a real logo at public/partners/<filename>.
-// For a uniform, cohesive look the ticker renders EVERY logo as a flat white
-// silhouette (CSS filter: brightness(0) crushes to black, invert(1) flips to
-// white; transparency is preserved) — so the differing brand colours don't
-// clash on the dark page. Export logos with transparent backgrounds (remove.bg).
-// `scale` is an optional per-logo size multiplier for marks that would
-// otherwise look small inside the fixed container (e.g. AutoWelt's 1:1 mark).
-//
-// The .webp files are BUILT from the PNG sources by scripts/optimize-images.mjs
-// (`pnpm images`) — drop a new logo in as PNG and re-run it. The six PNGs were
-// 744 KB together and every one of them was requested eagerly at high priority
-// on the mobile home page, which starved the LCP element of bandwidth; the
-// WebP silhouettes are 62 KB total.
-const partners: { name: string; logo: string; scale?: number }[] = [
-  { name: "KFZ-Gutachter Cem Akdemir", logo: `${ASSET_BASE}partners/kfz-akdemir.webp` },
-  { name: "Sauerland Terrassen", logo: `${ASSET_BASE}partners/sauerland-terrassen.webp` },
-  { name: "AutoWelt Sauerland", logo: `${ASSET_BASE}partners/autowelt-sauerland.webp`, scale: 1.4 },
-  { name: "Eddys Kfz-Meisterbetrieb", logo: `${ASSET_BASE}partners/eddys.webp` },
-  { name: "Autozentrum Bestwig", logo: `${ASSET_BASE}partners/autozentrum-bestwig.webp` },
-  { name: "Putzfee Sauerland", logo: `${ASSET_BASE}partners/putzfee-sauerland.webp` },
+// Every logo is a flat WHITE silhouette on transparency, so the differing brand
+// colours don't clash on the dark page. The colour work happens at build time:
+// scripts/optimize-images.mjs (`pnpm images`) turns the PNG in
+// public/partners/ into a white, ink-cropped WebP and measures it into
+// partnerLogoMetrics.generated.ts. To add a partner: drop a transparent PNG in
+// public/partners/, run `pnpm images`, add a line below.
+const partners: { name: string; file: string }[] = [
+  { name: "KFZ-Gutachter Cem Akdemir", file: "kfz-akdemir.webp" },
+  { name: "Sauerland Terrassen", file: "sauerland-terrassen.webp" },
+  { name: "AutoWelt Sauerland", file: "autowelt-sauerland.webp" },
+  { name: "Eddys Kfz-Meisterbetrieb", file: "eddys.webp" },
+  { name: "Autozentrum Bestwig", file: "autozentrum-bestwig.webp" },
+  { name: "Putzfee Sauerland", file: "putzfee-sauerland.webp" },
+  { name: "Leitungsverlegung Özdemir", file: "leitungsverlegung-oezdemir.webp" },
+  { name: "Partnerlogo: Buchstabe B mit Phönix", file: "phoenix-b.webp" },
 ];
+
+// Optical size normalisation. Putting every logo in the same fixed box (the old
+// approach) made a wide wordmark read tiny and a compact mark read huge, and a
+// padded source file shrank for no visible reason. Instead each logo gets a
+// height in "logo units" chosen so that painted AREA is about equal:
+//  - height ∝ ratio^-0.4: a softened version of ratio^-½ (which would give
+//    every bounding box exactly the same area). Pure area-equality makes long
+//    wordmarks read too small next to compact marks — 0.4 is the usual
+//    compromise for logo walls;
+//  - × (typical ink density / this logo's density)^0.3 enlarges thin line art
+//    (Autozentrum, Putzfee) a little, because a sparse mark reads lighter than
+//    a solid one of the same box size;
+//  - clamps keep extreme shapes (a tall monogram, a very long wordmark) from
+//    dominating the strip.
+const TYPICAL_INK_DENSITY = 0.29;
+function logoHeightUnits(file: string): { units: number; width: number; height: number } {
+  const m = PARTNER_LOGO_METRICS[file] as (typeof PARTNER_LOGO_METRICS)[string] | undefined;
+  // A logo added to the list without re-running `pnpm images` must not take
+  // the home page down with it — render it at a neutral size instead.
+  if (!m) return { units: 1, width: 3, height: 1 };
+  const ratio = m.width / m.height;
+  let units = ratio ** -0.4 * (TYPICAL_INK_DENSITY / m.density) ** 0.3;
+  units = Math.min(1.2, Math.max(0.55, units));
+  if (units * ratio > 2.4) units = 2.4 / ratio;
+  return { units, width: m.width, height: m.height };
+}
+const sized = partners.map((p) => ({ ...p, ...logoHeightUnits(p.file) }));
 
 // GPU-composited transform marquee (same approach as the reviews carousel):
 // a translateX keyframe runs on the compositor thread, so it stays smooth and
@@ -120,7 +143,7 @@ export function ClientTicker() {
     return () => ro.disconnect();
   }, [reduced, halfRepeat]);
 
-  const renderedPartners = Array.from({ length: 2 * halfRepeat }, () => partners).flat();
+  const renderedPartners = Array.from({ length: 2 * halfRepeat }, () => sized).flat();
 
   return (
     <section className="py-12 border-t border-white/5 bg-[#0A0A0D]/50 relative z-20 overflow-hidden md:backdrop-blur-[2px]">
@@ -141,37 +164,33 @@ export function ClientTicker() {
       >
         {/* Trailing pr-* equals the gap so the two copies stay symmetric and
             translateX(-50%) wraps seamlessly. Second copy is aria-hidden. */}
+        {/* --logo-unit is the height of a "typical" logo per breakpoint; each
+            logo multiplies it by its own factor. The tallest logo sets the
+            strip height, the rest centre on it. Equal gaps between the actual
+            logos (not between fixed boxes) is what makes the row read evenly. */}
         <div
           ref={trackRef}
-          className="partner-marquee-track flex items-center w-max gap-10 sm:gap-14 md:gap-20 pr-10 sm:pr-14 md:pr-20"
+          className="partner-marquee-track flex items-center w-max gap-10 sm:gap-14 md:gap-16 pr-10 sm:pr-14 md:pr-16 [--logo-unit:2.5rem] sm:[--logo-unit:2.875rem] md:[--logo-unit:3.5rem] lg:[--logo-unit:3.875rem]"
         >
           {renderedPartners.map((p, i) => (
-            <div
+            <img
               key={i}
+              src={`${ASSET_BASE}partners/${p.file}`}
+              alt={i >= partners.length ? "" : p.name}
               aria-hidden={i >= partners.length || undefined}
-              className="flex items-center justify-center w-32 h-14 sm:w-36 sm:h-16 md:w-44 md:h-20 shrink-0"
-            >
-              <img
-                src={p.logo}
-                alt={p.name}
-                className="max-w-full max-h-full object-contain"
-                style={{
-                  // Uniform white silhouette for every logo (cohesive strip).
-                  filter: "brightness(0) invert(1)",
-                  ...(p.scale ? { transform: `scale(${p.scale})` } : {}),
-                }}
-                // No width/height attrs on purpose: the logos have differing
-                // aspect ratios and the wrapper box is fixed-size, so there is
-                // no layout shift to guard against — an intrinsic-size hint
-                // would only fight `object-contain`.
-                // Eager, but deliberately NOT fetchPriority="high": the strip
-                // sits just inside the fold on a tall phone, and six high-
-                // priority image requests used to compete with the hero (the
-                // LCP element) for a throttled mobile connection.
-                loading="eager"
-                decoding="async"
-              />
-            </div>
+              // Intrinsic size = aspect-ratio hint, so nothing shifts while the
+              // images load; the rendered height comes from the style below.
+              width={p.width}
+              height={p.height}
+              style={{ height: `calc(var(--logo-unit) * ${p.units.toFixed(3)})` }}
+              className="w-auto max-w-none shrink-0 select-none"
+              draggable={false}
+              // Eager, but deliberately NOT fetchPriority="high": the strip
+              // sits just inside the fold on a tall phone and must not compete
+              // with the hero (the LCP element) for bandwidth.
+              loading="eager"
+              decoding="async"
+            />
           ))}
         </div>
       </div>

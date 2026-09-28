@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router";
-import { motion } from "motion/react";
-import { PuronLogo } from "./PuronLogo";
 import { AnimatedBackground } from "./AnimatedBackground";
 import { AnimatedButton } from "./AnimatedButton";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -69,33 +67,26 @@ export function Layout() {
           <Link
             to="/"
             aria-label="Puron Media — zur Startseite"
-            className="flex items-center gap-2.5 md:gap-3 group"
+            className="flex shrink-0 items-center group"
           >
-            {/* Cascade reveal on app mount: icon → wordmark image.
-                Layout is mounted once at app start, so this only plays
-                once per session — not on route changes. */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="shrink-0"
-            >
-              <PuronLogo className="w-8 h-8 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-105" />
-            </motion.div>
-            {/* Wordmark — the exact brand image (transparent PNG) instead of
-                a CSS rebuild, per client request. The hex symbol stays its own
-                element to the left; this is only the "PURON MEDIA" lettering. */}
-            <motion.img
-              src={`${import.meta.env.BASE_URL}wordmark.webp`}
-              alt="Puron Media — Social Media & Creative Agency"
-              width={420}
-              height={116}
-              fetchPriority="high"
+            {/* The client's full lockup (hexagon + "PURON MEDIA" + tagline) as
+                ONE image — the dark-UI variant from `pnpm images`, whose
+                hexagon ring is light because the delivered black one vanishes
+                on this bar. Cropped to its ink, so the CSS height is the real
+                logo height. Sized so logo + "Kontakt" + menu button still fit
+                a 360px phone. No entrance animation: it is persistent chrome
+                and paints with the first frame. */}
+            <img
+              src={`${import.meta.env.BASE_URL}brand-logo.webp`}
+              alt="Puron Media"
+              width={601}
+              height={114}
+              // Lower-case on purpose: React 18 does not know the camelCase
+              // `fetchPriority` prop and warns on every render; the plain HTML
+              // attribute is passed through untouched and works the same.
+              {...{ fetchpriority: "high" }}
               decoding="async"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.45, ease: "easeOut", delay: 0.2 }}
-              className="h-10 md:h-14 w-auto select-none"
+              className="h-6 min-[360px]:h-7 min-[390px]:h-8 sm:h-9 lg:h-11 w-auto select-none transition-opacity duration-300 group-hover:opacity-85"
               draggable={false}
             />
           </Link>
@@ -186,17 +177,16 @@ export function Layout() {
             <Link
               to="/"
               aria-label="Puron Media — zur Startseite"
-              className="flex items-center gap-2.5 md:gap-3 group"
+              className="flex items-center group"
             >
-              <PuronLogo className="w-7 h-7 md:w-9 md:h-9 transition-transform duration-300 group-hover:scale-105 shrink-0" />
               <img
-                src={`${import.meta.env.BASE_URL}wordmark.webp`}
-                alt=""
-                width={420}
-                height={116}
+                src={`${import.meta.env.BASE_URL}brand-logo.webp`}
+                alt="Puron Media"
+                width={601}
+                height={114}
                 loading="lazy"
                 decoding="async"
-                className="h-10 md:h-12 w-auto select-none"
+                className="h-9 md:h-10 w-auto select-none transition-opacity duration-300 group-hover:opacity-85"
                 draggable={false}
               />
             </Link>

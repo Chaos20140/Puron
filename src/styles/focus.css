@@ -14,11 +14,3 @@
   outline-offset: 2px;
   border-radius: inherit;
 }
-
-/* The custom cursor hides the OS pointer, so on those devices the focus ring is
-   the only positional feedback there is — give it a little more presence. */
-@media (pointer: fine) {
-  :where(a, button, [role="button"]):focus-visible {
-    box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.25);
-  }
-}
